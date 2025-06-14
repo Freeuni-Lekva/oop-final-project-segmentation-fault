@@ -15,7 +15,6 @@ import java.util.List;
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     private Long id;
 
