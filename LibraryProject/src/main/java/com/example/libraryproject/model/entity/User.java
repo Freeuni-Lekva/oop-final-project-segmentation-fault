@@ -15,8 +15,6 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
     private Long id;
 
     @Column(name = "username", nullable = false, unique = true)
@@ -31,7 +29,7 @@ public class User {
     @NonNull
     private String bio;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(
             name = "borrowed_books",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -41,7 +39,7 @@ public class User {
     private Set<Book> borrowedBooks = new HashSet<>();
 
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(
             name = "read_books",
             joinColumns = @JoinColumn(name = "user_id"),
