@@ -1,4 +1,4 @@
-package libraryproject.repository;
+package com.example.libraryproject.repository;
 
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Review;
