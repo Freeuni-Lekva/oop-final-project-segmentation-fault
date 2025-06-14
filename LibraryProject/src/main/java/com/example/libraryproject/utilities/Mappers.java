@@ -16,9 +16,9 @@ public class Mappers {
         String hashedPassword = BCrypt.hashpw(userRequest.password(), BCrypt.gensalt());
         user.setUsername(userRequest.username());
         user.setPassword(hashedPassword);
-        user.setBookList(new HashSet<Book>());
-        user.setReadBookList(new HashSet<Book>());
-        user.setAmountOfBooksRead(0L);
+        user.setBorrowedBooks(new HashSet<Book>());
+        user.setReadBooks(new HashSet<Book>());
+        user.setReviewCount(0L);
         return user;
     }
     public static BookKeeper mapRequestToBookKeeper(RegistrationRequest bookKeeperRequest) {

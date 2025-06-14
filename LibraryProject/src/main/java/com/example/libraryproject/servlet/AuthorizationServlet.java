@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import java.io.IOException;
 
 @RequiredArgsConstructor
-@WebServlet(name = "LoginServlet", urlPatterns = "api/authorization/*")
+@WebServlet(name = "LoginServlet", urlPatterns = "/api/authorization/*")
 public class AuthorizationServlet extends HttpServlet {
 
     private final AuthorizationService authorizationService;
