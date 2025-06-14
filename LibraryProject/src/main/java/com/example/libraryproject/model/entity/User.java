@@ -52,7 +52,7 @@ public class User {
 
     @Column(name = "review_count")
     @NonNull
-    private int reviewCount;
+    private Long reviewCount;
 
     public User() {}
 
