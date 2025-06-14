@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/LibraryProject/LibraryProject.iml" filepath="$PROJECT_DIR$/LibraryProject/LibraryProject.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/oop-final-project-segmentation-fault.iml" filepath="$PROJECT_DIR$/.idea/oop-final-project-segmentation-fault.iml" />
     </modules>
   </component>
 </project>
