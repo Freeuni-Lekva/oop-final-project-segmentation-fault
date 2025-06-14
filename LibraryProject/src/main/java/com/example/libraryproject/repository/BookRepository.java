@@ -81,4 +81,18 @@ public class BookRepository {
         query.setParameter("genre", genre);
         return query.getResultList();
     }
+
+    public void saveAll(List<Book> books) {
+        Transaction transaction = null;
+        try {
+            transaction = session.beginTransaction();
+            for (Book book : books) {
+                session.persist(book);
+            }
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
+        }
+    }
 }
