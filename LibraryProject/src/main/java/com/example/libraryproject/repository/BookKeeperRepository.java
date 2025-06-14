@@ -12,13 +12,21 @@ public class BookKeeperRepository {
     public void save(BookKeeper bookKeeper) {
 
     }
+
     public void update(BookKeeper bookKeeper) {
 
     }
+
     public void delete(BookKeeper bookKeeper) {
 
     }
+
     public BookKeeper findById(Long id) {
+        //TODO
+        return null;
+    }
+    
+    public BookKeeper findByUsername(String username) {
         //TODO
         return null;
     }

@@ -3,6 +3,7 @@ package com.example.libraryproject.model.entity;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "reviews_table")
 public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,10 +1,14 @@
 package com.example.libraryproject.model.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Table(name = "book_keepers")
+@Table(name = "bookkeepers_table")
+@Getter
+@Setter
 @RequiredArgsConstructor
 public class BookKeeper {
 
