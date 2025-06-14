@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="ProjectModuleManager">
-    <modules>
-      <module fileurl="file://$PROJECT_DIR$/LibraryProject/LibraryProject.iml" filepath="$PROJECT_DIR$/LibraryProject/LibraryProject.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/oop-final-project-segmentation-fault.iml" filepath="$PROJECT_DIR$/.idea/oop-final-project-segmentation-fault.iml" />
-    </modules>
-  </component>
-</project>
