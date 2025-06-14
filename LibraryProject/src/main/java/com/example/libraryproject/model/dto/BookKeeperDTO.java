@@ -1,4 +1,4 @@
 package com.example.libraryproject.model.dto;
 
-public record BookKeeperDTO() {
+public record BookKeeperDTO(String username) {
 }
