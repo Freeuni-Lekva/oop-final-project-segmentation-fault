@@ -1,8 +1,6 @@
 package com.example.libraryproject.servlet;
 
-import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.configuration.DBConnectionConfig;
-import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.repository.BookKeeperRepository;
 import com.example.libraryproject.repository.BookRepository;
 import com.example.libraryproject.repository.OrderRepository;
