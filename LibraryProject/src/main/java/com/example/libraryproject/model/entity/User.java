@@ -1,5 +1,6 @@
 package com.example.libraryproject.model.entity;
 
+import com.example.libraryproject.model.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,6 +25,10 @@ public class User {
     @Column(name = "password", nullable = false)
     @NonNull
     private String password;
+
+    @Column(name = "status", nullable = false)
+    @NonNull
+    private UserStatus status;
 
     @Column(name = "bio")
     @NonNull
