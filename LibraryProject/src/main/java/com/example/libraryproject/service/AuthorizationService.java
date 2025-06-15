@@ -13,8 +13,6 @@ import org.mindrot.jbcrypt.BCrypt;
 @RequiredArgsConstructor
 public class AuthorizationService {
 
-    public static final String ATTRIBUTE_NAME = "AuthorizationService";
-
     private final UserRepository userRepository;
     private final BookKeeperRepository bookKeeperRepository;
 
