@@ -2,8 +2,11 @@ package com.example.libraryproject.service;
 
 import com.example.libraryproject.configuration.DBConnectionConfig;
 import com.example.libraryproject.model.dto.GoogleBooksResponse;
+import com.example.libraryproject.model.entity.BookKeeper;
 import com.example.libraryproject.repository.BookRepository;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,11 +16,23 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class GoogleBooksApiServiceTest {
 
+    private SessionFactory sessionFactory;
+    private Session session;
     private GoogleBooksAPIService googleBooksApiService;
 
     @BeforeEach
     public void setUp() {
-        Session session = DBConnectionConfig.getSessionFactory().openSession();
+        Configuration configuration = new Configuration()
+                .setProperty("hibernate.connection.driver_class", "org.h2.Driver")
+                .setProperty("hibernate.connection.url", "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1")
+                .setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect")
+                .setProperty("hibernate.hbm2ddl.auto", "create-drop")
+                .setProperty("hibernate.show_sql", "true")
+                .addAnnotatedClass(BookKeeper.class);
+
+        sessionFactory = configuration.buildSessionFactory();
+        session = sessionFactory.openSession();
+
         BookRepository bookRepository = new BookRepository(session);
         googleBooksApiService = new GoogleBooksAPIService(bookRepository);
     }

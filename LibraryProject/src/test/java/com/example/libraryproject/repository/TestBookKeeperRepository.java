@@ -1,4 +1,4 @@
-package libraryproject.repository;
+package com.example.libraryproject.repository;
 import com.example.libraryproject.model.entity.BookKeeper;
 import com.example.libraryproject.repository.BookKeeperRepository;
 import org.hibernate.Session;
