@@ -49,6 +49,12 @@ public class UserRepository {
         return Set.copyOf(user.getReadBooks());
     }
 
+    public Set<Book> findRequestedBooksByUserId(Long userId) {
+        User user = findById(userId);
+        if (user == null) return new HashSet<>();
+        return Set.copyOf(user.getRequestedBooks());
+    }
+
     public User findByUsername(String username) {
         return session.createQuery(
                         "FROM User u WHERE u.username = :username", User.class)

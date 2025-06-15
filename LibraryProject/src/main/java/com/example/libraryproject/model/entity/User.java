@@ -31,12 +31,22 @@ public class User {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(
+            name = "requested_books",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "book_id")
+    )
+    @NonNull
+    private Set<Book> requestedBooks = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable(
             name = "borrowed_books",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "book_id")
     )
     @NonNull
     private Set<Book> borrowedBooks = new HashSet<>();
+
 
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)

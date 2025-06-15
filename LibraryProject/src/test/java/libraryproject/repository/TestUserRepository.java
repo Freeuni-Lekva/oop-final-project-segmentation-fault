@@ -112,7 +112,7 @@ public class TestUserRepository {
     }
 
     @Test
-    public void testFindBorrowedReadBooksByUserId() {
+    public void testFindBorrowedReadRequestedBooksByUserId() {
         Book book1 = new Book("100 Years of Solitude", "Fiction", "Gabriel Garcia Marquez", LocalDate.now(),
                 "A classic novel about the Buendia family",
                 (long) 4.8, 600L, 300L);
@@ -127,11 +127,19 @@ public class TestUserRepository {
         Set<Book> borrowed = new HashSet<>();
         borrowed.add(book1);
         borrowed.add(book2);
+        user.setRequestedBooks(borrowed);
+        userRepository.save(user);
+        Set<Book> foundBooks = userRepository.findRequestedBooksByUserId(user.getId());
+
+        assertEquals(2, foundBooks.size());
+        assertTrue(foundBooks.contains(book1));
+        assertTrue(foundBooks.contains(book2));
+
         user.setBorrowedBooks(borrowed);
 
-        userRepository.save(user);
+        userRepository.update(user);
 
-        Set<Book> foundBooks = userRepository.findBorrowedBooksByUserId(user.getId());
+        foundBooks = userRepository.findBorrowedBooksByUserId(user.getId());
 
         assertEquals(2, foundBooks.size());
         assertTrue(foundBooks.contains(book1));
@@ -139,6 +147,7 @@ public class TestUserRepository {
 
         user.setReadBooks(borrowed);
         user.setBorrowedBooks(new HashSet<>());
+        userRepository.update(user);
 
         Set<Book> readBooks = userRepository.findReadBooksByUserId(user.getId());
         Set<Book> borrowedBooks = userRepository.findBorrowedBooksByUserId(user.getId());
