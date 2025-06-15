@@ -26,7 +26,7 @@ public class GoogleBooksAPIService {
 
     private static final int BOOKS_PER_REQUEST = 2;
 
-    private static final String GOOGLE_API_URL = "https://www.googleapis.com/books/v1/volumes";
+    private static final String GOOGLE_API_URL = "https://www.googleapis.cobookkeepers_tablem/books/v1/volumes";
     private static final int TOTAL_BOOKS_TARGET = 40;
 
     private final BookRepository bookRepository;
@@ -40,14 +40,13 @@ public class GoogleBooksAPIService {
         }
 
         List<GoogleBooksResponse> googleBooks = fetchBooks();
-
+        System.out.println(googleBooks.size());
         bookRepository.saveAll(googleBooks.stream()
                 .map(Mappers::mapGoogleBookToBook)
                 .toList());
     }
 
     List<GoogleBooksResponse> fetchBooks() {
-        System.out.println("VAIMEE " + GOOGLE_API_URL);
         List<GoogleBooksResponse> allBooks = new ArrayList<>();
         int requestsNeeded = TOTAL_BOOKS_TARGET / BOOKS_PER_REQUEST;
 
