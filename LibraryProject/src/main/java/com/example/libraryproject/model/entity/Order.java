@@ -2,32 +2,49 @@ package com.example.libraryproject.model.entity;
 
 import com.example.libraryproject.model.enums.OrderStatus;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+
+
 import java.time.LocalDateTime;
 
-@Entity
+
+@RequiredArgsConstructor
+@Getter
+@Setter
 @Table(name = "orders_table")
+@Entity
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "borrow_date", nullable = false)
+    @NonNull
     private LocalDateTime borrowDate;
 
     @Column(name = "due_date", nullable = false)
+    @NonNull
     private LocalDateTime dueDate;
 
     @Column(name = "return_date")
     private LocalDateTime returnDate;
 
     @Column(name = "status", length = 50, nullable = false)
+    @NonNull
     private OrderStatus status;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @NonNull
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "book_id", nullable = false)
+    @NonNull
     private Book book;
+
+    public Order() {}
 }
