@@ -27,7 +27,7 @@ public class User {
 
     @Column(name = "bio")
     @NonNull
-    private String bio;
+    private String bio = "";
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(
@@ -48,9 +48,19 @@ public class User {
     @NonNull
     private Set<Book> readBooks = new HashSet<>();
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_reviews",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "review_id")
+    )
+    private Set<Review> reviews = new HashSet<>();
+
+
+
     @Column(name = "review_count")
     @NonNull
-    private Long reviewCount;
+    private Long reviewCount = 0L;
 
     public User() {}
 
