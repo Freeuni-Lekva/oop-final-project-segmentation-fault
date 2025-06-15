@@ -34,8 +34,9 @@ public class Book {
     @Column(name = "publication_date")
     private LocalDate date;
 
+    @Lob
     @NonNull
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @NonNull
