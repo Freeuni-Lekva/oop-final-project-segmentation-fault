@@ -20,7 +20,7 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build with Maven
+        - name: Build with Maven
         run: mvn -B clean package --file LibraryProject/pom.xml
 
       - name: Update dependency graph
