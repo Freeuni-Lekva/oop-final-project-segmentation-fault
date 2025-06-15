@@ -28,7 +28,7 @@ public class User {
 
     @Column(name = "status", nullable = false)
     @NonNull
-    private UserStatus status;
+    private UserStatus status =  UserStatus.ACTIVE;
 
     @Column(name = "bio")
     @NonNull
