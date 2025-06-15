@@ -27,5 +27,3 @@ jobs:
         run: mvn -B clean package
         working-directory: LibraryProject
 
-      - name: Update dependency graph
-        uses: advanced-security/maven-dependency-submission-action@v4
