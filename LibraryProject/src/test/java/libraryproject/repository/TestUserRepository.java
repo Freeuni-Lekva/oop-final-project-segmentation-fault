@@ -9,8 +9,9 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.jupiter.api.*;
 
+import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -48,7 +49,6 @@ public class TestUserRepository {
         User user = new User();
         user.setUsername("misha");
         user.setPassword("pass");
-        user.setBorrowedBooks(new HashSet<>());
         userRepository.save(user);
 
         User found = userRepository.findById(user.getId());
@@ -61,7 +61,6 @@ public class TestUserRepository {
         User user = new User();
         user.setUsername("original");
         user.setPassword("pass");
-        user.setBorrowedBooks(new HashSet<>());
         userRepository.save(user);
 
         user.setUsername("updated");
@@ -76,7 +75,6 @@ public class TestUserRepository {
         User user = new User();
         user.setUsername("toDelete");
         user.setPassword("pass");
-        user.setBorrowedBooks(new HashSet<>());
         userRepository.save(user);
 
         userRepository.delete(user);
@@ -89,7 +87,6 @@ public class TestUserRepository {
         User user = new User();
         user.setUsername("misha");
         user.setPassword("pass");
-        user.setBorrowedBooks(new HashSet<>());
         userRepository.save(user);
 
         User found = userRepository.findByUsername("misha");
@@ -102,18 +99,53 @@ public class TestUserRepository {
         User user1 = new User();
         user1.setUsername("misha");
         user1.setPassword("pass");
-        user1.setBorrowedBooks(new HashSet<>());
 
         User user2 = new User();
         user2.setUsername("vano");
         user2.setPassword("pass");
-        user2.setBorrowedBooks(new HashSet<>());
 
         userRepository.save(user1);
         userRepository.save(user2);
 
-        List<User> users = userRepository.findAll();
+        Set<User> users = userRepository.findAll();
         assertEquals(2, users.size());
     }
+
+    @Test
+    public void testFindBorrowedReadBooksByUserId() {
+        Book book1 = new Book("100 Years of Solitude", "Fiction", "Gabriel Garcia Marquez", LocalDate.now(),
+                "A classic novel about the Buendia family",
+                (long) 4.8, 600L, 300L);
+
+        Book book2 = new Book("Dzalis Gamogvidzeba", "Politics", "Mikheil Saakashvili",
+                LocalDate.now(), "A thrilling political fiction novel", (long) 4.5, 555L, 400L);
+
+
+        User user = new User();
+        user.setUsername("kubdari");
+        user.setPassword("kubdari1234");
+        Set<Book> borrowed = new HashSet<>();
+        borrowed.add(book1);
+        borrowed.add(book2);
+        user.setBorrowedBooks(borrowed);
+
+        userRepository.save(user);
+
+        Set<Book> foundBooks = userRepository.findBorrowedBooksByUserId(user.getId());
+
+        assertEquals(2, foundBooks.size());
+        assertTrue(foundBooks.contains(book1));
+        assertTrue(foundBooks.contains(book2));
+
+        user.setReadBooks(borrowed);
+        user.setBorrowedBooks(new HashSet<>());
+
+        Set<Book> readBooks = userRepository.findReadBooksByUserId(user.getId());
+        Set<Book> borrowedBooks = userRepository.findBorrowedBooksByUserId(user.getId());
+
+        assertEquals(2, readBooks.size());
+        assertEquals(0, borrowedBooks.size());
+    }
+
 
 }

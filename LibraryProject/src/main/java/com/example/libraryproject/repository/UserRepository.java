@@ -6,7 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @RequiredArgsConstructor
 public class UserRepository {
@@ -36,16 +37,16 @@ public class UserRepository {
     }
 
 
-    public List<Book> findBorrowedBooksByUserId(Long userId) {
+    public Set<Book> findBorrowedBooksByUserId(Long userId) {
         User user = findById(userId);
-        if (user == null) return List.of();
-        return List.copyOf(user.getBorrowedBooks());
+        if (user == null) return Set.of();
+        return Set.copyOf(user.getBorrowedBooks());
     }
 
-    public List<Book> findReadBooksByUserId(Long userId) {
+    public Set<Book> findReadBooksByUserId(Long userId) {
         User user = findById(userId);
-        if (user == null) return List.of();
-        return List.copyOf(user.getReadBooks());
+        if (user == null) return new HashSet<>();
+        return Set.copyOf(user.getReadBooks());
     }
 
     public User findByUsername(String username) {
@@ -55,7 +56,7 @@ public class UserRepository {
                 .uniqueResult();
     }
 
-    public List<User> findAll() {
-        return session.createQuery("FROM User", User.class).getResultList();
+    public Set<User> findAll() {
+        return new HashSet<>(session.createQuery("FROM User", User.class).getResultList());
     }
 }
