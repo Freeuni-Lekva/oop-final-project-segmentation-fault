@@ -15,7 +15,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class BookKeeperService {
 
-    public static final String ATTRIBUTE_NAME = "BookKeeperService";
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;

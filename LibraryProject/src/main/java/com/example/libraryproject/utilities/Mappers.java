@@ -9,6 +9,7 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Random;
 
 public class Mappers {
 
@@ -50,9 +51,10 @@ public class Mappers {
             book.setDate(LocalDate.now());
         }
 
-        book.setGenre("Fiction");
-        book.setVolume(1L);
-        book.setAmountInLib(1L);
+        book.setGenre(googleBooksResponse.genre());
+        book.setVolume(googleBooksResponse.volume());
+        Random random = new Random();
+        book.setAmountInLib(random.nextLong(2,15));
         book.setRating(0L);
 
         return book;

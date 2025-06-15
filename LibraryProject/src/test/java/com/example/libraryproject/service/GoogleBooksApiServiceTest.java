@@ -7,7 +7,7 @@ import org.hibernate.Session;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
+import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,8 +24,8 @@ public class GoogleBooksApiServiceTest {
 
     @Test
     public void testGetBookDetails() {
-        List<GoogleBooksResponse> books= googleBooksApiService.fetchBooks();
-        assertEquals(40, books.size());
+        HashSet<GoogleBooksResponse> books= googleBooksApiService.fetchBooks();
+        assertNotEquals(0, books.size());
         for (var book : books) {
             assertNotEquals("No Title", book.title());
             assertNotEquals("No Author", book.author());

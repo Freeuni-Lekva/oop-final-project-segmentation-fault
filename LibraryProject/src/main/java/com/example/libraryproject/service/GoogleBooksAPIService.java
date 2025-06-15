@@ -1,58 +1,55 @@
 package com.example.libraryproject.service;
 
 import com.example.libraryproject.model.dto.GoogleBooksResponse;
+import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.repository.BookRepository;
 import com.example.libraryproject.utilities.Mappers;
 import jakarta.json.*;
 import lombok.RequiredArgsConstructor;
+
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+
+import static com.example.libraryproject.configuration.ApplicationProperties.*;
 
 @RequiredArgsConstructor
 public class GoogleBooksAPIService {
 
-    public static final String ATTRIBUTE_NAME = "google_api_service";
-
-    private static final String[] GENRES = {
-            "romance", "mystery", "fantasy", "thriller", "science-fiction",
-            "horror", "adventure", "drama", "comedy",
-            "biography", "memoir", "poetry", "philosophy", "psychology",
-            "art", "music", "religion", "politics", "history"
-    };
-
-    private static final int BOOKS_PER_REQUEST = 2;
-
-    private static final String GOOGLE_API_URL = "https://www.googleapis.cobookkeepers_tablem/books/v1/volumes";
-    private static final int TOTAL_BOOKS_TARGET = 40;
 
     private final BookRepository bookRepository;
 
     private final Random random = new Random();
 
 
+    public static List<String> getRandomGenres(int n) {
+        List<String> genreList = new ArrayList<>(Arrays.asList(GOOGLE_BOOKS_GENRES));
+        Collections.shuffle(genreList);
+        return genreList.subList(0, n);
+    }
+
     public void fetchAndSaveBooks() {
         if (!bookRepository.findAll().isEmpty()) {
             return;
         }
 
-        List<GoogleBooksResponse> googleBooks = fetchBooks();
-        System.out.println(googleBooks.size());
-        bookRepository.saveAll(googleBooks.stream()
+        HashSet<GoogleBooksResponse> googleBooks = fetchBooks();
+        List<Book> books = googleBooks.stream()
                 .map(Mappers::mapGoogleBookToBook)
-                .toList());
+                .toList();
+        System.out.println(books.size());
+        bookRepository.saveAll(books);
     }
 
-    List<GoogleBooksResponse> fetchBooks() {
-        List<GoogleBooksResponse> allBooks = new ArrayList<>();
+    HashSet<GoogleBooksResponse> fetchBooks() {
+        HashSet<GoogleBooksResponse> allBooks = new HashSet<>();
         int requestsNeeded = TOTAL_BOOKS_TARGET / BOOKS_PER_REQUEST;
 
+        List<String> chosenGenres =  getRandomGenres(requestsNeeded);
+
         for (int i = 0; i < requestsNeeded; i++) {
-            String randomGenre = getRandomGenre();
-            List<GoogleBooksResponse> booksFromGenre = fetchBooksFromGenre(randomGenre);
+            HashSet<GoogleBooksResponse> booksFromGenre = fetchBooksFromGenre(chosenGenres.get(i));
             allBooks.addAll(booksFromGenre);
 
         }
@@ -60,13 +57,8 @@ public class GoogleBooksAPIService {
         return allBooks;
     }
 
-    private String getRandomGenre() {
-        int randomIndex = random.nextInt(GENRES.length);
-        return GENRES[randomIndex];
-    }
-
-    private List<GoogleBooksResponse> fetchBooksFromGenre(String genre) {
-        List<GoogleBooksResponse> books = new ArrayList<>();
+    private HashSet<GoogleBooksResponse> fetchBooksFromGenre(String genre) {
+        HashSet<GoogleBooksResponse> books = new HashSet<>();
 
         try {
             String fullUrl = GOOGLE_API_URL + "?q=subject:" + genre + "&maxResults=" + BOOKS_PER_REQUEST;
@@ -90,6 +82,9 @@ public class GoogleBooksAPIService {
                     JsonObject item = itemVal.asJsonObject();
                     JsonObject volumeInfo = item.getJsonObject("volumeInfo");
 
+                    Long pageCount = volumeInfo.getJsonNumber("pageCount") != null ?
+                            volumeInfo.getJsonNumber("pageCount").longValue() : 0;
+
                     String title = volumeInfo.getString("title", "No Title");
                     String publishedDate = volumeInfo.getString("publishedDate", "Unknown Date");
                     String description = volumeInfo.getString("description", "No Description");
@@ -106,7 +101,7 @@ public class GoogleBooksAPIService {
                         thumbnail = imageLinks.getString("thumbnail", null);
                     }
 
-                    books.add(new GoogleBooksResponse(title, publishedDate, author, description, thumbnail));
+                    books.add(new GoogleBooksResponse(title, publishedDate, author, description, thumbnail, genre, pageCount));
                 }
 
             }
