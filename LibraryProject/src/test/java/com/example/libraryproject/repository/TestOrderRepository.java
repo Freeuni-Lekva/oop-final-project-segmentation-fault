@@ -1,14 +1,11 @@
-package libraryproject.repository;
+package com.example.libraryproject.repository;
 
 
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.entity.Review;
 import com.example.libraryproject.model.entity.User;
-import com.example.libraryproject.repository.BookRepository;
-import com.example.libraryproject.repository.OrderRepository;
 import com.example.libraryproject.model.enums.OrderStatus;
-import com.example.libraryproject.repository.UserRepository;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
