@@ -65,6 +65,6 @@
         </small>
     </div>
 </div>
-
+<%@ include file="password-validation.jsp" %>
 </body>
 </html>
