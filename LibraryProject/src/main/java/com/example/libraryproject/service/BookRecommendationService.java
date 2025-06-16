@@ -9,14 +9,13 @@ import lombok.RequiredArgsConstructor;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.example.libraryproject.configuration.ApplicationProperties.*;
+
 @RequiredArgsConstructor
 public class BookRecommendationService {
-
-    private static final int DEFAULT_RATING = 3;
-    private static final int RECOMMENDED_COUNT = 20;
-    private final BookRepository bookRepository;
-
     private static final Map<Integer, Integer> OFFSET_MAP;
+
+    private final BookRepository bookRepository;
 
     static {
         Map<Integer, Integer> map = new HashMap<>();
@@ -58,34 +57,86 @@ public class BookRecommendationService {
         Set<String> topAuthorNames = authorScores.entrySet()
                 .stream()
                 .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
-                .limit(3)
+                .limit(TOP_AUTHORS_COUNT)
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
 
         Set<String> topGenreNames = genreScores.entrySet()
                 .stream()
                 .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
-                .limit(3)
+                .limit(TOP_GENRE_COUNT)
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
 
-        List<Book> allBooks = bookRepository.findAll();
-        List<Book> filtered;
+        List<Book> filtered = bookRepository.findWithFilter(topAuthorNames,topGenreNames,readBooks);
+        List<Book> doubleFiltered = applyCoefficients(topAuthorNames,topGenreNames,authorScores,genreScores,filtered);
 
-        if (topAuthorNames.isEmpty() && topGenreNames.isEmpty()) {
-            filtered = new ArrayList<>(allBooks);
-        } else {
-            filtered = allBooks.stream()
-                    .filter(book -> (topAuthorNames.contains(book.getAuthor()) || topGenreNames.contains(book.getGenre()))
-                            && !readBooks.contains(book))
-                    .collect(Collectors.toList());
-        }
+        Collections.shuffle(doubleFiltered);
 
-        Collections.shuffle(filtered);
-
-        return filtered.stream()
+        return doubleFiltered.stream()
                 .limit(RECOMMENDED_COUNT)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    private List<Book> applyCoefficients(Set<String> topAuthorNames,
+                                  Set<String> topGenreNames,
+                                  Map<String, Double> authorScores,
+                                  Map<String, Double> genreScores,
+                                  List<Book> candidateBooks){
+        int totalCount = RECOMMENDED_COUNT;
+
+        Map<String, Double> combinedScores = new HashMap<>();
+
+        for (String author : topAuthorNames) {
+            combinedScores.put("A:" + author, authorScores.getOrDefault(author, 0.0));
+        }
+        for (String genre : topGenreNames) {
+            combinedScores.put("G:" + genre, genreScores.getOrDefault(genre, 0.0));
+        }
+
+        double totalScore = combinedScores.values().stream().mapToDouble(Double::doubleValue).sum();
+
+        Map<String, Integer> allocations = new HashMap<>();
+        for (var entry : combinedScores.entrySet()) {
+            double fraction = entry.getValue() / totalScore;
+            int count = (int) Math.round(fraction * totalCount);
+            allocations.put(entry.getKey(), count);
+        }
+
+        Map<String, List<Book>> booksByAuthor = candidateBooks.stream()
+                .filter(b -> topAuthorNames.contains(b.getAuthor()))
+                .collect(Collectors.groupingBy(Book::getAuthor));
+
+        Map<String, List<Book>> booksByGenre = candidateBooks.stream()
+                .filter(b -> topGenreNames.contains(b.getGenre()))
+                .collect(Collectors.groupingBy(Book::getGenre));
+
+        Set<Book> result = new LinkedHashSet<>();
+
+        for (String key : allocations.keySet()) {
+            int count = allocations.get(key);
+            List<Book> pool;
+
+            if (key.startsWith("A:")) {
+                String author = key.substring(2);
+                pool = booksByAuthor.getOrDefault(author, Collections.emptyList());
+            } else {
+                String genre = key.substring(2);
+                pool = booksByGenre.getOrDefault(genre, Collections.emptyList());
+            }
+
+            Collections.shuffle(pool);
+            result.addAll(pool.stream().limit(count).toList());
+        }
+
+        if (result.size() < totalCount) {
+            List<Book> remaining = new ArrayList<>(candidateBooks);
+            remaining.removeAll(result);
+            Collections.shuffle(remaining);
+            result.addAll(remaining.stream().limit(totalCount - result.size()).toList());
+        }
+
+        return new ArrayList<>(result);
     }
 
     public Set<Book> recommendBooks(User user){

@@ -8,6 +8,7 @@ import org.hibernate.query.Query;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RequiredArgsConstructor
 public class BookRepository {
@@ -56,6 +57,23 @@ public class BookRepository {
     public Optional<Book> findById(Long id) {
         Book book = session.get(Book.class, id);
         return Optional.ofNullable(book);
+    }
+
+    public List<Book> findWithFilter(Set<String> authors, Set<String> genres, Set<Book> readBooks){
+        String hql = "FROM Book b WHERE " +
+                "(:authorsSize = 0 OR b.author IN :authors) AND " +
+                "(:genresSize = 0 OR b.genre IN :genres) AND " +
+                "(b NOT IN :readBooks)";
+        Query<Book> query = session.createQuery(hql, Book.class);
+
+        query.setParameter("authors", authors);
+        query.setParameter("genres", genres);
+        query.setParameter("readBooks", readBooks);
+
+        query.setParameter("authorsSize", authors.size());
+        query.setParameter("genresSize", genres.size());
+
+        return query.getResultList();
     }
 
     public List<Book> findAll() {

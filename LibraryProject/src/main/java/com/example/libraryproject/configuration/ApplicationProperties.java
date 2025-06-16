@@ -18,4 +18,8 @@ public class ApplicationProperties {
     public static final int TOTAL_BOOKS_TARGET = 100;
     public static final int BOOKS_PER_REQUEST = 10;
 
+    public static final int DEFAULT_RATING = 3;
+    public static final int RECOMMENDED_COUNT = 3;
+    public static final int TOP_AUTHORS_COUNT = 3;
+    public static final int TOP_GENRE_COUNT = 3;
 }
