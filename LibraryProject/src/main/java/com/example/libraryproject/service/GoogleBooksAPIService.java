@@ -8,8 +8,10 @@ import jakarta.json.*;
 import lombok.RequiredArgsConstructor;
 
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.*;
 
 import static com.example.libraryproject.configuration.ApplicationProperties.*;
@@ -19,8 +21,6 @@ public class GoogleBooksAPIService {
 
 
     private final BookRepository bookRepository;
-
-    private final Random random = new Random();
 
 
     public static List<String> getRandomGenres(int n) {
@@ -63,12 +63,16 @@ public class GoogleBooksAPIService {
         try {
             String fullUrl = GOOGLE_API_URL + "?q=subject:" + genre + "&maxResults=" + BOOKS_PER_REQUEST;
 
-            URL url = new URL(fullUrl);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.setRequestProperty("User-Agent", "LibraryProject/1.0");
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(fullUrl))
+                    .header("User-Agent", "LibraryProject/1.0")
+                    .GET()
+                    .build();
 
-            try (InputStream is = conn.getInputStream();
+            HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+
+            try (InputStream is = response.body();
                  JsonReader reader = Json.createReader(is)) {
 
                 JsonObject root = reader.readObject();
@@ -82,7 +86,7 @@ public class GoogleBooksAPIService {
                     JsonObject item = itemVal.asJsonObject();
                     JsonObject volumeInfo = item.getJsonObject("volumeInfo");
 
-                    Long pageCount = volumeInfo.getJsonNumber("pageCount") != null ?
+                    Long pageCount = volumeInfo.containsKey("pageCount") ?
                             volumeInfo.getJsonNumber("pageCount").longValue() : 0;
 
                     String title = volumeInfo.getString("title", "No Title");
@@ -112,4 +116,5 @@ public class GoogleBooksAPIService {
 
         return books;
     }
+
 }
