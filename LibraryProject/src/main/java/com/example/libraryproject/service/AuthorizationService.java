@@ -1,5 +1,6 @@
 package com.example.libraryproject.service;
 
+import com.example.libraryproject.model.dto.LoginRequest;
 import com.example.libraryproject.model.dto.RegistrationRequest;
 import com.example.libraryproject.model.entity.BookKeeper;
 import com.example.libraryproject.model.entity.User;
@@ -43,15 +44,21 @@ public class AuthorizationService {
         userRepository.save(user);
     }
 
-    public void login(RegistrationRequest request) {
-        String hashedPassword = BCrypt.hashpw(request.password(), BCrypt.gensalt());
-        BookKeeper keeper = bookKeeperRepository.findByUsername(request.username());
-        User user = userRepository.findByUsername(request.username());
+    public void login(LoginRequest request) {
+        String username = request.username();
+        String password = request.password();
+
+        BookKeeper keeper = bookKeeperRepository.findByUsername(username);
+        User user = userRepository.findByUsername(username);
+
         if (keeper == null && user == null)
             throw new IllegalArgumentException("This username does not exist");
-        if (!keeper.getPassword().equals(hashedPassword) && !user.getPassword().equals(hashedPassword)) {
+
+        String storedPassword = keeper != null ? keeper.getPassword() : user.getPassword();
+
+        if (!BCrypt.checkpw(password, storedPassword))
             throw new IllegalArgumentException("Incorrect password");
-        }
+
     }
 
 }
