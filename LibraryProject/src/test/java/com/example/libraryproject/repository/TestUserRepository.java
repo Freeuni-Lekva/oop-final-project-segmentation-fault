@@ -3,7 +3,6 @@ package com.example.libraryproject.repository;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Review;
 import com.example.libraryproject.model.entity.User;
-import com.example.libraryproject.repository.UserRepository;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -115,10 +114,10 @@ public class TestUserRepository {
     public void testFindBorrowedReadBooksByUserId() {
         Book book1 = new Book("100 Years of Solitude", "Fiction", "Gabriel Garcia Marquez", LocalDate.now(),
                 "A classic novel about the Buendia family",
-                (long) 4.8, 600L, 300L);
+                4L, 600L, 300L, "100YearsOfSolitude.jpg");
 
         Book book2 = new Book("Dzalis Gamogvidzeba", "Politics", "Mikheil Saakashvili",
-                LocalDate.now(), "A thrilling political fiction novel", (long) 4.5, 555L, 400L);
+                LocalDate.now(), "A thrilling political fiction novel", 4L, 555L, 400L, "dzalisGamogvidzeba.jpg");
 
 
         User user = new User();

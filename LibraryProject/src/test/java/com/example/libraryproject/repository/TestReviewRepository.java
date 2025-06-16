@@ -50,9 +50,9 @@ public class TestReviewRepository {
         user2.setPassword("kubdari1234");
 
         book1 = new Book("Dzalis Gamogvidzeba","Politics" , "Mikheil Saakashvili", LocalDate.now(), "A thrilling political fiction novel",
-                (long) 4.5, (long) 555, (long) 400);
+                 4L,  555L,400L, "dzalisGamogvidzeba.jpg" );
         book2 = new Book("100 Years of Solitude", "Fiction", "Gabriel Garcia Marquez", LocalDate.now(), "A classic novel about the Buendia family",
-                (long) 4.8, (long) 600, (long) 300);
+                4L, 600L, 300L, "100YearsOfSolitude.jpg");
         UserRepository userRepository = new UserRepository(session);
         BookRepository bookRepository = new BookRepository(session);
         userRepository.save(user);

@@ -44,7 +44,7 @@ public class TestOrderRepository {
         orderRepository = new OrderRepository(session);
         User user = new User("gubaz","541541");
         Book book = new Book("Oddysey", "Sci-Fi", "Arthur C. Clarke", LocalDate.of(1968, 7, 1),
-                "A journey through space and time", 1L, 10L, 5L);
+                "A journey through space and time", 1L, 10L, 5L, "oddysey.jpg");
         UserRepository userRepository = new UserRepository(session);
         BookRepository bookRepository = new BookRepository(session);
         userRepository.save(user);
