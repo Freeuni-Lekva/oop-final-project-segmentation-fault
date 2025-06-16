@@ -68,7 +68,7 @@ public class BookRecommendationService {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
 
-        List<Book> filtered = bookRepository.findWithFilter(topAuthorNames,topGenreNames,readBooks);
+        List<Book> filtered = bookRepository.findByAuthorsAndGenres(topAuthorNames,topGenreNames,readBooks);
         List<Book> doubleFiltered = applyCoefficients(topAuthorNames,topGenreNames,authorScores,genreScores,filtered);
 
         Collections.shuffle(doubleFiltered);

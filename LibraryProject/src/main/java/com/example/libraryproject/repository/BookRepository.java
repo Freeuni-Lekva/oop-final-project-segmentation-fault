@@ -59,7 +59,7 @@ public class BookRepository {
         return Optional.ofNullable(book);
     }
 
-    public List<Book> findWithFilter(Set<String> authors, Set<String> genres, Set<Book> readBooks){
+    public List<Book> findByAuthorsAndGenres(Set<String> authors, Set<String> genres, Set<Book> readBooks){
         String hql = "FROM Book b WHERE " +
                 "(:authorsSize = 0 OR b.author IN :authors) AND " +
                 "(:genresSize = 0 OR b.genre IN :genres) AND " +
