@@ -56,7 +56,7 @@ public class BookRecommendationServiceTest {
                 "Author A",
                 LocalDate.of(2020, 5, 10),
                 "A gripping tale of magic and destiny.",
-                1L, 5L, 4L
+                1L, 5L, 4L, ""
         );
 
         Book book2 = new Book(
@@ -65,7 +65,7 @@ public class BookRecommendationServiceTest {
                 "Author A",
                 LocalDate.of(2021, 6, 15),
                 "The saga continues with greater peril.",
-                2L, 3L, 5L
+                2L, 3L, 5L, ""
         );
 
         Book book3 = new Book(
@@ -74,7 +74,7 @@ public class BookRecommendationServiceTest {
                 "Author A",
                 LocalDate.of(2019, 4, 20),
                 "Ancient secrets resurface to test the realm.",
-                3L, 2L, 3L
+                3L, 2L, 3L, ""
         );
 
         Book book4 = new Book(
@@ -83,7 +83,7 @@ public class BookRecommendationServiceTest {
                 "Author A",
                 LocalDate.of(2022, 1, 5),
                 "The rise of a legendary sorcerer.",
-                4L, 1L, 5L
+                4L, 1L, 5L, ""
         );
 
         Book book5 = new Book(
@@ -92,7 +92,7 @@ public class BookRecommendationServiceTest {
                 "Author A",
                 LocalDate.of(2023, 3, 12),
                 "A kingdom on the edge of collapse.",
-                5L, 4L, 2L
+                5L, 4L, 2L, ""
         );
 
         Book book6 = new Book(
@@ -101,7 +101,7 @@ public class BookRecommendationServiceTest {
                 "Author A",
                 LocalDate.of(2023, 3, 12),
                 "euf.",
-                5L, 4L, 2L
+                5L, 4L, 2L, ""
         );
         bookRepository.save(book1);
         bookRepository.save(book2);
