@@ -38,7 +38,7 @@ public class Mappers {
         book.setName(googleBooksResponse.title() != null ? googleBooksResponse.title() : "Unknown Title");
         book.setAuthor(googleBooksResponse.author() != null ? googleBooksResponse.author() : "Unknown Author");
         book.setDescription(googleBooksResponse.description() != null ? googleBooksResponse.description() : "No description available");
-
+        book.setImageUrl(googleBooksResponse.thumbnailUrl());
         if (googleBooksResponse.publishedDate() != null && !googleBooksResponse.publishedDate().isEmpty()) {
             try {
                 LocalDate parsedDate = getLocalDate(googleBooksResponse);

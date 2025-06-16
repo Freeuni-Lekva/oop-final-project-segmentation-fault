@@ -12,6 +12,10 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 import static com.example.libraryproject.configuration.ApplicationProperties.*;
@@ -19,9 +23,7 @@ import static com.example.libraryproject.configuration.ApplicationProperties.*;
 @RequiredArgsConstructor
 public class GoogleBooksAPIService {
 
-
     private final BookRepository bookRepository;
-
 
     public static List<String> getRandomGenres(int n) {
         List<String> genreList = new ArrayList<>(Arrays.asList(GOOGLE_BOOKS_GENRES));
@@ -34,7 +36,7 @@ public class GoogleBooksAPIService {
             return;
         }
 
-        HashSet<GoogleBooksResponse> googleBooks = fetchBooks();
+        HashSet<GoogleBooksResponse> googleBooks = fetchBooks(TOTAL_BOOKS_TARGET, BOOKS_PER_REQUEST);
         List<Book> books = googleBooks.stream()
                 .map(Mappers::mapGoogleBookToBook)
                 .toList();
@@ -42,26 +44,25 @@ public class GoogleBooksAPIService {
         bookRepository.saveAll(books);
     }
 
-    HashSet<GoogleBooksResponse> fetchBooks() {
+    HashSet<GoogleBooksResponse> fetchBooks(int amountOfBooks, int booksPerRequest) {
         HashSet<GoogleBooksResponse> allBooks = new HashSet<>();
-        int requestsNeeded = TOTAL_BOOKS_TARGET / BOOKS_PER_REQUEST;
+        int requestsNeeded = amountOfBooks / booksPerRequest;
 
-        List<String> chosenGenres =  getRandomGenres(requestsNeeded);
+        List<String> chosenGenres = getRandomGenres(requestsNeeded);
 
         for (int i = 0; i < requestsNeeded; i++) {
-            HashSet<GoogleBooksResponse> booksFromGenre = fetchBooksFromGenre(chosenGenres.get(i));
+            HashSet<GoogleBooksResponse> booksFromGenre = fetchBooksFromGenre(chosenGenres.get(i), booksPerRequest);
             allBooks.addAll(booksFromGenre);
-
         }
 
         return allBooks;
     }
 
-    private HashSet<GoogleBooksResponse> fetchBooksFromGenre(String genre) {
+    HashSet<GoogleBooksResponse> fetchBooksFromGenre(String genre, int booksPerRequest) {
         HashSet<GoogleBooksResponse> books = new HashSet<>();
 
         try {
-            String fullUrl = GOOGLE_API_URL + "?q=subject:" + genre + "&maxResults=" + BOOKS_PER_REQUEST;
+            String fullUrl = GOOGLE_API_URL + "?q=subject:" + genre + "&maxResults=" + booksPerRequest;
 
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
@@ -98,23 +99,56 @@ public class GoogleBooksAPIService {
                     if (authors != null && !authors.isEmpty()) {
                         author = authors.getString(0);
                     }
-
+                    String safeTitle = title.replaceAll("[^a-zA-Z0-9.\\-]", "_");
                     String thumbnail = null;
                     JsonObject imageLinks = volumeInfo.getJsonObject("imageLinks");
                     if (imageLinks != null) {
                         thumbnail = imageLinks.getString("thumbnail", null);
+                        if (thumbnail != null && !thumbnail.isEmpty()) {
+                            try {
+                                downloadAndSaveImage(thumbnail, safeTitle);
+                            } catch (Exception ex) {
+                                System.err.printf("Failed to download thumbnail for '%s': %s%n", title, ex.getMessage());
+                            }
+                        }
                     }
 
-                    books.add(new GoogleBooksResponse(title, publishedDate, author, description, thumbnail, genre, pageCount));
+                    books.add(new GoogleBooksResponse(title, publishedDate, author, description, safeTitle + ".jpg", genre, pageCount));
                 }
-
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.printf("Error fetching books for genre '%s': %s%n", genre, e.getMessage());
         }
 
         return books;
+    }
+
+    void downloadAndSaveImage(String imageUrl, String title) throws Exception {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(imageUrl))
+                .GET()
+                .build();
+
+        HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("Image download failed with status: " + response.statusCode());
+        }
+
+        String safeTitle = title.replaceAll("[^a-zA-Z0-9.\\-]", "_");
+
+        String projectRoot = System.getProperty("user.dir");
+        Path imagesDir = Paths.get(projectRoot, "src", "main", "webapp", "images");
+
+        Files.createDirectories(imagesDir);
+        Path filePath = imagesDir.resolve(safeTitle + ".jpg");
+
+        try (InputStream is = response.body()) {
+            Files.copy(is, filePath, StandardCopyOption.REPLACE_EXISTING);
+            System.out.printf("Saved image to %s%n", filePath.toAbsolutePath());
+        }
     }
 
 }

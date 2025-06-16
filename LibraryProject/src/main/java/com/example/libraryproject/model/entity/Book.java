@@ -69,5 +69,9 @@ public class Book {
                 ", rating=" + rating +
                 '}';
     }
+    
+    @NonNull
+    @Column(name = "image_url", length = 255)
+    private String imageUrl;
 }
 
