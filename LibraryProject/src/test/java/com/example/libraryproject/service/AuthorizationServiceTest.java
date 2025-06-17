@@ -33,8 +33,8 @@ public class AuthorizationServiceTest {
     void testRegisterUser_Success() {
         RegistrationRequest request = new RegistrationRequest("newuser", "pass123", Role.USER);
 
-        when(userRepository.findByUsername("newuser")).thenReturn(null);
-        when(bookKeeperRepository.findByUsername("newuser")).thenReturn(null);
+        when(userRepository.findByUsername("newuser")).thenReturn(Optional.empty());
+        when(bookKeeperRepository.findByUsername("newuser")).thenReturn(Optional.empty());
 
         authorizationService.register(request);
 
@@ -44,8 +44,8 @@ public class AuthorizationServiceTest {
     @Test
     void testRegisterBookKeeper_Success() {
         RegistrationRequest request = new RegistrationRequest("keeper", "pass123", Role.BOOKKEEPER);
-        when(userRepository.findByUsername("keeper")).thenReturn(null);
-        when(bookKeeperRepository.findByUsername("keeper")).thenReturn(null);
+        when(userRepository.findByUsername("keeper")).thenReturn(Optional.empty());
+        when(bookKeeperRepository.findByUsername("keeper")).thenReturn(Optional.empty());
 
         authorizationService.register(request);
 
@@ -71,7 +71,7 @@ public class AuthorizationServiceTest {
         user.setPassword(hashedPassword);
 
         when(userRepository.findByUsername("user1")).thenReturn(Optional.of(user));
-        when(bookKeeperRepository.findByUsername("user1")).thenReturn(null);
+        when(bookKeeperRepository.findByUsername("user1")).thenReturn(Optional.empty());
 
         LoginRequest request = new LoginRequest("user1", "secret");
 
@@ -86,7 +86,7 @@ public class AuthorizationServiceTest {
         user.setPassword(hashedPassword);
 
         when(userRepository.findByUsername("user1")).thenReturn(Optional.of(user));
-        when(bookKeeperRepository.findByUsername("user1")).thenReturn(null);
+        when(bookKeeperRepository.findByUsername("user1")).thenReturn(Optional.empty());
 
         LoginRequest request = new LoginRequest("user1", "wrong");
 
@@ -95,8 +95,8 @@ public class AuthorizationServiceTest {
 
     @Test
     void testLogin_Failure_UserNotFound() {
-        when(userRepository.findByUsername("ghost")).thenReturn(null);
-        when(bookKeeperRepository.findByUsername("ghost")).thenReturn(null);
+        when(userRepository.findByUsername("ghost")).thenReturn(Optional.empty());
+        when(bookKeeperRepository.findByUsername("ghost")).thenReturn(Optional.empty());
 
         LoginRequest request = new LoginRequest("ghost", "any");
 

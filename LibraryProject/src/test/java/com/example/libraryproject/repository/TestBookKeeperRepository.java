@@ -1,6 +1,5 @@
 package com.example.libraryproject.repository;
 import com.example.libraryproject.model.entity.BookKeeper;
-import com.example.libraryproject.repository.BookKeeperRepository;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -76,8 +75,8 @@ public class TestBookKeeperRepository {
         assertEquals("luka", bookKeeper1.getUsername());
         assertEquals("maka", bookKeeper2.getUsername());
         bookKeeperRepository.delete(bookKeeper1);
-        assertNull(bookKeeperRepository.findByUsername("luka"));
-        assertNotNull(bookKeeperRepository.findByUsername("maka"));
+        assertTrue(bookKeeperRepository.findByUsername("luka").isEmpty());
+        assertTrue(bookKeeperRepository.findByUsername("maka").isPresent());
     }
 
 }
