@@ -15,7 +15,9 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -43,13 +45,13 @@ public class TestOrderRepository {
         session = sessionFactory.openSession();
         orderRepository = new OrderRepository(session);
         User user = new User("gubaz","541541");
-        Book book = new Book("Oddysey", "Sci-Fi", "Arthur C. Clarke", LocalDate.of(1968, 7, 1),
+        Book book = new Book("Oddysey","Oddysey", "Sci-Fi", "Arthur C. Clarke", LocalDate.of(1968, 7, 1),
                 "A journey through space and time", 1L, 10L, 5L, "oddysey.jpg");
         UserRepository userRepository = new UserRepository(session);
         BookRepository bookRepository = new BookRepository(session);
         userRepository.save(user);
         bookRepository.save(book);
-        order = new Order(LocalDateTime.now(), LocalDateTime.now().plusDays(14),
+        order = new Order (UUID.randomUUID(), LocalDateTime.now(), LocalDateTime.now().plusDays(14),
                 OrderStatus.RESERVED, user, book);
         orderRepository.save(order);
     }
@@ -64,7 +66,9 @@ public class TestOrderRepository {
 
     @Test
     public void testSave() {
-        Order foundOrder = orderRepository.findById(order.getId());
+        Optional<Order> foundOrderOptional = orderRepository.findById(order.getId());
+        assertTrue(foundOrderOptional.isPresent());
+        Order foundOrder = foundOrderOptional.get();
         assertEquals(order.getId(), foundOrder.getId());
         assertEquals(order.getUser().getUsername(), foundOrder.getUser().getUsername());
         assertEquals(order.getBook().getName(), foundOrder.getBook().getName());
@@ -78,7 +82,9 @@ public class TestOrderRepository {
     public void testUpdate() {
         order.setStatus(OrderStatus.BORROWED);
         orderRepository.update(order);
-        Order updatedOrder = orderRepository.findById(order.getId());
+        Optional<Order> updatedOrderOptional = orderRepository.findById(order.getId());
+        assertTrue(updatedOrderOptional.isPresent());
+        Order updatedOrder = updatedOrderOptional.get();
         assertNotNull(updatedOrder);
         assertEquals(OrderStatus.BORROWED, updatedOrder.getStatus());
     }
@@ -86,8 +92,9 @@ public class TestOrderRepository {
     @Test
     public void testDelete() {
         orderRepository.delete(order);
-        Order deletedOrder = orderRepository.findById(order.getId());
-        assertNull(deletedOrder);
+        Optional<Order> deletedOrderOptional = orderRepository.findById(order.getId());
+
+        assertTrue(deletedOrderOptional.isEmpty());
     }
 
     @Test
@@ -106,7 +113,7 @@ public class TestOrderRepository {
 
     @Test
     public void testFindAll() {
-        Order newOrder = new Order(LocalDateTime.now().plusDays(40), LocalDateTime.now().plusDays(40+14),
+        Order newOrder = new Order(UUID.randomUUID(),LocalDateTime.now().plusDays(40), LocalDateTime.now().plusDays(40+14),
                 OrderStatus.RESERVED, order.getUser(), order.getBook());
         orderRepository.save(newOrder);
         Set<Order> allOrders = orderRepository.findAll();

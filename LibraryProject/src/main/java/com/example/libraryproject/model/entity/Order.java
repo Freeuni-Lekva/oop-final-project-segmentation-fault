@@ -9,6 +9,7 @@ import lombok.Setter;
 
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 
 @RequiredArgsConstructor
@@ -17,9 +18,14 @@ import java.time.LocalDateTime;
 @Table(name = "orders_table")
 @Entity
 public class Order {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NonNull
+    @Column(name = "public_id", nullable = false, unique = true)
+    private UUID publicId;
 
     @Column(name = "borrow_date", nullable = false)
     @NonNull

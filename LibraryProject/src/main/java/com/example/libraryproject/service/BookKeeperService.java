@@ -1,5 +1,6 @@
 package com.example.libraryproject.service;
 
+import com.example.libraryproject.model.dto.BookAdditionRequest;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.entity.User;
@@ -19,19 +20,32 @@ public class BookKeeperService {
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
 
-    public void addBook(Book book) {
-        Optional<Book> existingBook = bookRepository.findByTitle(book.getName());
+    public void addBook(BookAdditionRequest bookRequest) {
+        Optional<Book> existingBook = bookRepository.findByTitle(bookRequest.title());
+
         if (existingBook.isPresent()) {
             Book bookInLibrary = existingBook.get();
             bookInLibrary.setAmountInLib(bookInLibrary.getAmountInLib() + 1);
             bookRepository.update(bookInLibrary);
         } else {
-            book.setAmountInLib((long) 1);
+            Book book = new Book();
+            book.setName(bookRequest.title());
+            book.setAuthor(bookRequest.author());
+            book.setDescription(bookRequest.description());
+            book.setGenre(bookRequest.genre());
+            book.setPublicId(bookRequest.title().replaceAll("[^a-zA-Z0-9.\\-]", "_"));
+
+            book.setAmountInLib(1L);
             bookRepository.save(book);
         }
     }
 
-    public void deleteBook(Book book) {
+    public void deleteBook(String bookPublicId) {
+        Optional<Book> bookOptional = bookRepository.findByPublicId(bookPublicId);
+        if (bookOptional.isEmpty()) {
+            throw new IllegalArgumentException("Book not found");
+        }
+        Book book = bookOptional.get();
         Optional<Book> existingBook = bookRepository.findByTitle(book.getName());
         if (existingBook.isPresent()) {
             Book bookInLibrary = existingBook.get();
@@ -47,12 +61,22 @@ public class BookKeeperService {
         }
     }
 
-    public void tookBook(Order order) {
+    public void tookBook(String orderPublicId) {
+        Optional<Order> orderOptional = orderRepository.findByPublicId(orderPublicId);
+        if (orderOptional.isEmpty()) {
+            throw new IllegalArgumentException("Order not found");
+        }
+        Order order = orderOptional.get();
         order.setStatus(OrderStatus.BORROWED);
         orderRepository.update(order);
     }
 
     public void banUser(Order order) {
+        Optional<Order> orderOptional = orderRepository.findById(order.getId());
+        if (orderOptional.isEmpty()) {
+            throw new IllegalArgumentException("Order not found");
+        }
+        order = orderOptional.get();
         User user = order.getUser();
         user.setStatus(UserStatus.BANNED);
         userRepository.update(user);

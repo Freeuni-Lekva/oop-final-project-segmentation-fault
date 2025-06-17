@@ -7,6 +7,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @RequiredArgsConstructor
@@ -32,8 +33,8 @@ public class OrderRepository {
         tx.commit();
     }
 
-    public Order findById(Long id) {
-        return session.get(Order.class, id);
+    public Optional<Order> findById(Long id) {
+        return Optional.ofNullable(session.get(Order.class, id));
     }
 
     public Set<Order> findOrdersByUserId(Long userId) {
@@ -53,6 +54,12 @@ public class OrderRepository {
     public Set<Order> findAll() {
         return new HashSet<>(session.createQuery("FROM Order", Order.class)
                 .getResultList());
+    }
+
+    public Optional<Order> findByPublicId(String publicId) {
+        return Optional.ofNullable(session.createQuery("SELECT o FROM Order o WHERE o.publicId = :publicId", Order.class)
+                .setParameter("publicId", publicId)
+                .uniqueResult());
     }
 
     public Set<Order> findOrdersByStatus(OrderStatus status) {

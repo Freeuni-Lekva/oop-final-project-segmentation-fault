@@ -51,6 +51,7 @@ public class BookRecommendationServiceTest {
         recommendationService = new BookRecommendationService(bookRepository);
 
         Book book1 = new Book(
+                "Shadow_Realms",
                 "Shadow Realms",
                 "Fantasy",
                 "Author A",
@@ -60,6 +61,7 @@ public class BookRecommendationServiceTest {
         );
 
         Book book2 = new Book(
+                "Shadow_Realms_II",
                 "Shadow Realms II",
                 "Fantasy",
                 "Author A",
@@ -69,6 +71,7 @@ public class BookRecommendationServiceTest {
         );
 
         Book book3 = new Book(
+                "Echoes_of_Power",
                 "Echoes of Power",
                 "Fantasy",
                 "Author A",
@@ -78,6 +81,7 @@ public class BookRecommendationServiceTest {
         );
 
         Book book4 = new Book(
+                "Rise_of_the_Mage",
                 "Rise of the Mage",
                 "Fantasy",
                 "Author A",
@@ -87,6 +91,7 @@ public class BookRecommendationServiceTest {
         );
 
         Book book5 = new Book(
+                "Fall_of_the_Realm",
                 "Fall of the Realm",
                 "Fantasy",
                 "Author A",
@@ -96,6 +101,7 @@ public class BookRecommendationServiceTest {
         );
 
         Book book6 = new Book(
+                "euf",
                 "euf",
                 "Fantasy",
                 "Author A",

@@ -6,6 +6,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 
@@ -32,8 +33,8 @@ public class ReviewRepository {
         tx.commit();
     }
 
-    public Review findById(Long id) {
-        return session.get(Review.class, id);
+    public Optional<Review> findById(Long id) {
+        return Optional.ofNullable(session.get(Review.class, id));
     }
 
     public Set<Review> findReviewsByUserId(Long userId) {
