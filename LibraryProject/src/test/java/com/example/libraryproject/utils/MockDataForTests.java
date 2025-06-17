@@ -8,6 +8,7 @@ public class MockDataForTests {
 
     public static  Book createTestBook(String name, String author, String genre, Long rating, Long amount, String imageUrl) {
         return new Book(
+                name.replaceAll("[^a-zA-Z0-9.\\-]", "_"),
                 name,
                 genre,
                 author,

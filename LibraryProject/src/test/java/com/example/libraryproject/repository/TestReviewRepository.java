@@ -11,7 +11,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -49,9 +51,9 @@ public class TestReviewRepository {
         user2.setUsername("kubdari");
         user2.setPassword("kubdari1234");
 
-        book1 = new Book("Dzalis Gamogvidzeba","Politics" , "Mikheil Saakashvili", LocalDate.now(), "A thrilling political fiction novel",
+        book1 = new Book("Dzalis_Gamogvidzeba","Dzalis Gamogvidzeba","Politics" , "Mikheil Saakashvili", LocalDate.now(), "A thrilling political fiction novel",
                  4L,  555L,400L, "dzalisGamogvidzeba.jpg" );
-        book2 = new Book("100 Years of Solitude", "Fiction", "Gabriel Garcia Marquez", LocalDate.now(), "A classic novel about the Buendia family",
+        book2 = new Book("100_Years_of_Solitude", "100 Years of Solitude", "Fiction", "Gabriel Garcia Marquez", LocalDate.now(), "A classic novel about the Buendia family",
                 4L, 600L, 300L, "100YearsOfSolitude.jpg");
         UserRepository userRepository = new UserRepository(session);
         BookRepository bookRepository = new BookRepository(session);
@@ -70,12 +72,13 @@ public class TestReviewRepository {
 
     @Test
     public void testSaveAndFindById() {
-        Review review = new Review(5, "Tafliani 9 weli", user, book1);
+        Review review = new Review(UUID.randomUUID(),5, "Tafliani 9 weli", user, book1);
 
         reviewRepository.save(review);
 
-        Review found = reviewRepository.findById(review.getId());
-        assertNotNull(found);
+        Optional<Review> foundOptional = reviewRepository.findById(review.getId());
+        assertTrue(foundOptional.isPresent());
+        Review found = foundOptional.get();
         assertEquals("Tafliani 9 weli", found.getComment());
     }
 
@@ -83,19 +86,21 @@ public class TestReviewRepository {
     public void testDelete() {
         Review review = new Review();
         review.setUser(user);
+        review.setPublicId(UUID.randomUUID());
         review.setBook(book1);
         review.setRating(5);
         review.setComment("The best book1 ever!");
         reviewRepository.save(review);
         reviewRepository.delete(review);
-        Review found = reviewRepository.findById(review.getId());
-        assertNull(found);
+        Optional<Review> found = reviewRepository.findById(review.getId());
+        assertFalse(found.isPresent());
     }
 
     @Test
     public void testUpdate() {
         Review review = new Review();
         review.setUser(user);
+        review.setPublicId(UUID.randomUUID());
         review.setBook(book1);
         review.setRating(0);
         review.setComment("Veraferi gavige");
@@ -103,8 +108,9 @@ public class TestReviewRepository {
         review.setRating(5);
         review.setComment("Gavige, magaria");
         reviewRepository.update(review);
-        Review found = reviewRepository.findById(review.getId());
-        assertNotNull(found);
+        Optional<Review> foundOptional = reviewRepository.findById(review.getId());
+        assertTrue(foundOptional.isPresent());
+        Review found = foundOptional.get();
         assertEquals(5, found.getRating());
         assertEquals("Gavige, magaria", found.getComment());
     }
@@ -114,12 +120,14 @@ public class TestReviewRepository {
     public void testFindReviewsById() {
         Review review = new Review();
         review.setUser(user);
+        review.setPublicId(UUID.randomUUID());
         review.setBook(book1);
         review.setRating(4);
         review.setComment("Great book1");
         reviewRepository.save(review);
-        Review foundReview = reviewRepository.findById(review.getId());
-        assertNotNull(foundReview);
+        Optional<Review> foundReviewOptional = reviewRepository.findById(review.getId());
+        assertTrue(foundReviewOptional.isPresent());
+        Review foundReview = foundReviewOptional.get();
         assertEquals("Great book1", foundReview.getComment());
         assertEquals(4, foundReview.getRating());
     }
@@ -128,6 +136,7 @@ public class TestReviewRepository {
     public void findReviewsByUserBookId() {
         Review review1 = new Review();
         review1.setUser(user);
+        review1.setPublicId(UUID.randomUUID());
         review1.setBook(book1);
         review1.setRating(0);
         review1.setComment("Sisulele");
@@ -135,6 +144,7 @@ public class TestReviewRepository {
         Review review2 = new Review();
         review2.setUser(user);
         review2.setBook(book2);
+        review2.setPublicId(UUID.randomUUID());
         review2.setRating(5);
         review2.setComment("Magaria, omi minda");
 
@@ -155,12 +165,14 @@ public class TestReviewRepository {
 
         Review review1 = new Review();
         review1.setUser(user);
+        review1.setPublicId(UUID.randomUUID());
         review1.setBook(book1);
         review1.setRating(3);
         review1.setComment("Mid book1");
 
         Review review2 = new Review();
         review2.setUser(user2);
+        review2.setPublicId(UUID.randomUUID());
         review2.setBook(book2);
         review2.setRating(4);
         review2.setComment("Good read");

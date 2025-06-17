@@ -112,11 +112,11 @@ public class TestUserRepository {
 
     @Test
     public void testFindBorrowedReadBooksByUserId() {
-        Book book1 = new Book("100 Years of Solitude", "Fiction", "Gabriel Garcia Marquez", LocalDate.now(),
+        Book book1 = new Book("100_Years_of_Solitude","100 Years of Solitude", "Fiction", "Gabriel Garcia Marquez", LocalDate.now(),
                 "A classic novel about the Buendia family",
                 4L, 600L, 300L, "100YearsOfSolitude.jpg");
 
-        Book book2 = new Book("Dzalis Gamogvidzeba", "Politics", "Mikheil Saakashvili",
+        Book book2 = new Book("Dzalis_Gamogvidzeba","Dzalis Gamogvidzeba", "Politics", "Mikheil Saakashvili",
                 LocalDate.now(), "A thrilling political fiction novel", 4L, 555L, 400L, "dzalisGamogvidzeba.jpg");
 
 
