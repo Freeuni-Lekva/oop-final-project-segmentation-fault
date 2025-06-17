@@ -20,7 +20,7 @@ public class Book {
 
     @NonNull
     @Column(name = "public_id", unique = true, nullable = false, length = 36)
-    private String public_id;
+    private String publicId;
 
     @NonNull
     @Column(name = "name", unique = true, nullable = false, length = 100)
@@ -59,6 +59,10 @@ public class Book {
     @Column(name = "rating")
     private Long rating;
 
+    @NonNull
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @Override
     public String toString() {
         return "Book{" +
@@ -73,9 +77,4 @@ public class Book {
                 ", rating=" + rating +
                 '}';
     }
-    
-    @NonNull
-    @Column(name = "image_url", length = 255)
-    private String imageUrl;
 }
-

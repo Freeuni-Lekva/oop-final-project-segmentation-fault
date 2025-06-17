@@ -35,7 +35,7 @@ public class Mappers {
     public static Book mapGoogleBookToBook(GoogleBooksResponse googleBooksResponse) {
         Book book = new Book();
         String safeTitle = googleBooksResponse.title().replaceAll("[^a-zA-Z0-9.\\-]", "_");
-        book.setPublic_id(safeTitle);
+        book.setPublicId(safeTitle);
         book.setName(googleBooksResponse.title());
         book.setAuthor(googleBooksResponse.author() != null ? googleBooksResponse.author() : "Unknown Author");
         book.setDescription(googleBooksResponse.description() != null ? googleBooksResponse.description() : "No description available");

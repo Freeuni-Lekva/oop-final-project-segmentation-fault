@@ -1,5 +1,6 @@
 package com.example.libraryproject.service;
 
+import com.example.libraryproject.model.dto.BookAdditionRequest;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.entity.User;
@@ -19,17 +20,25 @@ public class BookKeeperService {
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
 
-//    public void addBook(BookAdditionRequest bookRequest) {
-//        Optional<Book> existingBook = bookRepository.findByTitle(book.getName());
-//        if (existingBook.isPresent()) {
-//            Book bookInLibrary = existingBook.get();
-//            bookInLibrary.setAmountInLib(bookInLibrary.getAmountInLib() + 1);
-//            bookRepository.update(bookInLibrary);
-//        } else {
-//            book.setAmountInLib((long) 1);
-//            bookRepository.save(book);
-//        }
-//    }
+    public void addBook(BookAdditionRequest bookRequest) {
+        Optional<Book> existingBook = bookRepository.findByTitle(bookRequest.title());
+
+        if (existingBook.isPresent()) {
+            Book bookInLibrary = existingBook.get();
+            bookInLibrary.setAmountInLib(bookInLibrary.getAmountInLib() + 1);
+            bookRepository.update(bookInLibrary);
+        } else {
+            Book book = new Book();
+            book.setName(bookRequest.title());
+            book.setAuthor(bookRequest.author());
+            book.setDescription(bookRequest.description());
+            book.setGenre(bookRequest.genre());
+            book.setPublicId(bookRequest.title().replaceAll("[^a-zA-Z0-9.\\-]", "_"));
+
+            book.setAmountInLib(1L);
+            bookRepository.save(book);
+        }
+    }
 
     public void deleteBook(String bookPublicId) {
         Optional<Book> bookOptional = bookRepository.findByPublicId(bookPublicId);
