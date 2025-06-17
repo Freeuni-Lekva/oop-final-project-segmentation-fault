@@ -11,6 +11,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -53,7 +55,7 @@ public class AuthorizationServiceTest {
     @Test
     void testRegisterUser_DuplicateUsername_ThrowsException() {
         RegistrationRequest request = new RegistrationRequest("existing", "pass123", Role.USER);
-        when(userRepository.findByUsername("existing")).thenReturn(new User());
+        when(userRepository.findByUsername("existing")).thenReturn(Optional.of(new User()));
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> authorizationService.register(request));
@@ -68,7 +70,7 @@ public class AuthorizationServiceTest {
         user.setUsername("user1");
         user.setPassword(hashedPassword);
 
-        when(userRepository.findByUsername("user1")).thenReturn(user);
+        when(userRepository.findByUsername("user1")).thenReturn(Optional.of(user));
         when(bookKeeperRepository.findByUsername("user1")).thenReturn(null);
 
         LoginRequest request = new LoginRequest("user1", "secret");
@@ -83,7 +85,7 @@ public class AuthorizationServiceTest {
         user.setUsername("user1");
         user.setPassword(hashedPassword);
 
-        when(userRepository.findByUsername("user1")).thenReturn(user);
+        when(userRepository.findByUsername("user1")).thenReturn(Optional.of(user));
         when(bookKeeperRepository.findByUsername("user1")).thenReturn(null);
 
         LoginRequest request = new LoginRequest("user1", "wrong");

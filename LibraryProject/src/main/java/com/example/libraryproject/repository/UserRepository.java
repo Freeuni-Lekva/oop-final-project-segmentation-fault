@@ -7,6 +7,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @RequiredArgsConstructor
@@ -49,11 +50,12 @@ public class UserRepository {
         return Set.copyOf(user.getReadBooks());
     }
 
-    public User findByUsername(String username) {
-        return session.createQuery(
+    public Optional<User> findByUsername(String username) {
+        User user = session.createQuery(
                         "FROM User u WHERE u.username = :username", User.class)
                 .setParameter("username", username)
                 .uniqueResult();
+        return Optional.ofNullable(user);
     }
 
     public Set<User> findAll() {

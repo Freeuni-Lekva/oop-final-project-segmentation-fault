@@ -2,6 +2,7 @@ package com.example.libraryproject.service;
 
 import com.example.libraryproject.model.dto.LoginRequest;
 import com.example.libraryproject.model.dto.RegistrationRequest;
+import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.BookKeeper;
 import com.example.libraryproject.model.entity.User;
 import com.example.libraryproject.repository.BookKeeperRepository;
@@ -9,6 +10,8 @@ import com.example.libraryproject.repository.UserRepository;
 import com.example.libraryproject.utilities.Mappers;
 import lombok.RequiredArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
+
+import java.util.Optional;
 
 
 @RequiredArgsConstructor
@@ -25,22 +28,22 @@ public class AuthorizationService {
     }
 
     private void registerBookKeeper(RegistrationRequest request) {
-        BookKeeper bookKeeper = bookKeeperRepository.findByUsername(request.username());
-        User user = userRepository.findByUsername(request.username());
-        if (bookKeeper != null || user != null) {
+        Optional<BookKeeper> optionalBookKeeper = bookKeeperRepository.findByUsername(request.username());
+        Optional<User> optionalUser = userRepository.findByUsername(request.username());
+        if (optionalUser.isPresent() || optionalBookKeeper.isPresent()) {
             throw new IllegalArgumentException("This username already exists");
         }
-        bookKeeper = Mappers.mapRequestToBookKeeper(request);
+        BookKeeper bookKeeper = Mappers.mapRequestToBookKeeper(request);
         bookKeeperRepository.save(bookKeeper);
     }
 
     private void registerUser(RegistrationRequest request) {
-        BookKeeper bookKeeper = bookKeeperRepository.findByUsername(request.username());
-        User user = userRepository.findByUsername(request.username());
-        if (bookKeeper != null || user != null) {
+        Optional<BookKeeper> optionalBookKeeper = bookKeeperRepository.findByUsername(request.username());
+        Optional<User> optionalUser = userRepository.findByUsername(request.username());
+        if (optionalUser.isPresent() || optionalBookKeeper.isPresent()) {
             throw new IllegalArgumentException("This username already exists");
         }
-        user = Mappers.mapRequestToUser(request);
+        User user = Mappers.mapRequestToUser(request);
         userRepository.save(user);
     }
 
@@ -48,13 +51,20 @@ public class AuthorizationService {
         String username = request.username();
         String password = request.password();
 
-        BookKeeper keeper = bookKeeperRepository.findByUsername(username);
-        User user = userRepository.findByUsername(username);
+        Optional<BookKeeper> optionalBookKeeper = bookKeeperRepository.findByUsername(request.username());
+        Optional<User> optionalUser = userRepository.findByUsername(request.username());
 
-        if (keeper == null && user == null)
+        if (optionalUser.isEmpty() && optionalBookKeeper.isEmpty())
             throw new IllegalArgumentException("This username does not exist");
 
-        String storedPassword = keeper != null ? keeper.getPassword() : user.getPassword();
+        String storedPassword;
+        if (optionalBookKeeper.isPresent()){
+            BookKeeper bookKeeper = optionalBookKeeper.get();
+            storedPassword = bookKeeper.getPassword();
+        } else {
+            User user = optionalUser.get();
+            storedPassword = user.getPassword();
+        }
 
         if (!BCrypt.checkpw(password, storedPassword))
             throw new IllegalArgumentException("Incorrect password");
