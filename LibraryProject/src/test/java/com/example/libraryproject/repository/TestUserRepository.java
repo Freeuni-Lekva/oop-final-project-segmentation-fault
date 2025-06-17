@@ -10,6 +10,7 @@ import org.junit.jupiter.api.*;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -88,7 +89,8 @@ public class TestUserRepository {
         user.setPassword("pass");
         userRepository.save(user);
 
-        User found = userRepository.findByUsername("misha");
+        Optional<User> foundOptional = userRepository.findByUsername("misha");
+        User found = foundOptional.get();
         assertNotNull(found);
         assertEquals(user.getId(), found.getId());
     }

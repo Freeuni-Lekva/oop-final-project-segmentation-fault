@@ -11,6 +11,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -31,8 +33,8 @@ public class AuthorizationServiceTest {
     void testRegisterUser_Success() {
         RegistrationRequest request = new RegistrationRequest("newuser", "pass123", Role.USER);
 
-        when(userRepository.findByUsername("newuser")).thenReturn(null);
-        when(bookKeeperRepository.findByUsername("newuser")).thenReturn(null);
+        when(userRepository.findByUsername("newuser")).thenReturn(Optional.empty());
+        when(bookKeeperRepository.findByUsername("newuser")).thenReturn(Optional.empty());
 
         authorizationService.register(request);
 
@@ -42,8 +44,8 @@ public class AuthorizationServiceTest {
     @Test
     void testRegisterBookKeeper_Success() {
         RegistrationRequest request = new RegistrationRequest("keeper", "pass123", Role.BOOKKEEPER);
-        when(userRepository.findByUsername("keeper")).thenReturn(null);
-        when(bookKeeperRepository.findByUsername("keeper")).thenReturn(null);
+        when(userRepository.findByUsername("keeper")).thenReturn(Optional.empty());
+        when(bookKeeperRepository.findByUsername("keeper")).thenReturn(Optional.empty());
 
         authorizationService.register(request);
 
@@ -53,7 +55,7 @@ public class AuthorizationServiceTest {
     @Test
     void testRegisterUser_DuplicateUsername_ThrowsException() {
         RegistrationRequest request = new RegistrationRequest("existing", "pass123", Role.USER);
-        when(userRepository.findByUsername("existing")).thenReturn(new User());
+        when(userRepository.findByUsername("existing")).thenReturn(Optional.of(new User()));
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> authorizationService.register(request));
@@ -68,8 +70,8 @@ public class AuthorizationServiceTest {
         user.setUsername("user1");
         user.setPassword(hashedPassword);
 
-        when(userRepository.findByUsername("user1")).thenReturn(user);
-        when(bookKeeperRepository.findByUsername("user1")).thenReturn(null);
+        when(userRepository.findByUsername("user1")).thenReturn(Optional.of(user));
+        when(bookKeeperRepository.findByUsername("user1")).thenReturn(Optional.empty());
 
         LoginRequest request = new LoginRequest("user1", "secret");
 
@@ -83,8 +85,8 @@ public class AuthorizationServiceTest {
         user.setUsername("user1");
         user.setPassword(hashedPassword);
 
-        when(userRepository.findByUsername("user1")).thenReturn(user);
-        when(bookKeeperRepository.findByUsername("user1")).thenReturn(null);
+        when(userRepository.findByUsername("user1")).thenReturn(Optional.of(user));
+        when(bookKeeperRepository.findByUsername("user1")).thenReturn(Optional.empty());
 
         LoginRequest request = new LoginRequest("user1", "wrong");
 
@@ -93,8 +95,8 @@ public class AuthorizationServiceTest {
 
     @Test
     void testLogin_Failure_UserNotFound() {
-        when(userRepository.findByUsername("ghost")).thenReturn(null);
-        when(bookKeeperRepository.findByUsername("ghost")).thenReturn(null);
+        when(userRepository.findByUsername("ghost")).thenReturn(Optional.empty());
+        when(bookKeeperRepository.findByUsername("ghost")).thenReturn(Optional.empty());
 
         LoginRequest request = new LoginRequest("ghost", "any");
 

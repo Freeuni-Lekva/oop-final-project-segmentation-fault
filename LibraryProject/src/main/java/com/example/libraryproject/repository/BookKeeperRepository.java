@@ -6,6 +6,8 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 public class BookKeeperRepository {
     private final Session session;
@@ -31,9 +33,11 @@ public class BookKeeperRepository {
     public BookKeeper findById(Long id) {
         return session.find(BookKeeper.class, id);
     }
-    
-    public BookKeeper findByUsername(String username) {
-        Query<BookKeeper> query = session.createQuery("FROM BookKeeper WHERE username = :username", BookKeeper.class);
-        return query.setParameter("username", username).uniqueResult();
+
+    public Optional<BookKeeper> findByUsername(String username) {
+        Query<BookKeeper> query = session.createQuery(
+                "FROM BookKeeper WHERE username = :username", BookKeeper.class);
+        BookKeeper result = query.setParameter("username", username).uniqueResult();
+        return Optional.ofNullable(result);
     }
 }
