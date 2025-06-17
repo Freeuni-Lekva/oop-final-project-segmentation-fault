@@ -80,6 +80,11 @@ public class BookRepository {
         Query<Book> query = session.createQuery("FROM Book", Book.class);
         return query.getResultList();
     }
+    public Optional<Book> findByPublicId(String publicId) {
+        Query<Book> query = session.createQuery("FROM Book WHERE public_id = :publicId", Book.class);
+        query.setParameter("publicId", publicId);
+        return Optional.ofNullable(query.uniqueResult());
+    }
 
     public Optional<Book> findByTitle(String title) {
         Query<Book> query = session.createQuery("FROM Book WHERE name = :title", Book.class);

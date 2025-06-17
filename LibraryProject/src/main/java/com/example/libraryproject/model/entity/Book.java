@@ -19,6 +19,10 @@ public class Book {
     private Long id;
 
     @NonNull
+    @Column(name = "public_id", unique = true, nullable = false, length = 36)
+    private String public_id;
+
+    @NonNull
     @Column(name = "name", unique = true, nullable = false, length = 100)
     private String name;
 
