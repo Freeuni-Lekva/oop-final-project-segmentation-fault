@@ -8,6 +8,7 @@ import com.example.libraryproject.repository.ReviewRepository;
 import com.example.libraryproject.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -66,6 +67,7 @@ public class UserServiceTest {
         );
 
         user = new User("rezi", "1234");
+        user.setPassword(BCrypt.hashpw("1234", BCrypt.gensalt()));
         user.setBorrowedBooks(new HashSet<>());
         user.setReadBooks(new HashSet<>());
 
@@ -127,7 +129,7 @@ public class UserServiceTest {
 
         // Test with correct old password
         assertDoesNotThrow(() -> userService.changePassword(user.getUsername(), "1234", "newPassword"));
-        assertEquals("newPassword", user.getPassword());
+        assertTrue(BCrypt.checkpw("newPassword", user.getPassword()));
 
         // Test with non-existent user
         assertThrows(IllegalArgumentException.class,
