@@ -47,7 +47,7 @@ public class Book {
     @Column(name = "volume")
     private Long volume;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "book_id")
     private List<Review> reviews = new ArrayList<>();
 
