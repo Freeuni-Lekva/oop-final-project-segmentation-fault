@@ -104,5 +104,14 @@ public class BookKeeperService {
                     user.getId(), order.getPublicId());
     }
 
+    public void unbanUser(Long userId) {
+        User user = userRepository.findById(userId);
+        if(user == null) {
+            throw new IllegalArgumentException("User not found");
+        }
 
+        user.setStatus(UserStatus.ACTIVE);
+        userRepository.update(user);
+        logger.info("User with ID '{}' has been unbanned", userId);
+    }
 }
