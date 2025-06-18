@@ -7,6 +7,7 @@ import com.example.libraryproject.repository.BookRepository;
 import com.example.libraryproject.repository.ReviewRepository;
 import com.example.libraryproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -126,12 +127,12 @@ public class UserService {
             throw new IllegalArgumentException("user doesn't exist");
         }
         user = optionalUser.get();
-        if (!user.getPassword().equals(oldPassword)) {
+        if (!user.getPassword().equals(BCrypt.hashpw(oldPassword, BCrypt.gensalt()))) {
             logger.info("Password change attempt failed for user {}: incorrect old password", username);
             throw new IllegalArgumentException("password is incorrect");
         }
 
-        user.setPassword(newPassword);
+        user.setPassword(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
         userRepository.update(user);
         logger.info("User {} changed password successfully", username);
     }
