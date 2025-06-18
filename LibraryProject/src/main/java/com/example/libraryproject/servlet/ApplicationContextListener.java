@@ -2,11 +2,7 @@ package com.example.libraryproject.servlet;
 
 import com.example.libraryproject.configuration.DBConnectionConfig;
 import com.example.libraryproject.repository.*;
-import com.example.libraryproject.service.AuthorizationService;
-import com.example.libraryproject.service.BookKeeperService;
-import com.example.libraryproject.service.BookService;
-import com.example.libraryproject.service.GoogleBooksAPIService;
-import com.example.libraryproject.service.SchedulerService;
+import com.example.libraryproject.service.*;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
@@ -47,6 +43,9 @@ public class ApplicationContextListener implements ServletContextListener {
 
             BookService bookService = new BookService(bookRepository, reviewRepository);
             event.getServletContext().setAttribute(BOOK_SERVICE_ATTRIBUTE_NAME, bookService);
+
+            BookRecommendationService bookRecomendationService = new BookRecommendationService(bookRepository, userRepository);
+            event.getServletContext().setAttribute(BOOK_RECOMMENDATION_SERVICE_ATTRIBUTE_NAME, bookRecomendationService);
 
             System.out.println("✅ Hibernate schema created or validated successfully.");
 
