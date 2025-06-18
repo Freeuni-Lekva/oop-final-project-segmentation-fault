@@ -15,11 +15,14 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static com.example.libraryproject.configuration.ApplicationProperties.STALE_ORDER_TIMEOUT_HRS;
+
 
 public class TestOrderRepository {
 
@@ -52,13 +55,12 @@ public class TestOrderRepository {
         userRepository.save(user);
         bookRepository.save(book);
         order = new Order (UUID.randomUUID(), LocalDateTime.now(), LocalDateTime.now().plusDays(14),
-                OrderStatus.RESERVED, user, book);
+                OrderStatus.BORROWED, user, book);
         orderRepository.save(order);
     }
 
     @AfterEach
     public void tearDown() {
-        // Close session here
         if (session != null && session.isOpen()) {
             session.close();
         }
@@ -125,12 +127,66 @@ public class TestOrderRepository {
 
     @Test
     public void testFindOrdersByStatus() {
-        Set<Order> foundOrders = orderRepository.findOrdersByStatus(OrderStatus.RESERVED);
+        Set<Order> foundOrders = orderRepository.findOrdersByStatus(OrderStatus.BORROWED);
         assertFalse(foundOrders.isEmpty());
         assertTrue(foundOrders.contains(order));
 
         Set<Order> emptyOrders = orderRepository.findOrdersByStatus(OrderStatus.RETURNED);
         assertTrue(emptyOrders.isEmpty());
+    }
+
+    @Test
+    public void testFindDueOrders() {
+        order.setDueDate(LocalDateTime.now().minusDays(1));
+        orderRepository.update(order);
+        Set<Order> dueOrders = orderRepository.findDueOrders();
+        assertFalse(dueOrders.isEmpty());
+        assertTrue(dueOrders.contains(order));
+
+        Order notDueOrder = new Order(UUID.randomUUID(),LocalDateTime.now().plusDays(20), LocalDateTime.now().plusDays(20 + 14),
+                OrderStatus.RESERVED, order.getUser(), order.getBook());
+        orderRepository.save(notDueOrder);
+
+        Set<Order> allDueOrders = orderRepository.findDueOrders();
+        assertEquals(1, allDueOrders.size());
+        assertTrue(allDueOrders.contains(order));
+    }
+
+    @Test
+    public void testFindStaleOrders() {
+        order.setStatus(OrderStatus.RESERVED);
+        order.setCreateDate(LocalDateTime.now().minusHours(STALE_ORDER_TIMEOUT_HRS + 1));
+        orderRepository.update(order);
+        Set<Order> staleOrders = orderRepository.findStaleOrders();
+        assertFalse(staleOrders.isEmpty());
+        assertTrue(staleOrders.contains(order));
+
+        Order notStaleOrder = new Order(UUID.randomUUID(),LocalDateTime.now().minusHours(10), LocalDateTime.now().plusDays(14),
+                OrderStatus.BORROWED, order.getUser(), order.getBook());
+        orderRepository.save(notStaleOrder);
+
+        Set<Order> allStaleOrders = orderRepository.findStaleOrders();
+        assertEquals(1, allStaleOrders.size());
+        assertTrue(allStaleOrders.contains(order));
+    }
+
+    @Test
+    public void testFindByPublicId() {
+        Optional<Order> foundOrder = orderRepository.findByPublicId(order.getPublicId().toString());
+        assertTrue(foundOrder.isPresent());
+        assertEquals(order.getId(), foundOrder.get().getId());
+        assertEquals(order.getPublicId(), foundOrder.get().getPublicId());
+    }
+
+    @Test
+    public void testDeleteAll() {
+        Set<Order> staleOrders = new HashSet<>();
+        staleOrders.add(order);
+
+        orderRepository.deleteAll(staleOrders);
+
+        Set<Order> allOrders = orderRepository.findAll();
+        assertTrue(allOrders.isEmpty());
     }
 
 

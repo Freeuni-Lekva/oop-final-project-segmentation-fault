@@ -6,6 +6,8 @@ import com.example.libraryproject.repository.BookRepository;
 import com.example.libraryproject.utilities.Mappers;
 import jakarta.json.*;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -24,10 +26,13 @@ import static com.example.libraryproject.configuration.ApplicationProperties.*;
 public class GoogleBooksAPIService {
 
     private final BookRepository bookRepository;
+    private static final Logger logger = LoggerFactory.getLogger(GoogleBooksAPIService.class);
+
 
     public static List<String> getRandomGenres(int n) {
         List<String> genreList = new ArrayList<>(Arrays.asList(GOOGLE_BOOKS_GENRES));
         Collections.shuffle(genreList);
+        logger.info("Selected genres: {}", genreList.subList(0, n));
         return genreList.subList(0, n);
     }
 
@@ -40,7 +45,7 @@ public class GoogleBooksAPIService {
         List<Book> books = googleBooks.stream()
                 .map(Mappers::mapGoogleBookToBook)
                 .toList();
-        System.out.println(books.size());
+        logger.info("Fetched {} books from Google Books API", books.size());
         bookRepository.saveAll(books);
     }
 
@@ -54,7 +59,6 @@ public class GoogleBooksAPIService {
             HashSet<GoogleBooksResponse> booksFromGenre = fetchBooksFromGenre(chosenGenres.get(i), booksPerRequest);
             allBooks.addAll(booksFromGenre);
         }
-
         return allBooks;
     }
 

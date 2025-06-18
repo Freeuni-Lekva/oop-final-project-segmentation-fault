@@ -5,7 +5,7 @@ public class ApplicationProperties {
     public static final String GOOGLE_BOOKS_API_ATTRIBUTE_NAME = "google_api_service";
     public static final String BOOKKEEPER_SERVICE_ATTRIBUTE_NAME = "BookKeeperService";
     public static final String AUTHORIZATION_SERVICE_ATTRIBUTE_NAME = "AuthorizationService";
-
+    public static final String SCHEDULER_SERVICE_ATTRIBUTE_NAME = "SchedulerService";
 
 
     public static final String[] GOOGLE_BOOKS_GENRES = {
@@ -22,4 +22,7 @@ public class ApplicationProperties {
     public static final int RECOMMENDED_COUNT = 3;
     public static final int TOP_AUTHORS_COUNT = 3;
     public static final int TOP_GENRE_COUNT = 3;
+
+    public static final int SCHEDULER_UPDATE_INTERVAL_HRS = 1;
+    public static final int STALE_ORDER_TIMEOUT_HRS = 48;
 }

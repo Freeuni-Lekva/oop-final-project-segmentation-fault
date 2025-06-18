@@ -27,6 +27,9 @@ public class Order {
     @Column(name = "public_id", nullable = false, unique = true)
     private UUID publicId;
 
+    @Column(name = "create_date", nullable = false)
+    private LocalDateTime createDate = LocalDateTime.now();
+
     @Column(name = "borrow_date", nullable = false)
     @NonNull
     private LocalDateTime borrowDate;
