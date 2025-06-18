@@ -10,6 +10,8 @@ import com.example.libraryproject.repository.UserRepository;
 import com.example.libraryproject.utilities.Mappers;
 import lombok.RequiredArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
@@ -17,6 +19,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AuthorizationService {
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthorizationService.class);
     private final UserRepository userRepository;
     private final BookKeeperRepository bookKeeperRepository;
 
@@ -35,6 +38,7 @@ public class AuthorizationService {
         }
         BookKeeper bookKeeper = Mappers.mapRequestToBookKeeper(request);
         bookKeeperRepository.save(bookKeeper);
+        logger.info("BookKeeper with username {} registered successfully", request.username());
     }
 
     private void registerUser(RegistrationRequest request) {
@@ -45,6 +49,7 @@ public class AuthorizationService {
         }
         User user = Mappers.mapRequestToUser(request);
         userRepository.save(user);
+        logger.info("User with username {} registered successfully", request.username());
     }
 
     public void login(LoginRequest request) {
@@ -54,8 +59,10 @@ public class AuthorizationService {
         Optional<BookKeeper> optionalBookKeeper = bookKeeperRepository.findByUsername(request.username());
         Optional<User> optionalUser = userRepository.findByUsername(request.username());
 
-        if (optionalUser.isEmpty() && optionalBookKeeper.isEmpty())
+        if (optionalUser.isEmpty() && optionalBookKeeper.isEmpty()) {
+            logger.info("Login attempt with non-existing username: {}", username);
             throw new IllegalArgumentException("This username does not exist");
+        }
 
         String storedPassword;
         if (optionalBookKeeper.isPresent()){
@@ -66,8 +73,10 @@ public class AuthorizationService {
             storedPassword = user.getPassword();
         }
 
-        if (!BCrypt.checkpw(password, storedPassword))
+        if (!BCrypt.checkpw(password, storedPassword)) {
+            logger.info("Incorrect password for user {}", username);
             throw new IllegalArgumentException("Incorrect password");
+        }
 
     }
 

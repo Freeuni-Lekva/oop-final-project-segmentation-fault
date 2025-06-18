@@ -61,4 +61,12 @@ public class UserRepository {
     public Set<User> findAll() {
         return new HashSet<>(session.createQuery("FROM User", User.class).getResultList());
     }
+
+    public void updateAll(Set<User> dueUsers) {
+        Transaction tx = session.beginTransaction();
+        for (User user : dueUsers) {
+            session.merge(user);
+        }
+        tx.commit();
+    }
 }

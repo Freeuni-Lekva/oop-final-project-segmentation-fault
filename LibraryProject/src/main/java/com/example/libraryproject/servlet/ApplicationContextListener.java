@@ -8,6 +8,7 @@ import com.example.libraryproject.repository.UserRepository;
 import com.example.libraryproject.service.AuthorizationService;
 import com.example.libraryproject.service.BookKeeperService;
 import com.example.libraryproject.service.GoogleBooksAPIService;
+import com.example.libraryproject.service.SchedulerService;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
@@ -15,9 +16,11 @@ import org.hibernate.Session;
 
 import static com.example.libraryproject.configuration.ApplicationProperties.AUTHORIZATION_SERVICE_ATTRIBUTE_NAME;
 import static com.example.libraryproject.configuration.ApplicationProperties.BOOKKEEPER_SERVICE_ATTRIBUTE_NAME;
+import static com.example.libraryproject.configuration.ApplicationProperties.SCHEDULER_SERVICE_ATTRIBUTE_NAME;
 
 @WebListener
 public class ApplicationContextListener implements ServletContextListener {
+
 
     @Override
     public void contextInitialized(ServletContextEvent event) {
@@ -41,6 +44,10 @@ public class ApplicationContextListener implements ServletContextListener {
 
             BookKeeperService bookKeeperService = new BookKeeperService(bookRepository, userRepository, orderRepository);
             event.getServletContext().setAttribute(BOOKKEEPER_SERVICE_ATTRIBUTE_NAME, bookKeeperService);
+
+            SchedulerService schedulerService = new SchedulerService(userRepository, orderRepository);
+            event.getServletContext().setAttribute(SCHEDULER_SERVICE_ATTRIBUTE_NAME, schedulerService);
+            schedulerService.start();
 
             System.out.println("✅ Hibernate schema created or validated successfully.");
 

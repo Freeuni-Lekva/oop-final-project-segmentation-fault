@@ -5,6 +5,8 @@ import com.example.libraryproject.model.entity.Review;
 import com.example.libraryproject.model.entity.User;
 import com.example.libraryproject.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -16,6 +18,8 @@ public class BookRecommendationService {
     private static final Map<Integer, Integer> OFFSET_MAP;
 
     private final BookRepository bookRepository;
+    private static final Logger logger = LoggerFactory.getLogger(BookRecommendationService.class);
+
 
     static {
         Map<Integer, Integer> map = new HashMap<>();
@@ -142,7 +146,7 @@ public class BookRecommendationService {
     public Set<Book> recommendBooks(User user){
         Set<Book> readBooks = user.getReadBooks();
         Set<Review> userReviews = user.getReviews();
-
+        logger.info("Recommending books for user: {}", user.getUsername());
         return getPreferredBooks(readBooks, userReviews);
     }
 }
