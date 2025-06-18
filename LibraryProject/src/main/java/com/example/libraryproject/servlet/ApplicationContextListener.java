@@ -1,12 +1,10 @@
 package com.example.libraryproject.servlet;
 
 import com.example.libraryproject.configuration.DBConnectionConfig;
-import com.example.libraryproject.repository.BookKeeperRepository;
-import com.example.libraryproject.repository.BookRepository;
-import com.example.libraryproject.repository.OrderRepository;
-import com.example.libraryproject.repository.UserRepository;
+import com.example.libraryproject.repository.*;
 import com.example.libraryproject.service.AuthorizationService;
 import com.example.libraryproject.service.BookKeeperService;
+import com.example.libraryproject.service.BookService;
 import com.example.libraryproject.service.GoogleBooksAPIService;
 import com.example.libraryproject.service.SchedulerService;
 import jakarta.servlet.ServletContextEvent;
@@ -14,9 +12,7 @@ import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
 import org.hibernate.Session;
 
-import static com.example.libraryproject.configuration.ApplicationProperties.AUTHORIZATION_SERVICE_ATTRIBUTE_NAME;
-import static com.example.libraryproject.configuration.ApplicationProperties.BOOKKEEPER_SERVICE_ATTRIBUTE_NAME;
-import static com.example.libraryproject.configuration.ApplicationProperties.SCHEDULER_SERVICE_ATTRIBUTE_NAME;
+import static com.example.libraryproject.configuration.ApplicationProperties.*;
 
 @WebListener
 public class ApplicationContextListener implements ServletContextListener {
@@ -31,7 +27,7 @@ public class ApplicationContextListener implements ServletContextListener {
             BookKeeperRepository bookKeeperRepository = new BookKeeperRepository(session);
             BookRepository bookRepository = new BookRepository(session);
             OrderRepository orderRepository = new OrderRepository(session);
-
+            ReviewRepository reviewRepository = new ReviewRepository(session);
 
             GoogleBooksAPIService googleBooksAPIService = new GoogleBooksAPIService(bookRepository);
             Thread fetcherThread = new Thread(googleBooksAPIService::fetchAndSaveBooks);
@@ -48,6 +44,9 @@ public class ApplicationContextListener implements ServletContextListener {
             SchedulerService schedulerService = new SchedulerService(userRepository, orderRepository);
             event.getServletContext().setAttribute(SCHEDULER_SERVICE_ATTRIBUTE_NAME, schedulerService);
             schedulerService.start();
+
+            BookService bookService = new BookService(bookRepository, reviewRepository);
+            event.getServletContext().setAttribute(BOOK_SERVICE_ATTRIBUTE_NAME, bookService);
 
             System.out.println("✅ Hibernate schema created or validated successfully.");
 

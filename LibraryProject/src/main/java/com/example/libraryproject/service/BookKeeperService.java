@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
+import java.util.UUID;
 
 
 /*
@@ -80,17 +81,22 @@ public class BookKeeperService {
             throw new IllegalArgumentException("Order not found");
         }
         Order order = orderOptional.get();
+
         order.setStatus(OrderStatus.BORROWED);
+        Book book = order.getBook();
+        book.setAmountInLib(book.getAmountInLib() - 1);
+
+        bookRepository.update(book);
         orderRepository.update(order);
         logger.info("Order with public ID '{}' marked as BORROWED", orderPublicId);
     }
 
-    public void banUser(Order order) {
-        Optional<Order> orderOptional = orderRepository.findById(order.getId());
+    public void banUser(UUID orderPublicId) {
+        Optional<Order> orderOptional = orderRepository.findByPublicId(orderPublicId.toString());
         if (orderOptional.isEmpty()) {
             throw new IllegalArgumentException("Order not found");
         }
-        order = orderOptional.get();
+        Order order = orderOptional.get();
         User user = order.getUser();
         user.setStatus(UserStatus.BANNED);
         userRepository.update(user);

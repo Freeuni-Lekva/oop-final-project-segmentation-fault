@@ -19,7 +19,7 @@ public class Book {
     private Long id;
 
     @NonNull
-    @Column(name = "public_id", unique = true, nullable = false, length = 36)
+    @Column(name = "public_id", unique = true, nullable = false, length = 100)
     private String publicId;
 
     @NonNull
@@ -47,7 +47,7 @@ public class Book {
     @Column(name = "volume")
     private Long volume;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "book_id")
     private List<Review> reviews = new ArrayList<>();
 

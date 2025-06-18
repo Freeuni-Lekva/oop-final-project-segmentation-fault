@@ -48,7 +48,7 @@ public class BookRecommendationServiceTest {
 
         bookRepository = new BookRepository(session);
         UserRepository userRepository = new UserRepository(session);
-        recommendationService = new BookRecommendationService(bookRepository);
+        recommendationService = new BookRecommendationService(bookRepository, userRepository);
 
         Book book1 = new Book(
                 "Shadow_Realms",
@@ -123,7 +123,7 @@ public class BookRecommendationServiceTest {
         readBook.add(book6);
         user.setReadBooks(readBook);
 
-        recommendedBooks = recommendationService.recommendBooks(user);
+        recommendedBooks = recommendationService.recommendBooks(user.getUsername());
     }
 
     @AfterEach

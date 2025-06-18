@@ -5,6 +5,9 @@ public class ApplicationProperties {
     public static final String GOOGLE_BOOKS_API_ATTRIBUTE_NAME = "google_api_service";
     public static final String BOOKKEEPER_SERVICE_ATTRIBUTE_NAME = "BookKeeperService";
     public static final String AUTHORIZATION_SERVICE_ATTRIBUTE_NAME = "AuthorizationService";
+    public static final String BOOK_RECOMMENDATION_SERVICE_ATTRIBUTE_NAME = "BookRecommendationService";
+    public static final String BOOK_SERVICE_ATTRIBUTE_NAME = "BookService";
+    public static final String USER_SERVICE_ATTRIBUTE_NAME = "UserService";
     public static final String SCHEDULER_SERVICE_ATTRIBUTE_NAME = "SchedulerService";
 
 
