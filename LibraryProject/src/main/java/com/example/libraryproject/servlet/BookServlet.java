@@ -1,6 +1,7 @@
 package com.example.libraryproject.servlet;
 
 import com.example.libraryproject.service.BookService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -28,18 +29,19 @@ public class BookServlet extends HttpServlet {
         bookService = (BookService) getServletContext().getAttribute(BOOK_SERVICE_ATTRIBUTE_NAME);
         String[] pathParts = request.getPathInfo().substring(1).split("/");
         String path = pathParts[0];
+        ObjectMapper map = new ObjectMapper();
         switch (path) {
             case "all":
-                response.getWriter().write(bookService.getAllBooks().toString());
+                map.writeValue(response.getWriter(),bookService.getAllBooks());
                 break;
             case "details":
-                response.getWriter().write(bookService.getBookDetails(pathParts[1]).toString());
+                map.writeValue(response.getWriter(),bookService.getBookDetails(pathParts[1]));
                 break;
             case "available":
-                response.getWriter().write(bookService.getAvailableBooks().toString());
+                map.writeValue(response.getWriter(),bookService.getAvailableBooks());
                 break;
             case "get-books-by-genre":
-                response.getWriter().write(bookService.getBooksByGenre(pathParts[1]).toString());
+                map.writeValue(response.getWriter(),bookService.getBooksByGenre(pathParts[1]));
                 break;
             default:
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
