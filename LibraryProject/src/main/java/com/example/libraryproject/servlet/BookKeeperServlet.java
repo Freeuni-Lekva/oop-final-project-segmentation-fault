@@ -110,7 +110,7 @@ public class BookKeeperServlet extends HttpServlet {
             throw new IllegalArgumentException("User ID is required to unban a user.");
         }
 
-        UUID userId = UUID.fromString(userIdParam);
+        Long userId = Long.parseLong(userIdParam);
         bookKeeperService.unbanUser(userId);
     }
 

@@ -104,17 +104,14 @@ public class BookKeeperService {
                     user.getId(), order.getPublicId());
     }
 
-    public void unbanUser(UUID orderPublicId) {
-        Optional<Order> orderOptional = orderRepository.findByPublicId(orderPublicId.toString());
-        if (orderOptional.isEmpty()) {
-            throw new IllegalArgumentException("Order not found");
+    public void unbanUser(Long userId) {
+        User user = userRepository.findById(userId);
+        if(user == null) {
+            throw new IllegalArgumentException("User not found");
         }
-        Order order = orderOptional.get();
-        User user = order.getUser();
+
         user.setStatus(UserStatus.ACTIVE);
         userRepository.update(user);
-        logger.info("User with ID '{}' has been unbanned", user.getId());
+        logger.info("User with ID '{}' has been unbanned", userId);
     }
-
-
 }
