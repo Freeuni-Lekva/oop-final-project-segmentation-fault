@@ -127,7 +127,8 @@ public class UserService {
             throw new IllegalArgumentException("user doesn't exist");
         }
         user = optionalUser.get();
-        if (!user.getPassword().equals(BCrypt.hashpw(oldPassword, BCrypt.gensalt()))) {
+
+        if (!BCrypt.checkpw(oldPassword, user.getPassword())) {
             logger.info("Password change attempt failed for user {}: incorrect old password", username);
             throw new IllegalArgumentException("password is incorrect");
         }
