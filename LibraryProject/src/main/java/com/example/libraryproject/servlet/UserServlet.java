@@ -14,7 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 
-@WebServlet(name = "LoginServlet", urlPatterns = "/api/user/*")
+@WebServlet(name = "UserServlet", urlPatterns = "/api/user/*")
 public class UserServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {

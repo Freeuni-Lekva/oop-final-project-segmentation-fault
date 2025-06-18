@@ -10,6 +10,7 @@ import org.hibernate.Session;
 
 import static com.example.libraryproject.configuration.ApplicationProperties.*;
 
+
 @WebListener
 public class ApplicationContextListener implements ServletContextListener {
 
