@@ -19,7 +19,7 @@ public class Book {
     private Long id;
 
     @NonNull
-    @Column(name = "public_id", unique = true, nullable = false, length = 36)
+    @Column(name = "public_id", unique = true, nullable = false, length = 100)
     private String publicId;
 
     @NonNull

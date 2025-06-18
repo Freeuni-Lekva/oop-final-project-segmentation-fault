@@ -81,7 +81,7 @@ public class BookRepository {
         return query.getResultList();
     }
     public Optional<Book> findByPublicId(String publicId) {
-        Query<Book> query = session.createQuery("FROM Book WHERE public_id = :publicId", Book.class);
+        Query<Book> query = session.createQuery("FROM Book WHERE publicId = :publicId", Book.class);
         query.setParameter("publicId", publicId);
         return Optional.ofNullable(query.uniqueResult());
     }

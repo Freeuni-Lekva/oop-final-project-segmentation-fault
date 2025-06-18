@@ -34,12 +34,13 @@ public class AuthorizationServlet extends HttpServlet {
                         new RegistrationRequest(username,
                         password,
                         role));
-
+                response.setStatus(HttpServletResponse.SC_OK);
                 break;
             case "/login":
                 authorizationService.login(
                         new LoginRequest(username, password)
                 );
+                response.setStatus(HttpServletResponse.SC_OK);
                 break;
             default:
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
