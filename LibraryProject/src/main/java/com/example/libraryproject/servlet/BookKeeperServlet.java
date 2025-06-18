@@ -2,7 +2,6 @@ package com.example.libraryproject.servlet;
 
 import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.model.dto.BookAdditionRequest;
-import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.service.BookKeeperService;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -10,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @WebServlet(name = "BookKeeperServlet", urlPatterns = "/api/bookkeeper/*")
 public class BookKeeperServlet extends HttpServlet {
@@ -31,6 +31,10 @@ public class BookKeeperServlet extends HttpServlet {
 
             case "/ban-user":
                 handleBanUser(req, bookKeeperService);
+                break;
+
+            case "/unban-user":
+                handleUnbanUser(req, bookKeeperService);
                 break;
 
             default:
@@ -91,16 +95,23 @@ public class BookKeeperServlet extends HttpServlet {
     }
 
     private void handleBanUser(HttpServletRequest req, BookKeeperService bookKeeperService) {
-        String orderIdStr = req.getParameter("orderId");
-
-        if(orderIdStr == null){
-            throw new IllegalArgumentException("Order ID is required to ban a user.");
+        String userIdParam = req.getParameter("userId");
+        if (userIdParam == null) {
+            throw new IllegalArgumentException("User ID is required to ban a user.");
         }
 
-        Long orderId = Long.parseLong(orderIdStr);
-        Order order= new Order();
-        order.setId(orderId);
-        bookKeeperService.banUser(order);
+        UUID userId = UUID.fromString(userIdParam);
+        bookKeeperService.banUser(userId);
+    }
+
+    private void handleUnbanUser(HttpServletRequest req, BookKeeperService bookKeeperService) {
+        String userIdParam = req.getParameter("userId");
+        if (userIdParam == null) {
+            throw new IllegalArgumentException("User ID is required to unban a user.");
+        }
+
+        UUID userId = UUID.fromString(userIdParam);
+        bookKeeperService.unbanUser(userId);
     }
 
 }
