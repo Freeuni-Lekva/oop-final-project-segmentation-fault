@@ -4,7 +4,6 @@ import com.example.libraryproject.model.dto.BookDTO;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.repository.BookRepository;
 import com.example.libraryproject.repository.ReviewRepository;
-import com.example.libraryproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
