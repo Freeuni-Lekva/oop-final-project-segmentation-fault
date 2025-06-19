@@ -39,7 +39,7 @@
 </head>
 <body>
 
-<img src="${pageContext.request.contextPath}/image4.jpg" alt="Centered Banner" class="login-image"/>
+<img src="${pageContext.request.contextPath}/images/image4.jpg" alt="Centered Banner" class="login-image"/>
 
 <div class="login-box">
     <h2>

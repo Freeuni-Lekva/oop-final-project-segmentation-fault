@@ -38,6 +38,45 @@
       My Books
     </a>
 
+    <div class="nav-box browse-dropdown" id="browseDropdown">
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+      </svg>
+      Browse
+      <svg class="dropdown-arrow" viewBox="0 0 24 24">
+        <path d="M7 10l5 5 5-5z"/>
+      </svg>
+
+      <!-- Browse Dropdown Menu -->
+      <div class="browse-menu" id="browseMenu">
+        <div class="browse-section">
+          <h4>Recommendations</h4>
+          <a href="#recommendations" class="browse-item featured">Recommendations</a>
+        </div>
+
+        <div class="browse-section">
+          <h4>Administration</h4>
+          <a href="#banned-users" class="browse-item featured">Banned Users</a>
+        </div>
+
+        <div class="browse-section">
+          <h4>Favorite Genres</h4>
+          <a href="#fiction" class="browse-item">Fiction</a>
+          <a href="#classics" class="browse-item">Classics</a>
+          <a href="#mystery" class="browse-item">Mystery & Thriller</a>
+          <a href="#romance" class="browse-item">Romance</a>
+          <a href="#fantasy" class="browse-item">Fantasy</a>
+          <a href="#science-fiction" class="browse-item">Science Fiction</a>
+          <a href="#non-fiction" class="browse-item">Non-Fiction</a>
+          <a href="#biography" class="browse-item">Biography</a>
+          <a href="#history" class="browse-item">History</a>
+          <a href="#poetry" class="browse-item">Poetry</a>
+          <a href="#psychology" class="browse-item">Psychology</a>
+          <a href="#all-genres" class="browse-item featured">All Genres</a>
+        </div>
+      </div>
+    </div>
+
     <a href="#search" class="nav-box">
       <svg class="nav-icon" viewBox="0 0 24 24">
         <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
@@ -54,9 +93,34 @@
   </div>
 </div>
 
-<div class="main page content">
-
+<div class="main-content">
+  <h3>Welcome to Freeuni Library</h3>
 </div>
+
+<script>
+  const browseDropdown = document.getElementById('browseDropdown');
+  const browseMenu = document.getElementById('browseMenu');
+
+  browseDropdown.addEventListener('click', function(e) {
+    e.preventDefault();
+    const isOpen = browseMenu.classList.contains('show');
+
+    if (isOpen) {
+      browseMenu.classList.remove('show');
+      browseDropdown.classList.remove('open');
+    } else {
+      browseMenu.classList.add('show');
+      browseDropdown.classList.add('open');
+    }
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!browseDropdown.contains(e.target) && !browseMenu.contains(e.target)) {
+      browseMenu.classList.remove('show');
+      browseDropdown.classList.remove('open');
+    }
+  });
+</script>
 
 </body>
 </html>
