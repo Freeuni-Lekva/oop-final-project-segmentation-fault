@@ -67,12 +67,13 @@ public class BookKeeperServlet extends HttpServlet {
         String author = req.getParameter("author");
         String description = req.getParameter("description");
         String genre = req.getParameter("genre");
+        String imageUrl = req.getParameter("imageUrl");
 
         if(title == null || author == null){
             throw new IllegalArgumentException("Title and author are required to add a new book.");
         }
 
-        BookAdditionRequest bookAdditionRequest = new BookAdditionRequest(title, author, description, genre);
+        BookAdditionRequest bookAdditionRequest = new BookAdditionRequest(title, author, description, genre, imageUrl);
         bookKeeperService.addBook(bookAdditionRequest);
     }
 
