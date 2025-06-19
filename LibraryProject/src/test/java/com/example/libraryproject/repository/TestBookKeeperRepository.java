@@ -1,6 +1,5 @@
 package com.example.libraryproject.repository;
 import com.example.libraryproject.model.entity.BookKeeper;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.jupiter.api.AfterEach;
@@ -12,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TestBookKeeperRepository {
 
     private SessionFactory sessionFactory;
-    private Session session;
     private BookKeeperRepository bookKeeperRepository;
 
     @BeforeEach
@@ -26,13 +24,11 @@ public class TestBookKeeperRepository {
                 .addAnnotatedClass(BookKeeper.class);
 
         sessionFactory = configuration.buildSessionFactory();
-        session = sessionFactory.openSession();
-        bookKeeperRepository  = new BookKeeperRepository(session);
+        bookKeeperRepository  = new BookKeeperRepository(sessionFactory);
     }
 
     @AfterEach
     public void tearDown() {
-        session.close();
         sessionFactory.close();
     }
 
@@ -45,7 +41,7 @@ public class TestBookKeeperRepository {
 
         assertEquals("luka", bookKeeper.getUsername());
         bookKeeperRepository.delete(bookKeeper);
-        assertNull(bookKeeperRepository.findById(bookKeeper.getId()));
+        assertTrue(bookKeeperRepository.findById(bookKeeper.getId()).isEmpty());
     }
 
     @Test

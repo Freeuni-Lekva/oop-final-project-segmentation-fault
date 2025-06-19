@@ -3,7 +3,6 @@ package com.example.libraryproject.repository;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Review;
 import com.example.libraryproject.model.entity.User;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.jupiter.api.AfterEach;
@@ -21,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TestReviewRepository {
 
     private SessionFactory sessionFactory;
-    private Session session;
     private ReviewRepository reviewRepository;
     private Book book1;
     private User user;
@@ -42,8 +40,7 @@ public class TestReviewRepository {
                 .addAnnotatedClass(Review.class);
 
         sessionFactory = configuration.buildSessionFactory();
-        session = sessionFactory.openSession();
-        reviewRepository = new ReviewRepository(session);
+        reviewRepository = new ReviewRepository(sessionFactory);
         user = new User();
         user.setUsername("misha");
         user.setPassword("magaria");
@@ -55,8 +52,8 @@ public class TestReviewRepository {
                  4L,  555L,400L, "dzalisGamogvidzeba.jpg" );
         book2 = new Book("100_Years_of_Solitude", "100 Years of Solitude", "Fiction", "Gabriel Garcia Marquez", LocalDate.now(), "A classic novel about the Buendia family",
                 4L, 600L, 300L, "100YearsOfSolitude.jpg");
-        UserRepository userRepository = new UserRepository(session);
-        BookRepository bookRepository = new BookRepository(session);
+        UserRepository userRepository = new UserRepository(sessionFactory);
+        BookRepository bookRepository = new BookRepository(sessionFactory);
         userRepository.save(user);
         userRepository.save(user2);
         bookRepository.save(book1);
@@ -65,7 +62,6 @@ public class TestReviewRepository {
 
     @AfterEach
     public void tearDown() {
-        session.close();
         sessionFactory.close();
     }
 
@@ -153,8 +149,10 @@ public class TestReviewRepository {
 
         Set<Review> reviewsByUserId = reviewRepository.findReviewsByUserId(user.getId());
         Set<Review> reviewsByBookId = reviewRepository.findReviewsByBookId(book1.getId());
+
         assertEquals(2, reviewsByUserId.size());
         assertEquals(1, reviewsByBookId.size());
+
         assertTrue(reviewsByUserId.contains(review1));
         assertTrue(reviewsByUserId.contains(review2));
         assertTrue(reviewsByBookId.contains(review1));

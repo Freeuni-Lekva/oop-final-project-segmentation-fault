@@ -3,7 +3,6 @@ package com.example.libraryproject.repository;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Review;
 import com.example.libraryproject.model.entity.User;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.jupiter.api.AfterEach;
@@ -19,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TestBookRepository {
 
     private SessionFactory sessionFactory;
-    private Session session;
     private BookRepository bookRepository;
 
     @BeforeEach
@@ -35,18 +33,12 @@ public class TestBookRepository {
                 .addAnnotatedClass(Review.class);
 
         sessionFactory = configuration.buildSessionFactory();
-        session = sessionFactory.openSession();
-        bookRepository = new BookRepository(session);
+        bookRepository = new BookRepository(sessionFactory);
     }
 
     @AfterEach
     public void tearDown() {
-        if (session != null) {
-            session.close();
-        }
-        if (sessionFactory != null) {
-            sessionFactory.close();
-        }
+        sessionFactory.close();
     }
 
     @Test
@@ -137,7 +129,7 @@ public class TestBookRepository {
 
         List<Book> fantasyBooks = bookRepository.findByGenre("Fantasy");
         assertEquals(1, fantasyBooks.size());
-        assertEquals("The Golden Compass", fantasyBooks.get(0).getName());
+        assertEquals("The Golden Compass", fantasyBooks.getFirst().getName());
     }
 
     @Test
