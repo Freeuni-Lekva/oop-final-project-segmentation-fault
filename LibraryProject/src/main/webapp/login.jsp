@@ -35,7 +35,7 @@
 
 <h1 class="header-text">Explore the world's knowledge, cultures and ideas</h1>
 
-<img src="${pageContext.request.contextPath}/image4.jpg" alt="Centered Banner" class="login-image"/>
+<img src="${pageContext.request.contextPath}/images/image4.jpg" alt="Centered Banner" class="login-image"/>
 
 <div class="login-box">
   <h2>Sign in to Freeuni Library</h2>
