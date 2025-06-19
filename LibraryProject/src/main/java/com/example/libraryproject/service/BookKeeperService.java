@@ -45,6 +45,7 @@ public class BookKeeperService {
             book.setDescription(bookRequest.description());
             book.setGenre(bookRequest.genre());
             book.setPublicId(bookRequest.title().replaceAll("[^a-zA-Z0-9.\\-]", "_"));
+            book.setImageUrl(bookRequest.imageUrl());
 
             book.setAmountInLib(1L);
             bookRepository.save(book);

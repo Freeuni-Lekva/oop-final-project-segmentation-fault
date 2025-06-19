@@ -4,6 +4,7 @@ public record BookAdditionRequest(
         String title,
         String author,
         String description,
-        String genre
+        String genre,
+        String imageUrl
 ) {
 }
