@@ -7,6 +7,7 @@ import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 
 import static com.example.libraryproject.configuration.ApplicationProperties.*;
 
@@ -18,13 +19,13 @@ public class ApplicationContextListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent event) {
         try {
-            Session session = DBConnectionConfig.getSessionFactory().openSession();
+            SessionFactory sessionFactory = DBConnectionConfig.getSessionFactory();
 
-            UserRepository userRepository = new UserRepository(session);
-            BookKeeperRepository bookKeeperRepository = new BookKeeperRepository(session);
-            BookRepository bookRepository = new BookRepository(session);
-            OrderRepository orderRepository = new OrderRepository(session);
-            ReviewRepository reviewRepository = new ReviewRepository(session);
+            UserRepository userRepository = new UserRepository(sessionFactory);
+            BookKeeperRepository bookKeeperRepository = new BookKeeperRepository(sessionFactory);
+            BookRepository bookRepository = new BookRepository(sessionFactory);
+            OrderRepository orderRepository = new OrderRepository(sessionFactory);
+            ReviewRepository reviewRepository = new ReviewRepository(sessionFactory);
 
             GoogleBooksAPIService googleBooksAPIService = new GoogleBooksAPIService(bookRepository);
             Thread fetcherThread = new Thread(googleBooksAPIService::fetchAndSaveBooks);
