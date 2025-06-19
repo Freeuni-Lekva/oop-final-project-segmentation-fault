@@ -20,6 +20,8 @@ public class ApplicationProperties {
     public static final String GOOGLE_API_URL = "https://www.googleapis.com/books/v1/volumes";
     public static final int TOTAL_BOOKS_TARGET = 100;
     public static final int BOOKS_PER_REQUEST = 10;
+    public static final String IMAGE_DIR = System.getProperty("user.dir") + "/src/main/webapp/images/";
+
 
     public static final int DEFAULT_RATING = 3;
     public static final int RECOMMENDED_COUNT = 3;
