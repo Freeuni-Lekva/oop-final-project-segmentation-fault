@@ -9,13 +9,20 @@ import com.example.libraryproject.model.enums.UserStatus;
 import com.example.libraryproject.repository.BookRepository;
 import com.example.libraryproject.repository.OrderRepository;
 import com.example.libraryproject.repository.UserRepository;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Part;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.UUID;
+
+import static com.example.libraryproject.configuration.ApplicationProperties.IMAGE_DIR;
 
 
 /*
@@ -115,5 +122,22 @@ public class BookKeeperService {
         user.setStatus(UserStatus.ACTIVE);
         userRepository.update(user);
         logger.info("User with ID '{}' has been unbanned", userId);
+    }
+
+    public String downloadImage(Part filePart, String contextPath) throws IOException, ServletException {
+        String submittedFileName = Path.of(filePart.getSubmittedFileName()).getFileName().toString();
+        String safeFileName = submittedFileName.replaceAll("[^a-zA-Z0-9.\\-]", "_");
+
+        Path imagesDir = Paths.get(IMAGE_DIR);
+        if (!Files.exists(imagesDir)) {
+            Files.createDirectories(imagesDir);
+        }
+
+        Path filePath = imagesDir.resolve(safeFileName);
+        filePart.write(filePath.toString());
+
+        logger.info("Downloading image file: {}", filePath);
+
+        return contextPath + "/images/" + safeFileName;
     }
 }

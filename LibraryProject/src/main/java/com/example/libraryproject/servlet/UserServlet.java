@@ -1,16 +1,11 @@
 package com.example.libraryproject.servlet;
 
 import com.example.libraryproject.configuration.ApplicationProperties;
-import com.example.libraryproject.model.dto.LoginRequest;
-import com.example.libraryproject.model.dto.RegistrationRequest;
-import com.example.libraryproject.model.enums.Role;
-import com.example.libraryproject.service.AuthorizationService;
 import com.example.libraryproject.service.UserService;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 
 
