@@ -1,6 +1,5 @@
 package com.example.libraryproject.model.entity;
 
-import com.example.libraryproject.model.dto.GoogleBooksResponse;
 import jakarta.persistence.*;
 import lombok.*;
 

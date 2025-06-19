@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class BookRecommendationServiceTest {
     private SessionFactory sessionFactory;
-    private Session session;
     private BookRepository bookRepository;
     private BookRecommendationService recommendationService;
     private UserRepository userRepository;
@@ -44,10 +43,9 @@ public class BookRecommendationServiceTest {
                 .addAnnotatedClass(User.class);
 
         sessionFactory = configuration.buildSessionFactory();
-        session = sessionFactory.openSession();
 
-        bookRepository = new BookRepository(session);
-        UserRepository userRepository = new UserRepository(session);
+        bookRepository = new BookRepository(sessionFactory);
+        UserRepository userRepository = new UserRepository(sessionFactory);
         recommendationService = new BookRecommendationService(bookRepository, userRepository);
 
         Book book1 = new Book(
@@ -128,10 +126,7 @@ public class BookRecommendationServiceTest {
 
     @AfterEach
     public void tearDown() {
-        // Close session here
-        if (session != null && session.isOpen()) {
-            session.close();
-        }
+      sessionFactory.close();
     }
 
     @Test

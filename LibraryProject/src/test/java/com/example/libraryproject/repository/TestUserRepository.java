@@ -3,7 +3,6 @@ package com.example.libraryproject.repository;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Review;
 import com.example.libraryproject.model.entity.User;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.jupiter.api.*;
@@ -18,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TestUserRepository {
 
     private SessionFactory sessionFactory;
-    private Session session;
     private UserRepository userRepository;
 
     @BeforeEach
@@ -34,13 +32,11 @@ public class TestUserRepository {
                 .addAnnotatedClass(Review.class);
 
         sessionFactory = configuration.buildSessionFactory();
-        session = sessionFactory.openSession();
-        userRepository = new UserRepository(session);
+        userRepository = new UserRepository(sessionFactory);
     }
 
     @AfterEach
     public void tearDown() {
-        session.close();
         sessionFactory.close();
     }
 
@@ -51,9 +47,9 @@ public class TestUserRepository {
         user.setPassword("pass");
         userRepository.save(user);
 
-        User found = userRepository.findById(user.getId());
-        assertNotNull(found);
-        assertEquals("misha", found.getUsername());
+        Optional<User> found = userRepository.findById(user.getId());
+        assertTrue(found.isPresent());
+        assertEquals("misha", found.get().getUsername());
     }
 
     @Test
@@ -66,8 +62,10 @@ public class TestUserRepository {
         user.setUsername("updated");
         userRepository.update(user);
 
-        User found = userRepository.findById(user.getId());
-        assertEquals("updated", found.getUsername());
+        Optional<User> found = userRepository.findById(user.getId());
+
+        assertTrue(found.isPresent());
+        assertEquals("updated", found.get().getUsername());
     }
 
     @Test
@@ -78,8 +76,10 @@ public class TestUserRepository {
         userRepository.save(user);
 
         userRepository.delete(user);
-        User deleted = userRepository.findById(user.getId());
-        assertNull(deleted);
+        Optional<User> deleted = userRepository.findById(user.getId());
+
+        assertTrue(deleted.isEmpty());
+
     }
 
     @Test
@@ -90,6 +90,7 @@ public class TestUserRepository {
         userRepository.save(user);
 
         Optional<User> foundOptional = userRepository.findByUsername("misha");
+        assertTrue(foundOptional.isPresent());
         User found = foundOptional.get();
         assertNotNull(found);
         assertEquals(user.getId(), found.getId());
@@ -140,6 +141,8 @@ public class TestUserRepository {
 
         user.setReadBooks(borrowed);
         user.setBorrowedBooks(new HashSet<>());
+
+        userRepository.update(user);
 
         Set<Book> readBooks = userRepository.findReadBooksByUserId(user.getId());
         Set<Book> borrowedBooks = userRepository.findBorrowedBooksByUserId(user.getId());

@@ -6,7 +6,6 @@ import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.entity.Review;
 import com.example.libraryproject.model.entity.User;
 import com.example.libraryproject.model.enums.OrderStatus;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.jupiter.api.AfterEach;
@@ -15,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -27,7 +27,6 @@ import static com.example.libraryproject.configuration.ApplicationProperties.STA
 public class TestOrderRepository {
 
     private SessionFactory sessionFactory;
-    private Session session;
     private OrderRepository orderRepository;
     private Order order;
 
@@ -45,25 +44,24 @@ public class TestOrderRepository {
                 .addAnnotatedClass(Order.class);
 
         sessionFactory = configuration.buildSessionFactory();
-        session = sessionFactory.openSession();
-        orderRepository = new OrderRepository(session);
+        orderRepository = new OrderRepository(sessionFactory);
         User user = new User("gubaz","541541");
         Book book = new Book("Oddysey","Oddysey", "Sci-Fi", "Arthur C. Clarke", LocalDate.of(1968, 7, 1),
                 "A journey through space and time", 1L, 10L, 5L, "oddysey.jpg");
-        UserRepository userRepository = new UserRepository(session);
-        BookRepository bookRepository = new BookRepository(session);
+        UserRepository userRepository = new UserRepository(sessionFactory);
+        BookRepository bookRepository = new BookRepository(sessionFactory);
         userRepository.save(user);
         bookRepository.save(book);
-        order = new Order (UUID.randomUUID(), LocalDateTime.now(), LocalDateTime.now().plusDays(14),
-                OrderStatus.BORROWED, user, book);
+
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS);
+        order = new Order(UUID.randomUUID(), now, now.plusDays(14), OrderStatus.BORROWED, user, book);
+
         orderRepository.save(order);
     }
 
     @AfterEach
     public void tearDown() {
-        if (session != null && session.isOpen()) {
-            session.close();
-        }
+        sessionFactory.close();
     }
 
     @Test

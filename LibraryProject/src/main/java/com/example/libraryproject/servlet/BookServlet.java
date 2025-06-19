@@ -14,26 +14,24 @@ import static com.example.libraryproject.configuration.ApplicationProperties.BOO
 @WebServlet(name = "BookServlet",urlPatterns = {"/api/books/*"})
 public class BookServlet extends HttpServlet {
 
-    private BookService bookService;
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        bookService = (BookService) getServletContext().getAttribute(BOOK_SERVICE_ATTRIBUTE_NAME);
+        BookService bookService = (BookService) getServletContext().getAttribute(BOOK_SERVICE_ATTRIBUTE_NAME);
         String[] pathParts = request.getPathInfo().substring(1).split("/");
         String path = pathParts[0];
         ObjectMapper map = new ObjectMapper();
         switch (path) {
             case "all":
-                map.writeValue(response.getWriter(),bookService.getAllBooks());
+                map.writeValue(response.getWriter(), bookService.getAllBooks());
                 break;
             case "details":
-                map.writeValue(response.getWriter(),bookService.getBookDetails(pathParts[1]));
+                map.writeValue(response.getWriter(), bookService.getBookDetails(pathParts[1]));
                 break;
             case "available":
-                map.writeValue(response.getWriter(),bookService.getAvailableBooks());
+                map.writeValue(response.getWriter(), bookService.getAvailableBooks());
                 break;
             case "get-books-by-genre":
-                map.writeValue(response.getWriter(),bookService.getBooksByGenre(pathParts[1]));
+                map.writeValue(response.getWriter(), bookService.getBooksByGenre(pathParts[1]));
                 break;
             default:
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
