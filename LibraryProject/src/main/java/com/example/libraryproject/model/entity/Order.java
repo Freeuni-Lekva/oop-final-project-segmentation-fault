@@ -56,4 +56,19 @@ public class Order {
     private Book book;
 
     public Order() {}
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+
+        Order order = (Order) obj;
+        return publicId.equals(order.publicId);
+    }
+
+
+    @Override
+    public int hashCode() {
+        return publicId.hashCode();
+    }
 }

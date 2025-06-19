@@ -105,11 +105,11 @@ public class BookKeeperService {
     }
 
     public void unbanUser(Long userId) {
-        User user = userRepository.findById(userId);
-        if(user == null) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if(userOptional.isEmpty()) {
             throw new IllegalArgumentException("User not found");
         }
-
+        User user = userOptional.get();
         user.setStatus(UserStatus.ACTIVE);
         userRepository.update(user);
         logger.info("User with ID '{}' has been unbanned", userId);

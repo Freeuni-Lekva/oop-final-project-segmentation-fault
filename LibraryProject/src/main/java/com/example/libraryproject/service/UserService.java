@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 public class UserService {
@@ -47,6 +48,7 @@ public class UserService {
 
         Review review = new Review();
         review.setUser(user);
+        review.setPublicId(UUID.randomUUID());
         review.setBook(book);
         review.setRating(rating);
         review.setComment(comment);

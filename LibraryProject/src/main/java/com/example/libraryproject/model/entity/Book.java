@@ -1,5 +1,6 @@
 package com.example.libraryproject.model.entity;
 
+import com.example.libraryproject.model.dto.GoogleBooksResponse;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -76,5 +77,12 @@ public class Book {
                 ", amountInLib=" + amountInLib +
                 ", rating=" + rating +
                 '}';
+    }
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Book book = (Book) obj;
+        return publicId.equalsIgnoreCase(book.publicId);
     }
 }
