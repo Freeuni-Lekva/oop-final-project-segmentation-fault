@@ -2,7 +2,6 @@ package com.example.libraryproject.servlet;
 
 import com.example.libraryproject.service.BookService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,13 +15,6 @@ import static com.example.libraryproject.configuration.ApplicationProperties.BOO
 public class BookServlet extends HttpServlet {
 
     private BookService bookService;
-
-
-//    @Override
-//    public void init() throws ServletException {
-//        super.init();
-//        bookService = (BookService) getServletContext().getAttribute(BOOK_SERVICE_ATTRIBUTE_NAME);
-//    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {

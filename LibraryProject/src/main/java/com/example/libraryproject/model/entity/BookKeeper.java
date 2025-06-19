@@ -21,4 +21,18 @@ public class BookKeeper {
 
     @Column(nullable = false)
     private String password;
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        BookKeeper bookKeeper = (BookKeeper) obj;
+        return username.equals(bookKeeper.username) && password.equals(bookKeeper.password);
+    }
+
+    @Override
+    public int hashCode() {
+        return username.hashCode();
+    }
+
 }

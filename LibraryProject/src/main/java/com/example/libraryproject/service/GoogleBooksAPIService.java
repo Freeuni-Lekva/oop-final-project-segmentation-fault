@@ -104,7 +104,7 @@ public class GoogleBooksAPIService {
                         author = authors.getString(0);
                     }
                     String safeTitle = title.replaceAll("[^a-zA-Z0-9.\\-]", "_");
-                    String thumbnail = null;
+                    String thumbnail;
                     JsonObject imageLinks = volumeInfo.getJsonObject("imageLinks");
                     if (imageLinks != null) {
                         thumbnail = imageLinks.getString("thumbnail", null);
@@ -118,11 +118,12 @@ public class GoogleBooksAPIService {
                     }
 
                     books.add(new GoogleBooksResponse(title, publishedDate, author, description, safeTitle + ".jpg", genre, pageCount));
+                    logger.info("added {} to books table",  title);
                 }
             }
 
         } catch (Exception e) {
-            System.err.printf("Error fetching books for genre '%s': %s%n", genre, e.getMessage());
+            logger.error("Error fetching books for genre {}: {}", genre, e.getMessage());
         }
 
         return books;
@@ -151,7 +152,7 @@ public class GoogleBooksAPIService {
 
         try (InputStream is = response.body()) {
             Files.copy(is, filePath, StandardCopyOption.REPLACE_EXISTING);
-            System.out.printf("Saved image to %s%n", filePath.toAbsolutePath());
+            logger.info("Image saved to: {}", filePath);
         }
     }
 

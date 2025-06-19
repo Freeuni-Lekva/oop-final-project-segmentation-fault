@@ -41,4 +41,18 @@ public class Review {
     private Book book;
 
     public Review() {}
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Review review = (Review) obj;
+        return publicId.equals(review.publicId);
+    }
+
+    @Override
+    public int hashCode() {
+        return publicId.hashCode();
+    }
+
 }
