@@ -2,6 +2,7 @@ package com.example.libraryproject.servlet;
 
 import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.model.dto.LoginRequest;
+import com.example.libraryproject.model.dto.LoginResult;
 import com.example.libraryproject.model.dto.RegistrationRequest;
 import com.example.libraryproject.model.enums.Role;
 import com.example.libraryproject.service.AuthorizationService;
@@ -13,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 @WebServlet(name = "AuthorizationServlet", urlPatterns = "/api/authorization/*")
@@ -58,19 +60,23 @@ public class AuthorizationServlet extends HttpServlet {
             }
             case "/login" -> {
                 try {
-                    LoginRequest loginRequest = objectMapper.readValue(request.getInputStream(), LoginRequest.class);
-                    authorizationService.login(loginRequest);
+                    String username = request.getParameter("username");
+                    String password = request.getParameter("password");
+                    LoginRequest loginRequest = new LoginRequest(username, password);
+                    LoginResult loginResult = authorizationService.login(loginRequest);
 
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    objectMapper.writeValue(response.getWriter(),
-                            new JsonResponse("Login successful",
-                                    request.getContextPath() + "/bookkeeper-admin.jsp")
-                    );
+                    String redirectPath = request.getContextPath();
+                    if (loginResult.role() == Role.BOOKKEEPER) {
+                        redirectPath = redirectPath + "/bookkeeper-admin.jsp";
+                    } else {
+                        redirectPath = redirectPath + "/main-page.jsp";
+                    }
+                    response.sendRedirect(redirectPath);
                 } catch (Exception e) {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    objectMapper.writeValue(response.getWriter(),
-                            new JsonResponse("Login failed: " + e.getMessage(), null)
-                    );
+                    String errorMessage = e.getMessage();
+                    String redirectPath = request.getContextPath() + "/login.jsp?error=" + URLEncoder.encode(errorMessage,
+                            StandardCharsets.UTF_8);
+                    response.sendRedirect(redirectPath);
                 }
             }
             default -> {

@@ -40,6 +40,15 @@
 <div class="login-box">
   <h2>Sign in to Freeuni Library</h2>
 
+  <%
+    String error = request.getParameter("error");
+    if (error != null && !error.isEmpty()) {
+  %>
+  <p style="color: red; text-align: center;"><%= error %></p>
+  <%
+    }
+  %>
+
   <form action="${pageContext.request.contextPath}/api/authorization/login" method="post">
     <input type="text" name="username" placeholder="Username" required />
     <input type="password" name="password" placeholder="Password" required />

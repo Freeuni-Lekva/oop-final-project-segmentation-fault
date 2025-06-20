@@ -1,8 +1,8 @@
 package com.example.libraryproject.service;
 
 import com.example.libraryproject.model.dto.LoginRequest;
+import com.example.libraryproject.model.dto.LoginResult;
 import com.example.libraryproject.model.dto.RegistrationRequest;
-import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.BookKeeper;
 import com.example.libraryproject.model.entity.User;
 import com.example.libraryproject.repository.BookKeeperRepository;
@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
-
 
 @RequiredArgsConstructor
 public class AuthorizationService {
@@ -52,32 +51,30 @@ public class AuthorizationService {
         logger.info("User with username {} registered successfully", request.username());
     }
 
-    public void login(LoginRequest request) {
+    public LoginResult login(LoginRequest request) {
         String username = request.username();
         String password = request.password();
 
-        Optional<BookKeeper> optionalBookKeeper = bookKeeperRepository.findByUsername(request.username());
-        Optional<User> optionalUser = userRepository.findByUsername(request.username());
+        Optional<BookKeeper> optionalBookKeeper = bookKeeperRepository.findByUsername(username);
+        Optional<User> optionalUser = userRepository.findByUsername(username);
 
-        if (optionalUser.isEmpty() && optionalBookKeeper.isEmpty()) {
-            logger.info("Login attempt with non-existing username: {}", username);
-            throw new IllegalArgumentException("This username does not exist");
+        String errorMsg = "Username or password is incorrect. Please try again.";
+        if (optionalBookKeeper.isEmpty() && optionalUser.isEmpty()) {
+            throw new IllegalArgumentException(errorMsg);
         }
-
-        String storedPassword;
-        if (optionalBookKeeper.isPresent()){
+        if (optionalBookKeeper.isPresent()) {
             BookKeeper bookKeeper = optionalBookKeeper.get();
-            storedPassword = bookKeeper.getPassword();
+            if (!BCrypt.checkpw(password, bookKeeper.getPassword())) {
+                throw new IllegalArgumentException(errorMsg);
+            }
+            return new LoginResult(username, com.example.libraryproject.model.enums.Role.BOOKKEEPER);
         } else {
             User user = optionalUser.get();
-            storedPassword = user.getPassword();
+            if (!BCrypt.checkpw(password, user.getPassword())) {
+                throw new IllegalArgumentException(errorMsg);
+            }
+            return new LoginResult(username, com.example.libraryproject.model.enums.Role.USER);
         }
-
-        if (!BCrypt.checkpw(password, storedPassword)) {
-            logger.info("Incorrect password for user {}", username);
-            throw new IllegalArgumentException("Incorrect password");
-        }
-
     }
 
 }
