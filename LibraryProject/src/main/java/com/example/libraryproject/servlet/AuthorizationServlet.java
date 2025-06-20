@@ -5,46 +5,91 @@ import com.example.libraryproject.model.dto.LoginRequest;
 import com.example.libraryproject.model.dto.RegistrationRequest;
 import com.example.libraryproject.model.enums.Role;
 import com.example.libraryproject.service.AuthorizationService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Getter;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
-@WebServlet(name = "LoginServlet", urlPatterns = "/api/authorization/*")
+@WebServlet(name = "AuthorizationServlet", urlPatterns = "/api/authorization/*")
 public class AuthorizationServlet extends HttpServlet {
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException  {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         AuthorizationService authorizationService = (AuthorizationService) request.getServletContext()
                 .getAttribute(ApplicationProperties.AUTHORIZATION_SERVICE_ATTRIBUTE_NAME);
 
         String path = request.getPathInfo();
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
-
+        request.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.setContentType("application/json");
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         switch (path) {
-            case "/register":
-                Role role = Role.valueOf(request.getParameter("role").toUpperCase());
-                authorizationService.register(
-                        new RegistrationRequest(username,
-                        password,
-                        role));
-                response.setStatus(HttpServletResponse.SC_OK);
-                break;
-            case "/login":
-                authorizationService.login(
-                        new LoginRequest(username, password)
+            case "/register" -> {
+                try {
+                    RegistrationRequest registrationRequest = objectMapper.readValue(request.getInputStream(), RegistrationRequest.class);
+                    authorizationService.register(registrationRequest);
+
+                    response.setStatus(HttpServletResponse.SC_CREATED);
+                    String redirectPath = request.getContextPath();
+
+                    if (registrationRequest.role() == Role.BOOKKEEPER) {
+                        redirectPath = redirectPath + "/bookkeeper-admin.jsp";
+                    } else redirectPath = redirectPath + "/main-page.jsp";
+
+                    objectMapper.writeValue(response.getWriter(),
+                            new JsonResponse(
+                                    "Bookkeeper registered successfully",
+                                    redirectPath)
+                    );
+                } catch (Exception e) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    objectMapper.writeValue(response.getWriter(),
+                            new JsonResponse("Registration failed: " + e.getMessage(), null)
+                    );
+                }
+            }
+            case "/login" -> {
+                try {
+                    LoginRequest loginRequest = objectMapper.readValue(request.getInputStream(), LoginRequest.class);
+                    authorizationService.login(loginRequest);
+
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    objectMapper.writeValue(response.getWriter(),
+                            new JsonResponse("Login successful",
+                                    request.getContextPath() + "/bookkeeper-admin.jsp")
+                    );
+                } catch (Exception e) {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    objectMapper.writeValue(response.getWriter(),
+                            new JsonResponse("Login failed: " + e.getMessage(), null)
+                    );
+                }
+            }
+            default -> {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                objectMapper.writeValue(response.getWriter(),
+                        new JsonResponse("Unknown endpoint: " + path, null)
                 );
-                response.setStatus(HttpServletResponse.SC_OK);
-                break;
-            default:
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-                break;
+            }
+        }
+    }
+
+    @Getter
+    public static class JsonResponse {
+        public String message;
+        public String redirect;
+
+        public JsonResponse(String message, String redirect) {
+            this.message = message;
+            this.redirect = redirect;
         }
     }
 }
