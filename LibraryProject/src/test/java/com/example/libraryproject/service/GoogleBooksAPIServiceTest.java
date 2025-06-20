@@ -8,8 +8,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static com.example.libraryproject.utils.MockDataForTests.createTestBook;
 import static org.junit.jupiter.api.Assertions.*;
@@ -67,6 +72,16 @@ class GoogleBooksAPIServiceTest {
         assertEquals(5, genres.size());
         long distinctCount = genres.stream().distinct().count();
         assertEquals(5, distinctCount);
+    }
+
+    @Test
+    void testFetchBook_fetchesSingleBook() {
+        Book book = service.getBookFromGoogle("100 Years Of Solitude", "Gabriel Garcia Marquez");
+        assertEquals("Gabriel García Márquez".toLowerCase(),book.getAuthor().toLowerCase());
+        assertEquals("One Hundred Years Of Solitude".toLowerCase(), book.getName().toLowerCase());
+        assertNotNull(book.getDescription());
+        assertNotEquals(0, book.getVolume());
+        assertNotNull(book.getGenre());
     }
 
 }

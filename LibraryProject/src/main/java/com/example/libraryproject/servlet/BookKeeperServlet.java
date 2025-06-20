@@ -1,8 +1,10 @@
 package com.example.libraryproject.servlet;
 
 import com.example.libraryproject.configuration.ApplicationProperties;
+import com.example.libraryproject.model.dto.BookAdditionFromGoogleRequest;
 import com.example.libraryproject.model.dto.BookAdditionRequest;
 import com.example.libraryproject.service.BookKeeperService;
+import com.example.libraryproject.service.GoogleBooksAPIService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -12,6 +14,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static com.example.libraryproject.configuration.ApplicationProperties.GOOGLE_BOOKS_API_ATTRIBUTE_NAME;
+
 
 import java.io.IOException;
 import java.util.UUID;
@@ -26,6 +30,8 @@ public class BookKeeperServlet extends HttpServlet {
     public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         BookKeeperService bookKeeperService = (BookKeeperService) req.getServletContext()
                 .getAttribute(ApplicationProperties.BOOKKEEPER_SERVICE_ATTRIBUTE_NAME);
+        GoogleBooksAPIService googleBooksAPIService = (GoogleBooksAPIService) req.getServletContext()
+                .getAttribute(ApplicationProperties.GOOGLE_BOOKS_API_ATTRIBUTE_NAME);
 
         String path = req.getPathInfo();
 
@@ -33,7 +39,9 @@ public class BookKeeperServlet extends HttpServlet {
             case "/add-book":
                 handleAddBook(req, bookKeeperService);
                 break;
-
+            case "/add-book-from-google":
+                handleAddBookFromGoogleAPI(req, bookKeeperService, googleBooksAPIService);
+                break;
             case "/mark-borrowed":
                 handleMarkBorrowed(req, bookKeeperService);
                 break;
@@ -49,6 +57,16 @@ public class BookKeeperServlet extends HttpServlet {
             default:
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
+    }
+
+    private void handleAddBookFromGoogleAPI(HttpServletRequest req, BookKeeperService bookKeeperService, GoogleBooksAPIService googleBooksAPIService) {
+        String title = req.getParameter("title");
+        String author = req.getParameter("author");
+        if(title == null){
+            throw new IllegalArgumentException("Title is required to add a new book.");
+        }
+        BookAdditionFromGoogleRequest request = new BookAdditionFromGoogleRequest(title, author);
+        googleBooksAPIService.fetchBook(request);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.example.libraryproject.service;
 
+import com.example.libraryproject.model.dto.BookAdditionFromGoogleRequest;
 import com.example.libraryproject.model.dto.GoogleBooksResponse;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.repository.BookRepository;
@@ -11,9 +12,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -41,7 +44,7 @@ public class GoogleBooksAPIService {
             return;
         }
 
-        HashSet<GoogleBooksResponse> googleBooks = fetchBooks(TOTAL_BOOKS_TARGET, BOOKS_PER_REQUEST);
+        HashSet<GoogleBooksResponse> googleBooks = fetchBooks();
         List<Book> books = googleBooks.stream()
                 .map(Mappers::mapGoogleBookToBook)
                 .toList();
@@ -49,14 +52,113 @@ public class GoogleBooksAPIService {
         bookRepository.saveAll(books);
     }
 
-    HashSet<GoogleBooksResponse> fetchBooks(int amountOfBooks, int booksPerRequest) {
+    // Fetch and saves just a single book by title and author
+    public boolean fetchBook(BookAdditionFromGoogleRequest request) {
+        Book book = getBookFromGoogle(request.title(), request.author());
+        if(book == null) {
+            return false;
+        }
+        bookRepository.save(book);
+        logger.info("Successfully saved book: {}", book.getName());
+        return true;
+    }
+
+
+    Book getBookFromGoogle(String title, String author) {
+        try {
+            String encodedTitle = URLEncoder.encode(title, StandardCharsets.UTF_8);
+            String query = GOOGLE_API_URL + "?q=intitle:" + encodedTitle;
+
+            if (author != null && !author.isBlank()) {
+                String encodedAuthor = URLEncoder.encode(author, StandardCharsets.UTF_8);
+                query += "+inauthor:" + encodedAuthor;
+            }
+
+            query += "&maxResults=1";
+
+
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(query))
+                    .header("User-Agent", "LibraryProject/1.0")
+                    .GET()
+                    .build();
+
+            HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+
+            try (InputStream is = response.body(); JsonReader reader = Json.createReader(is)) {
+                JsonObject root = reader.readObject();
+                JsonArray items = root.getJsonArray("items");
+
+                if (items == null || items.isEmpty()) {
+                    logger.warn("No book found for title '{}' and author '{}'", title, author);
+                    return null;
+                }
+
+                JsonObject item = items.getJsonObject(0);
+                JsonObject volumeInfo = item.getJsonObject("volumeInfo");
+
+                String bookTitle = volumeInfo.getString("title", "No Title");
+                String publishedDate = volumeInfo.getString("publishedDate", "Unknown Date");
+                String description = volumeInfo.getString("description", "No Description");
+
+                String bookAuthor = "Unknown Author";
+                JsonArray authors = volumeInfo.getJsonArray("authors");
+                if (authors != null && !authors.isEmpty()) {
+                    bookAuthor = authors.getString(0);
+                }
+
+                Long pageCount = volumeInfo.containsKey("pageCount")
+                        ? volumeInfo.getJsonNumber("pageCount").longValue()
+                        : 0L;
+
+                String genre = "Unknown";
+
+                String safeTitle = bookTitle.replaceAll("[^a-zA-Z0-9.\\-ა-ჰ]", "_");
+                String thumbnail = null;
+                JsonObject imageLinks = volumeInfo.getJsonObject("imageLinks");
+                if (imageLinks != null) {
+                    thumbnail = imageLinks.getString("thumbnail", null);
+                    if (thumbnail != null && !thumbnail.isEmpty()) {
+                        try {
+                            downloadAndSaveImage(thumbnail, safeTitle);
+                        } catch (Exception ex) {
+                            logger.warn("Could not download image for '{}': {}", bookTitle, ex.getMessage());
+                        }
+                    }
+                }
+
+                GoogleBooksResponse gBook = new GoogleBooksResponse(
+                        bookTitle,
+                        publishedDate,
+                        bookAuthor,
+                        description,
+                        (thumbnail != null ? safeTitle + ".jpg" : null),
+                        genre,
+                        pageCount
+                );
+
+                Book bookEntity = Mappers.mapGoogleBookToBook(gBook);
+                logger.info("Successfully fetched book: {}", bookTitle);
+                return bookEntity;
+            }
+
+        } catch (Exception e) {
+            logger.error("Failed to fetch book with title '{}' and author '{}': {}", title, author, e.getMessage());
+        }
+        return null;
+    }
+
+
+    HashSet<GoogleBooksResponse> fetchBooks() {
         HashSet<GoogleBooksResponse> allBooks = new HashSet<>();
-        int requestsNeeded = amountOfBooks / booksPerRequest;
+        int requestsNeeded = com.example.libraryproject.configuration.ApplicationProperties.TOTAL_BOOKS_TARGET / com.example.libraryproject.configuration.ApplicationProperties.BOOKS_PER_REQUEST;
 
         List<String> chosenGenres = getRandomGenres(requestsNeeded);
 
         for (int i = 0; i < requestsNeeded; i++) {
-            HashSet<GoogleBooksResponse> booksFromGenre = fetchBooksFromGenre(chosenGenres.get(i), booksPerRequest);
+            HashSet<GoogleBooksResponse> booksFromGenre = fetchBooksFromGenre(chosenGenres.get(i), com.example.libraryproject.configuration.ApplicationProperties.BOOKS_PER_REQUEST);
             allBooks.addAll(booksFromGenre);
         }
         return allBooks;
