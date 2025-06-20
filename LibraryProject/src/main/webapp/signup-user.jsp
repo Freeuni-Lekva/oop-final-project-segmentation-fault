@@ -1,10 +1,3 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: elenejobava
-  Date: 6/16/25
-  Time: 20:09
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -35,6 +28,12 @@
         .back-button:hover {
             background-color: #545b62;
         }
+
+        .error-message {
+            color: red;
+            margin-top: 1rem;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -47,11 +46,12 @@
         <img src="owl.jpg" alt="owl" class="owl-icon">
     </h2>
 
-    <form action="${pageContext.request.contextPath}/api/authorization/register" method="post">
-        <input type="text" name="username" placeholder="Username" required />
-        <input type="password" name="password" placeholder="Password" required />
-        <input type="password" name="confirmPassword" placeholder="Confirm Password" required />
-        <input type="hidden" name="role" value="USER" />
+    <!-- Removed form action and method, using JS -->
+    <form id="registerForm">
+        <input type="text" id="username" name="username" placeholder="Username" required />
+        <input type="password" id="password" name="password" placeholder="Password" required />
+        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required />
+        <input type="hidden" id="role" name="role" value="USER" />
 
         <button type="submit">Sign Up</button>
     </form>
@@ -64,7 +64,48 @@
             By creating an account, you agree to the Freeuni Library's Terms of Service and Privacy Policy
         </small>
     </div>
+
+    <div id="errorMessage" class="error-message"></div>
 </div>
+
 <%@ include file="password-validation.jsp" %>
+
+<script>
+    document.getElementById("registerForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+        const role = document.getElementById("role").value;
+
+        if (password !== confirmPassword) {
+            alert("Passwords do not match.");
+            return;
+        }
+
+        try {
+            const response = await fetch("<%= request.getContextPath() %>/api/authorization/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ username, password, role })
+            });
+
+            const result = await response.json();
+            console.log(result.redirect)
+            if (response.ok && result.redirect) {
+                window.location.href = result.redirect;
+            } else {
+                alert(result.message || "Registration failed.");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("An error occurred while registering.");
+        }
+    });
+</script>>
+
 </body>
 </html>

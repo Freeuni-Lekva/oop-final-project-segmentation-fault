@@ -1,10 +1,3 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: elenejobava
-  Date: 6/16/25
-  Time: 20:09
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -14,12 +7,10 @@
     <title>Bookkeeper Sign Up</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
     <%@ include file="styles.jsp" %>
-
     <style>
         .login-image {
             margin: 60px 0 20px;
         }
-
         .back-button {
             margin-top: 1rem;
             width: 100%;
@@ -31,7 +22,6 @@
             font-size: 1rem;
             cursor: pointer;
         }
-
         .back-button:hover {
             background-color: #545b62;
         }
@@ -47,12 +37,11 @@
         <img src="owl.jpg" alt="owl" class="owl-icon">
     </h2>
 
-    <form action="${pageContext.request.contextPath}/api/authorization/register" method="post">
-        <input type="text" name="username" placeholder="Username" required />
-        <input type="password" name="password" placeholder="Password" required />
-        <input type="password" name="confirmPassword" placeholder="Confirm Password" required />
-        <input type="hidden" name="role" value="BOOKKEEPER" />
-
+    <form id="registerForm">
+        <input type="text" id="username" placeholder="Username" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <input type="password" id="confirmPassword" placeholder="Confirm Password" required />
+        <input type="hidden" id="role" value="BOOKKEEPER" />
         <button type="submit">Sign Up</button>
     </form>
 
@@ -65,6 +54,45 @@
         </small>
     </div>
 </div>
+
 <%@ include file="password-validation.jsp" %>
+
+<script>
+    document.getElementById("registerForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+        const role = document.getElementById("role").value;
+
+        if (password !== confirmPassword) {
+            alert("Passwords do not match.");
+            return;
+        }
+
+        try {
+            const response = await fetch("<%= request.getContextPath() %>/api/authorization/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ username, password, role })
+            });
+
+            const result = await response.json();
+            console.log(result.redirect)
+            if (response.ok && result.redirect) {
+                window.location.href = result.redirect;
+            } else {
+                alert(result.message || "Registration failed.");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("An error occurred while registering.");
+        }
+    });
+</script>
+
 </body>
 </html>
