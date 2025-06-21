@@ -2,52 +2,97 @@ package com.example.libraryproject.servlet;
 
 import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.service.UserService;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
+import static com.example.libraryproject.configuration.ApplicationProperties.OBJECT_MAPPER_ATTRIBUTE_NAME;
 
 @WebServlet(name = "UserServlet", urlPatterns = "/api/user/*")
 public class UserServlet extends HttpServlet {
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+
+        ObjectMapper objectMapper = (ObjectMapper) getServletContext().getAttribute(OBJECT_MAPPER_ATTRIBUTE_NAME);
         UserService userService = (UserService) req.getServletContext()
                 .getAttribute(ApplicationProperties.USER_SERVICE_ATTRIBUTE_NAME);
 
         String path = req.getPathInfo();
-        String username = req.getParameter("username");
 
         try {
+            JsonNode jsonNode = objectMapper.readTree(req.getReader());
+            String username = jsonNode.get("username").asText();
+
+            Map<String, Object> response = new HashMap<>();
+
             switch (path) {
                 case "/review" -> {
-                    String publicId = req.getParameter("publicId");
-                    int rating = Integer.parseInt(req.getParameter("rating"));
-                    String comment = req.getParameter("comment");
+                    String publicId = jsonNode.get("publicId").asText();
+                    int rating = jsonNode.get("rating").asInt();
+                    String comment = jsonNode.get("comment").asText();
+
                     userService.reviewBook(username, publicId, rating, comment);
-                    //resp.getWriter().write("Review submitted successfully.");
+                    response.put("success", true);
+                    response.put("message", "Review submitted successfully.");
                 }
                 case "/reserve" -> {
-                    String publicId = req.getParameter("publicId");
+                    String publicId = jsonNode.get("publicId").asText();
+
                     userService.reserveBook(username, publicId);
-                    //resp.getWriter().write("Book reserved successfully.");
+                    response.put("success", true);
+                    response.put("message", "Book reserved successfully.");
                 }
                 case "/cancel" -> {
-                    String publicId = req.getParameter("publicId");
+                    String publicId = jsonNode.get("publicId").asText();
+
                     userService.cancelReservation(username, publicId);
-                    //resp.getWriter().write("Reservation cancelled successfully.");
+
+                    response.put("success", true);
+                    response.put("message", "Reservation cancelled successfully.");
                 }
                 case "/change-password" -> {
-                    String oldPassword = req.getParameter("oldPassword");
-                    String newPassword = req.getParameter("newPassword");
+                    String oldPassword = jsonNode.get("oldPassword").asText();
+                    String newPassword = jsonNode.get("newPassword").asText();
+
                     userService.changePassword(username, oldPassword, newPassword);
-                    //resp.getWriter().write("Password changed successfully.");
+                    response.put("success", true);
+                    response.put("message", "Password changed successfully.");
                 }
-                default -> resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Invalid endpoint.");
+                default -> {
+                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.put("success", false);
+                    response.put("error", "Invalid endpoint.");
+                }
             }
+
+            // Write JSON response
+            objectMapper.writeValue(resp.getWriter(), response);
+
         } catch (IllegalArgumentException | IllegalStateException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", e.getMessage());
+            objectMapper.writeValue(resp.getWriter(), errorResponse);
+
+        } catch (Exception e) {
+
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "An unexpected error occurred.");
+            objectMapper.writeValue(resp.getWriter(), errorResponse);
+
         }
     }
 }

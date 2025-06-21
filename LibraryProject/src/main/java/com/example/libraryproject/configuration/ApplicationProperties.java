@@ -9,7 +9,7 @@ public class ApplicationProperties {
     public static final String BOOK_SERVICE_ATTRIBUTE_NAME = "BookService";
     public static final String USER_SERVICE_ATTRIBUTE_NAME = "UserService";
     public static final String SCHEDULER_SERVICE_ATTRIBUTE_NAME = "SchedulerService";
-
+    public static final String OBJECT_MAPPER_ATTRIBUTE_NAME = "ObjectMapper";
 
     public static final String[] GOOGLE_BOOKS_GENRES = {
             "romance", "mystery", "fantasy", "thriller", "science-fiction",

@@ -3,6 +3,7 @@ package com.example.libraryproject.servlet;
 import com.example.libraryproject.configuration.DBConnectionConfig;
 import com.example.libraryproject.repository.*;
 import com.example.libraryproject.service.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
@@ -51,6 +52,9 @@ public class ApplicationContextListener implements ServletContextListener {
 
             UserService userService = new UserService(userRepository, bookRepository, reviewRepository, orderRepository);
             event.getServletContext().setAttribute(USER_SERVICE_ATTRIBUTE_NAME, userService);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            event.getServletContext().setAttribute(OBJECT_MAPPER_ATTRIBUTE_NAME, objectMapper);
 
             System.out.println("✅ Hibernate schema created or validated successfully.");
 
