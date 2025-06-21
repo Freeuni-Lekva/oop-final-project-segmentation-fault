@@ -31,51 +31,36 @@
       Home
     </a>
 
+    <div class="browse-dropdown">
+      <a href="#" class="nav-box" onclick="toggleDropdown(event)">
+        <svg class="nav-icon" viewBox="0 0 24 24">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        Browse
+        <svg class="dropdown-arrow" viewBox="0 0 24 24">
+          <path d="M7 10l5 5 5-5z"/>
+        </svg>
+      </a>
+      <div class="dropdown-content" id="browseDropdown">
+        <a href="genre-books.jsp?genre=classics" class="dropdown-item">Classics</a>
+        <a href="genre-books.jsp?genre=fiction" class="dropdown-item">Fiction</a>
+        <a href="genre-books.jsp?genre=non-fiction" class="dropdown-item">Non-Fiction</a>
+        <a href="genre-books.jsp?genre=mystery" class="dropdown-item">Mystery & Thriller</a>
+        <a href="genre-books.jsp?genre=romance" class="dropdown-item">Romance</a>
+        <a href="genre-books.jsp?genre=science-fiction" class="dropdown-item">Science Fiction</a>
+        <a href="genre-books.jsp?genre=fantasy" class="dropdown-item">Fantasy</a>
+        <a href="genre-books.jsp?genre=biography" class="dropdown-item">Biography</a>
+        <a href="genre-books.jsp?genre=history" class="dropdown-item">History</a>
+        <a href="genre-books.jsp?genre=children" class="dropdown-item">Children's Books</a>
+      </div>
+    </div>
+
     <a href="#my-books" class="nav-box">
       <svg class="nav-icon" viewBox="0 0 24 24">
         <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>
       </svg>
       My Books
     </a>
-
-    <div class="nav-box browse-dropdown" id="browseDropdown">
-      <svg class="nav-icon" viewBox="0 0 24 24">
-        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-      </svg>
-      Browse
-      <svg class="dropdown-arrow" viewBox="0 0 24 24">
-        <path d="M7 10l5 5 5-5z"/>
-      </svg>
-
-      <!-- Browse Dropdown Menu -->
-      <div class="browse-menu" id="browseMenu">
-        <div class="browse-section">
-          <h4>Recommendations</h4>
-          <a href="#recommendations" class="browse-item featured">Recommendations</a>
-        </div>
-
-        <div class="browse-section">
-          <h4>Administration</h4>
-          <a href="#banned-users" class="browse-item featured">Banned Users</a>
-        </div>
-
-        <div class="browse-section">
-          <h4>Favorite Genres</h4>
-          <a href="#fiction" class="browse-item">Fiction</a>
-          <a href="#classics" class="browse-item">Classics</a>
-          <a href="#mystery" class="browse-item">Mystery & Thriller</a>
-          <a href="#romance" class="browse-item">Romance</a>
-          <a href="#fantasy" class="browse-item">Fantasy</a>
-          <a href="#science-fiction" class="browse-item">Science Fiction</a>
-          <a href="#non-fiction" class="browse-item">Non-Fiction</a>
-          <a href="#biography" class="browse-item">Biography</a>
-          <a href="#history" class="browse-item">History</a>
-          <a href="#poetry" class="browse-item">Poetry</a>
-          <a href="#psychology" class="browse-item">Psychology</a>
-          <a href="#all-genres" class="browse-item featured">All Genres</a>
-        </div>
-      </div>
-    </div>
 
     <a href="#search" class="nav-box">
       <svg class="nav-icon" viewBox="0 0 24 24">
@@ -98,28 +83,24 @@
 </div>
 
 <script>
-  const browseDropdown = document.getElementById('browseDropdown');
-  const browseMenu = document.getElementById('browseMenu');
+  function toggleDropdown(event) {
+    event.preventDefault();
+    const dropdown = document.getElementById('browseDropdown');
+    dropdown.classList.toggle('show');
+  }
 
-  browseDropdown.addEventListener('click', function(e) {
-    e.preventDefault();
-    const isOpen = browseMenu.classList.contains('show');
-
-    if (isOpen) {
-      browseMenu.classList.remove('show');
-      browseDropdown.classList.remove('open');
-    } else {
-      browseMenu.classList.add('show');
-      browseDropdown.classList.add('open');
+  window.onclick = function(event) {
+    if (!event.target.matches('.nav-box') && !event.target.closest('.browse-dropdown')) {
+      const dropdown = document.getElementById('browseDropdown');
+      if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+      }
     }
-  });
 
-  document.addEventListener('click', function(e) {
-    if (!browseDropdown.contains(e.target) && !browseMenu.contains(e.target)) {
-      browseMenu.classList.remove('show');
-      browseDropdown.classList.remove('open');
+    if (event.target.classList.contains('dropdown-item')) {
+      window.location.href = event.target.getAttribute('href');
     }
-  });
+  }
 </script>
 
 </body>

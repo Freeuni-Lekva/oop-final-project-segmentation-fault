@@ -43,7 +43,7 @@
 <div class="login-box">
     <h2>
         Sign Up as User
-        <img src="owl.jpg" alt="owl" class="owl-icon">
+        <img src="images/owl.jpg" alt="owl" class="owl-icon">
     </h2>
 
     <!-- Removed form action and method, using JS -->
