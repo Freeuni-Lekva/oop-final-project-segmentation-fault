@@ -1,6 +1,7 @@
 package com.example.libraryproject.service;
 
 import com.example.libraryproject.model.dto.BookAdditionRequest;
+import com.example.libraryproject.model.dto.UserDTO;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.entity.User;
@@ -19,16 +20,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import java.util.HashSet;
 import java.util.Optional;
-import java.util.UUID;
+import java.util.Set;
 
 import static com.example.libraryproject.configuration.ApplicationProperties.IMAGE_DIR;
-
-
-/*
-    * IMPLEMENT UNBAN USER METHOD AND FIX ENTITY CLASSES AS ARGUMENTS
- */
-
 
 @RequiredArgsConstructor
 public class BookKeeperService {
@@ -100,28 +97,35 @@ public class BookKeeperService {
         logger.info("Order with public ID '{}' marked as BORROWED", orderPublicId);
     }
 
-    public void banUser(UUID orderPublicId) {
-        Optional<Order> orderOptional = orderRepository.findByPublicId(orderPublicId.toString());
-        if (orderOptional.isEmpty()) {
-            throw new IllegalArgumentException("Order not found");
+    public void banUser(String username) {
+        Optional<User> userOptional = userRepository.findByUsername(username);
+        if (userOptional.isEmpty()) {
+            throw new IllegalArgumentException("User not found");
         }
-        Order order = orderOptional.get();
-        User user = order.getUser();
+        User user = userOptional.get();
         user.setStatus(UserStatus.BANNED);
         userRepository.update(user);
-        logger.info("User with ID '{}' has been banned due to overdue order with public ID '{}'",
-                    user.getId(), order.getPublicId());
+        logger.info("User with username '{}' has been banned", username);
     }
 
-    public void unbanUser(Long userId) {
-        Optional<User> userOptional = userRepository.findById(userId);
+    public void unbanUser(String username) {
+        Optional<User> userOptional = userRepository.findByUsername(username);
         if(userOptional.isEmpty()) {
             throw new IllegalArgumentException("User not found");
         }
         User user = userOptional.get();
         user.setStatus(UserStatus.ACTIVE);
         userRepository.update(user);
-        logger.info("User with ID '{}' has been unbanned", userId);
+        logger.info("User with username '{}' has been unbanned", username);
+    }
+
+    public Set<UserDTO> getUsers() {
+        Set<User> users = userRepository.findAll();
+        Set<UserDTO> usersWithStatus = new HashSet<>();
+        for (User user : users) {
+            usersWithStatus.add(UserDTO.convertUser(user));
+        }
+        return usersWithStatus;
     }
 
     public String downloadImage(Part filePart, String contextPath) throws IOException, ServletException {

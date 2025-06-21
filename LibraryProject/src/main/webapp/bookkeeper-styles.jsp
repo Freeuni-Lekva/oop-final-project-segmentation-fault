@@ -511,6 +511,161 @@
         animation: spin 1s linear infinite;
     }
 
+    .message-area {
+        margin-top: 10px;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 12px;
+        display: none;
+    }
+
+    .message-area.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .message-area.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .user-management-container {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .username-input-section {
+        background: #f8fafa;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #e7edec;
+    }
+
+    .users-list-section {
+        background: #f8fafa;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #e7edec;
+    }
+
+    .users-list-section h3 {
+        margin-bottom: 15px;
+        color: #4a5568;
+        font-size: 18px;
+    }
+
+    .search-container {
+        margin-bottom: 15px;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #d1d9d8;
+        border-radius: 6px;
+        font-size: 14px;
+        background: white;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #a7cdcd;
+        box-shadow: 0 0 0 2px rgba(167, 205, 205, 0.1);
+    }
+
+    .users-list {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #e7edec;
+        border-radius: 6px;
+        background: white;
+    }
+
+    .user-item {
+        padding: 12px 15px;
+        padding-right: 80px;
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        position: relative;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+
+    .user-item:hover {
+        background-color: #f8fafa;
+    }
+
+    .user-item:last-child {
+        border-bottom: none;
+    }
+
+    .user-item.banned {
+        background-color: #fff5f5;
+        color: #c53030;
+    }
+
+    .user-item.active {
+        background-color: #f0fff4;
+        color: #2f855a;
+    }
+
+    .user-item .username {
+        font-weight: 500;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex: 1;
+    }
+
+    .user-item .status {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 12px;
+        font-weight: 400;
+        padding: 2px 8px;
+        border-radius: 12px;
+        background: rgba(0,0,0,0.1);
+        width: 60px;
+        text-align: center;
+    }
+
+    .user-item.banned .status {
+        background: #fed7d7;
+        color: #c53030;
+    }
+
+    .user-item.active .status {
+        background: #c6f6d5;
+        color: #2f855a;
+    }
+
+    .username-action-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .username-search-input {
+        flex: 1;
+        padding: 10px 12px;
+        border: 1px solid #d1d9d8;
+        border-radius: 6px;
+        font-size: 14px;
+        background: white;
+        min-width: 0;
+    }
+    .username-search-input:focus {
+        outline: none;
+        border-color: #a7cdcd;
+        box-shadow: 0 0 0 2px rgba(167, 205, 205, 0.1);
+    }
+
     @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
