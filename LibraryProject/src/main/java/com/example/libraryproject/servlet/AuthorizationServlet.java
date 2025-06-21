@@ -14,7 +14,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 @WebServlet(name = "AuthorizationServlet", urlPatterns = "/api/authorization/*")
@@ -60,9 +59,7 @@ public class AuthorizationServlet extends HttpServlet {
             }
             case "/login" -> {
                 try {
-                    String username = request.getParameter("username");
-                    String password = request.getParameter("password");
-                    LoginRequest loginRequest = new LoginRequest(username, password);
+                    LoginRequest loginRequest = objectMapper.readValue(request.getInputStream(), LoginRequest.class);
                     LoginResult loginResult = authorizationService.login(loginRequest);
 
                     String redirectPath = request.getContextPath();
@@ -71,12 +68,16 @@ public class AuthorizationServlet extends HttpServlet {
                     } else {
                         redirectPath = redirectPath + "/main-page.jsp";
                     }
-                    response.sendRedirect(redirectPath);
+
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    objectMapper.writeValue(response.getWriter(),
+                            new JsonResponse("Login successful", redirectPath)
+                    );
                 } catch (Exception e) {
-                    String errorMessage = e.getMessage();
-                    String redirectPath = request.getContextPath() + "/login.jsp?error=" + URLEncoder.encode(errorMessage,
-                            StandardCharsets.UTF_8);
-                    response.sendRedirect(redirectPath);
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    objectMapper.writeValue(response.getWriter(),
+                            new JsonResponse("Login failed: " + e.getMessage(), null)
+                    );
                 }
             }
             default -> {

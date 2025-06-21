@@ -40,19 +40,9 @@
 <div class="login-box">
   <h2>Sign in to Freeuni Library</h2>
 
-  <%
-    String error = request.getParameter("error");
-    if (error != null && !error.isEmpty()) {
-  %>
-  <p style="color: red; text-align: center;"><%= error %></p>
-  <%
-    }
-  %>
-
-  <form action="${pageContext.request.contextPath}/api/authorization/login" method="post">
-    <input type="text" name="username" placeholder="Username" required />
-    <input type="password" name="password" placeholder="Password" required />
-
+  <form id="loginForm">
+    <input type="text" id="username" name="username" placeholder="Username" required />
+    <input type="password" id="password" name="password" placeholder="Password" required />
     <button type="submit">Login</button>
   </form>
 
@@ -73,6 +63,32 @@
   function showSignupOptions() {
     document.getElementById("signup-options").style.display = "block";
   }
+
+  document.getElementById("loginForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
+
+    try {
+      const response = await fetch("<%= request.getContextPath() %>/api/authorization/login", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ username, password })
+      });
+
+
+      const result = await response.json();
+      if (response.ok && result.redirect) {
+        window.location.href = result.redirect;
+      } else {
+        alert(result.message || "Login failed");
+      }
+
+    } catch (error) {
+      console.error(error);
+      alert("Check connection");
+    }
+  });
 </script>
 
 </body>

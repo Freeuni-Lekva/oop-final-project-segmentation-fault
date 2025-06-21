@@ -88,12 +88,12 @@ public class BookKeeperService {
             throw new IllegalArgumentException("Order not found");
         }
         Order order = orderOptional.get();
+        if (order.getStatus() != OrderStatus.RESERVED) {
+            logger.info("Attempted to mark order {} as BORROWED but it has status {}", orderPublicId, order.getStatus());
+            throw new IllegalStateException("Invalid status: " + order.getStatus());
+        }
 
         order.setStatus(OrderStatus.BORROWED);
-        Book book = order.getBook();
-        book.setAmountInLib(book.getAmountInLib() - 1);
-
-        bookRepository.update(book);
         orderRepository.update(order);
         logger.info("Order with public ID '{}' marked as BORROWED", orderPublicId);
     }
