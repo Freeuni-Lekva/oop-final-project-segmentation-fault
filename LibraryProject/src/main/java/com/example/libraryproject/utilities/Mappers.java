@@ -2,6 +2,7 @@ package com.example.libraryproject.utilities;
 
 import com.example.libraryproject.model.dto.GoogleBooksResponse;
 import com.example.libraryproject.model.dto.RegistrationRequest;
+import com.example.libraryproject.model.dto.UserDTO;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.BookKeeper;
 import com.example.libraryproject.model.entity.User;
@@ -74,5 +75,9 @@ public class Mappers {
             parsedDate = LocalDate.parse(dateStr);
         }
         return parsedDate;
+    }
+
+    public static UserDTO convertUser(User user) {
+        return new UserDTO(user.getUsername(), user.getStatus().toString());
     }
 }
