@@ -113,6 +113,7 @@
               Add Book
             </button>
           </div>
+          <div id="addBookMessage" class="message-area" style="display: none;"></div>
         </form>
       </div>
     </div>
@@ -133,6 +134,7 @@
               Mark as Borrowed
             </button>
           </div>
+          <div id="markBorrowedMessage" class="message-area" style="display: none;"></div>
         </form>
       </div>
     </div>
@@ -140,35 +142,27 @@
     <div id="manage-users" class="tab-content">
       <div class="form-container">
         <h2 class="form-section-title">User Management</h2>
-        <div class="user-management-grid">
-          <form id="banUserForm">
-            <div class="form-group">
-              <label for="banUserId">Ban User (UUID)</label>
-              <input type="text" id="banUserId" name="userId" placeholder="Enter user UUID" required>
+        <div class="user-management-container">
+          <div class="username-action-row">
+            <input type="text" id="usernameInput" name="username" placeholder="Type username to search, ban, or unban" class="username-search-input" autocomplete="off" required>
+            <button type="button" class="btn btn-danger" id="banUserBtn" style="margin-left: 10px;">
+              <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11H7v-2h10v2z"/>
+              </svg>
+              Ban User
+            </button>
+            <button type="button" class="btn btn-success" id="unbanUserBtn" style="margin-left: 8px;">
+              <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+              Unban User
+            </button>
+          </div>
+          <div id="userManagementMessage" class="message-area" style="display: none; margin-bottom: 10px;"></div>
+          <div class="users-list-section">
+            <div id="usersList" class="users-list">
             </div>
-            <div class="action-buttons">
-              <button type="submit" class="btn btn-danger" id="banUserBtn">
-                <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11H7v-2h10v2z"/>
-                </svg>
-                Ban User
-              </button>
-            </div>
-          </form>
-          <form id="unbanUserForm">
-            <div class="form-group">
-              <label for="unbanUserId">Unban User (ID)</label>
-              <input type="number" id="unbanUserId" name="userId" placeholder="Enter user ID" required>
-            </div>
-            <div class="action-buttons">
-              <button type="submit" class="btn btn-success" id="unbanUserBtn">
-                <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                </svg>
-                Unban User
-              </button>
-            </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>
@@ -222,18 +216,187 @@
 
   document.getElementById('addBookForm').addEventListener('submit', function(e) {
     e.preventDefault();
+
+    const form = this;
+    const data = new FormData(form);
+    const button = document.getElementById('addBookBtn');
+    const buttonText = button.textContent;
+
+    button.disabled = true;
+    button.textContent = 'Adding...';
+    const msgBox = document.getElementById('addBookMessage');
+    msgBox.style.display = 'none';
+
+    fetch('${pageContext.request.contextPath}/api/bookkeeper/add-book', {
+        method: 'POST',
+        body: data
+    })
+    .then(function(response) {
+        if (response.ok) {
+            msgBox.textContent = 'Book added successfully';
+            msgBox.className = 'message-area success';
+            msgBox.style.display = 'block';
+            form.reset();
+            const preview = document.getElementById('imagePreview');
+            if (preview && preview.classList.contains('show')) {
+              preview.classList.remove('show');
+            }
+            setTimeout(function() {
+                msgBox.style.display = 'none';
+            }, 5000);
+        } else {
+            msgBox.textContent = 'Failed to add book';
+            msgBox.className = 'message-area error';
+            msgBox.style.display = 'block';
+        }
+    })
+    .catch(function(error) {
+        console.error(error);
+        msgBox.textContent = 'Error: Check your connection';
+        msgBox.className = 'message-area error';
+        msgBox.style.display = 'block';
+    })
+    .finally(function() {
+        button.textContent = buttonText;
+        button.disabled = false;
+    });
   });
 
   document.getElementById('markBorrowedForm').addEventListener('submit', function(e) {
     e.preventDefault();
+    
+    const form = this;
+    const data = new FormData(form);
+    const button = document.getElementById('markBorrowedBtn');
+    const buttonText = button.textContent;
+
+    button.disabled = true;
+    button.textContent = 'Processing...';
+    
+    const msgBox = document.getElementById('markBorrowedMessage');
+    msgBox.style.display = 'none';
+
+    fetch('${pageContext.request.contextPath}/api/bookkeeper/mark-borrowed', {
+        method: 'POST',
+        body: data
+    })
+    .then(function(response) {
+        if (response.ok) {
+            msgBox.textContent = 'Order marked as borrowed';
+            msgBox.className = 'message-area success';
+            msgBox.style.display = 'block';
+            form.reset();
+            
+            setTimeout(function() {
+                msgBox.style.display = 'none';
+            }, 5000);
+        } else {
+            msgBox.textContent = 'Order not found';
+            msgBox.className = 'message-area error';
+            msgBox.style.display = 'block';
+        }
+    })
+    .catch(function(error) {
+        console.error(error);
+        msgBox.textContent = 'Error: Check your connection';
+        msgBox.className = 'message-area error';
+        msgBox.style.display = 'block';
+    })
+    .finally(function() {
+        button.textContent = buttonText;
+        button.disabled = false;
+    });
   });
 
-  document.getElementById('banUserForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+  document.getElementById('banUserBtn').addEventListener('click', function() {
+    const username = document.getElementById('usernameInput').value;
+    const button = this;
+    const buttonText = button.textContent;
+
+    button.disabled = true;
+    button.textContent = 'Banning...';
+    
+    const msgBox = document.getElementById('userManagementMessage');
+    msgBox.style.display = 'none';
+
+    const formData = new FormData();
+    formData.append('username', username);
+
+    fetch('${pageContext.request.contextPath}/api/bookkeeper/ban-user', {
+        method: 'POST',
+        body: formData
+    })
+    .then(function(response) {
+        if (response.ok) {
+            msgBox.textContent = 'User banned';
+            msgBox.className = 'message-area success';
+            msgBox.style.display = 'block';
+            document.getElementById('usernameInput').value = '';
+            refreshUsersList();
+            setTimeout(function() {
+                msgBox.style.display = 'none';
+            }, 5000);
+        } else {
+            msgBox.textContent = 'Failed to ban user';
+            msgBox.className = 'message-area error';
+            msgBox.style.display = 'block';
+        }
+    })
+    .catch(function(error) {
+        console.error(error);
+        msgBox.textContent = 'Error: Check your connection';
+        msgBox.className = 'message-area error';
+        msgBox.style.display = 'block';
+    })
+    .finally(function() {
+        button.textContent = buttonText;
+        button.disabled = false;
+    });
   });
 
-  document.getElementById('unbanUserForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+  document.getElementById('unbanUserBtn').addEventListener('click', function() {
+    const username = document.getElementById('usernameInput').value;
+    const button = this;
+    const buttonText = button.textContent;
+
+    button.disabled = true;
+    button.textContent = 'Unbanning...';
+    
+    const msgBox = document.getElementById('userManagementMessage');
+    msgBox.style.display = 'none';
+
+    const formData = new FormData();
+    formData.append('username', username);
+    fetch('${pageContext.request.contextPath}/api/bookkeeper/unban-user', {
+        method: 'POST',
+        body: formData
+    })
+    .then(function(response) {
+        if (response.ok) {
+            msgBox.textContent = 'User unbanned';
+            msgBox.className = 'message-area success';
+            msgBox.style.display = 'block';
+            document.getElementById('usernameInput').value = '';
+            refreshUsersList();
+            setTimeout(function() {
+                msgBox.style.display = 'none';
+            }, 5000);
+        } else {
+            msgBox.textContent = 'Failed to unban user';
+            msgBox.className = 'message-area error';
+            msgBox.style.display = 'block';
+        }
+    })
+    .catch(function(error) {
+        console.error(error);
+        msgBox.textContent = 'Error: Check your connection';
+        msgBox.className = 'message-area error';
+        msgBox.style.display = 'block';
+    })
+    .finally(function() {
+        button.textContent = buttonText;
+        button.disabled = false;
+    });
   });
 
   document.getElementById('deleteBookForm').addEventListener('submit', function(e) {
@@ -263,6 +426,67 @@
       document.getElementById('bookImage').dispatchEvent(event);
     }
   });
+
+  document.getElementById('usernameInput').addEventListener('input', function(e) {
+    const nameInSearch = e.target.value.toLowerCase();
+    const allUsers = document.querySelectorAll('.user-item');
+    allUsers.forEach(function(item) {
+      const username = item.querySelector('.username').textContent.toLowerCase();
+      if (username.includes(nameInSearch)) {
+        item.style.display = 'block';
+      } else {
+        item.style.display = 'none';
+      }
+    });
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    loadUsersList();
+  });
+
+  function refreshUsersList() {
+    setTimeout(function() {
+      loadUsersList();
+    }, 800);
+  }
+
+  function loadUsersList() {
+    const list = document.getElementById('usersList');
+    fetch('${pageContext.request.contextPath}/api/bookkeeper/users')
+            .then(function(response) {
+              if (response.ok) {
+                return response.json();
+              } else {
+                throw new Error('Error loading users');
+              }
+            })
+            .then(function(users) {
+              list.textContent = '';
+              users.forEach(function(user) {
+                const listMember = document.createElement('div');
+                listMember.className = 'user-item ' + user.status.toLowerCase();
+
+                const usernameElement = document.createElement('span');
+                const statusElement = document.createElement('span');
+                usernameElement.className = 'username';
+                statusElement.className = 'status';
+                usernameElement.textContent = user.username;
+                statusElement.textContent = user.status;
+
+                listMember.appendChild(usernameElement);
+                listMember.appendChild(statusElement);
+                listMember.onclick = function() {
+                  document.getElementById('usernameInput').value = user.username;
+                };
+                list.appendChild(listMember);
+              });
+            })
+            .catch(function(error) {
+              console.error(error);
+              list.textContent = 'Error loading users';
+            });
+  }
+
 </script>
 </body>
 </html>

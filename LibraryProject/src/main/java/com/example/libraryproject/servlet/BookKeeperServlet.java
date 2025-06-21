@@ -3,8 +3,10 @@ package com.example.libraryproject.servlet;
 import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.model.dto.BookAdditionFromGoogleRequest;
 import com.example.libraryproject.model.dto.BookAdditionRequest;
+import com.example.libraryproject.model.dto.UserDTO;
 import com.example.libraryproject.service.BookKeeperService;
 import com.example.libraryproject.service.GoogleBooksAPIService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -12,13 +14,11 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import static com.example.libraryproject.configuration.ApplicationProperties.GOOGLE_BOOKS_API_ATTRIBUTE_NAME;
 
 
 import java.io.IOException;
-import java.util.UUID;
+
+import java.util.Set;
 
 
 @MultipartConfig
@@ -59,6 +59,18 @@ public class BookKeeperServlet extends HttpServlet {
         }
     }
 
+    @Override
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        BookKeeperService bookKeeperService = (BookKeeperService) request.getServletContext()
+                .getAttribute(ApplicationProperties.BOOKKEEPER_SERVICE_ATTRIBUTE_NAME);
+        String path = request.getPathInfo();
+        if ("/users".equals(path)) {
+            handleGetUsers(request, response, bookKeeperService);
+        } else {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
+
     private void handleAddBookFromGoogleAPI(HttpServletRequest req, BookKeeperService bookKeeperService, GoogleBooksAPIService googleBooksAPIService) {
         String title = req.getParameter("title");
         String author = req.getParameter("author");
@@ -68,9 +80,6 @@ public class BookKeeperServlet extends HttpServlet {
         BookAdditionFromGoogleRequest request = new BookAdditionFromGoogleRequest(title, author);
         googleBooksAPIService.fetchBook(request);
     }
-
-    @Override
-    public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {}
 
     @Override
     public void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -128,23 +137,26 @@ public class BookKeeperServlet extends HttpServlet {
     }
 
     private void handleBanUser(HttpServletRequest req, BookKeeperService bookKeeperService) {
-        String userIdParam = req.getParameter("userId");
-        if (userIdParam == null) {
-            throw new IllegalArgumentException("User ID is required to ban a user.");
+        String username = req.getParameter("username");
+        if (username == null || username.trim().isEmpty()) {
+            throw new IllegalArgumentException("Username is required to ban a user.");
         }
-
-        UUID userId = UUID.fromString(userIdParam);
-        bookKeeperService.banUser(userId);
+        bookKeeperService.banUser(username);
     }
 
     private void handleUnbanUser(HttpServletRequest req, BookKeeperService bookKeeperService) {
-        String userIdParam = req.getParameter("userId");
-        if (userIdParam == null) {
-            throw new IllegalArgumentException("User ID is required to unban a user.");
+        String username = req.getParameter("username");
+        if (username == null || username.trim().isEmpty()) {
+            throw new IllegalArgumentException("Username is required to unban a user.");
         }
+        bookKeeperService.unbanUser(username);
+    }
 
-        Long userId = Long.parseLong(userIdParam);
-        bookKeeperService.unbanUser(userId);
+    private void handleGetUsers(HttpServletRequest req, HttpServletResponse resp, BookKeeperService bookKeeperService)
+            throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Set<UserDTO> users = bookKeeperService.getUsers();
+        objectMapper.writeValue(resp.getWriter(), users);
     }
 
 }
