@@ -1,19 +1,20 @@
 package com.example.libraryproject.service;
 
 import com.example.libraryproject.model.entity.Book;
+import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.entity.User;
-import com.example.libraryproject.repository.BookKeeperRepository;
-import com.example.libraryproject.repository.BookRepository;
-import com.example.libraryproject.repository.ReviewRepository;
-import com.example.libraryproject.repository.UserRepository;
+import com.example.libraryproject.model.enums.OrderStatus;
+import com.example.libraryproject.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -24,6 +25,7 @@ public class UserServiceTest {
     private ReviewRepository reviewRepository;
     private UserService userService;
     private BookRepository bookRepository;
+    private OrderRepository orderRepository;
     private User user;
 
     private Book book1, book2, book3;
@@ -33,8 +35,9 @@ public class UserServiceTest {
         userRepository = mock(UserRepository.class);
         bookKeeperRepository = mock(BookKeeperRepository.class);
         reviewRepository = mock(ReviewRepository.class);
-        bookRepository = mock(BookRepository.class); // This was missing!
-        userService = new UserService(userRepository, bookRepository, reviewRepository);
+        bookRepository = mock(BookRepository.class);
+        orderRepository = mock(OrderRepository.class);
+        userService = new UserService(userRepository, bookRepository, reviewRepository, orderRepository);
 
         book1 = new Book(
                 "Shadow_Realms",
@@ -67,6 +70,7 @@ public class UserServiceTest {
         );
 
         user = new User("rezi", "1234");
+        user.setId(1L);
         user.setPassword(BCrypt.hashpw("1234", BCrypt.gensalt()));
         user.setBorrowedBooks(new HashSet<>());
         user.setReadBooks(new HashSet<>());
@@ -80,6 +84,9 @@ public class UserServiceTest {
         // Mock for non-existent entities
         when(userRepository.findByUsername("nonexistent")).thenReturn(Optional.empty());
         when(bookRepository.findByPublicId("nonexistent")).thenReturn(Optional.empty());
+        
+        // Mock OrderRepository
+        when(orderRepository.findOrdersByUserId(1L)).thenReturn(new HashSet<>());
     }
 
     @Test
@@ -102,12 +109,28 @@ public class UserServiceTest {
 
     @Test
     public void testCancelReservation() {
-        // First reserve a book
-        assertDoesNotThrow(() -> userService.reserveBook(user.getUsername(), book1.getPublicId()));
-
+        // Create a mock order
+        Order mockOrder = new Order(
+                UUID.randomUUID(),
+                LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(22),
+                OrderStatus.RESERVED,
+                user,
+                book1
+        );
+        
+        Set<Order> userOrders = new HashSet<>();
+        userOrders.add(mockOrder);
+        
+        // Mock OrderRepository
+        when(orderRepository.findOrdersByUserId(1L)).thenReturn(userOrders);
+        
         // Test successful cancellation
         assertDoesNotThrow(() -> userService.cancelReservation(user.getUsername(), book1.getPublicId()));
 
+        //return empty set for not reserved book
+        when(orderRepository.findOrdersByUserId(1L)).thenReturn(new HashSet<>());
+        
         // Test cancellation when book is not reserved
         assertThrows(IllegalStateException.class,
                 () -> userService.cancelReservation(user.getUsername(), book3.getPublicId()));

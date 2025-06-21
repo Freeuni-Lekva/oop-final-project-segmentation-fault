@@ -67,10 +67,6 @@ public class User {
     @NonNull
     private Long reviewCount = 0L;
 
-    @Column(name = "banned")
-    @NonNull
-    private boolean banned = false;
-
     public User() {}
 
     @Override

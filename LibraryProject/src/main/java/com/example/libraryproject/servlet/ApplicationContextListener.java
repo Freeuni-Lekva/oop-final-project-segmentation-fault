@@ -49,7 +49,7 @@ public class ApplicationContextListener implements ServletContextListener {
             BookRecommendationService bookRecomendationService = new BookRecommendationService(bookRepository, userRepository);
             event.getServletContext().setAttribute(BOOK_RECOMMENDATION_SERVICE_ATTRIBUTE_NAME, bookRecomendationService);
 
-            UserService userService = new UserService(userRepository,bookRepository,reviewRepository);
+            UserService userService = new UserService(userRepository, bookRepository, reviewRepository, orderRepository);
             event.getServletContext().setAttribute(USER_SERVICE_ATTRIBUTE_NAME, userService);
 
             System.out.println("✅ Hibernate schema created or validated successfully.");
