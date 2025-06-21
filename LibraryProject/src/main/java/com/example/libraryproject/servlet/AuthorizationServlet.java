@@ -19,10 +19,11 @@ import java.nio.charset.StandardCharsets;
 @WebServlet(name = "AuthorizationServlet", urlPatterns = "/api/authorization/*")
 public class AuthorizationServlet extends HttpServlet {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+        ObjectMapper objectMapper = (ObjectMapper) request.getServletContext()
+                .getAttribute(ApplicationProperties.OBJECT_MAPPER_ATTRIBUTE_NAME);
 
         AuthorizationService authorizationService = (AuthorizationService) request.getServletContext()
                 .getAttribute(ApplicationProperties.AUTHORIZATION_SERVICE_ATTRIBUTE_NAME);
@@ -35,6 +36,7 @@ public class AuthorizationServlet extends HttpServlet {
         switch (path) {
             case "/register" -> {
                 try {
+
                     RegistrationRequest registrationRequest = objectMapper.readValue(request.getInputStream(), RegistrationRequest.class);
                     authorizationService.register(registrationRequest);
 
@@ -59,6 +61,7 @@ public class AuthorizationServlet extends HttpServlet {
             }
             case "/login" -> {
                 try {
+
                     LoginRequest loginRequest = objectMapper.readValue(request.getInputStream(), LoginRequest.class);
                     LoginResult loginResult = authorizationService.login(loginRequest);
 

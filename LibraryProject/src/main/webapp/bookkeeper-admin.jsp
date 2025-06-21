@@ -214,190 +214,240 @@
   });
 
 
-  document.getElementById('addBookForm').addEventListener('submit', function(e) {
+  document.getElementById('addBookForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 
     const form = this;
-    const data = new FormData(form);
     const button = document.getElementById('addBookBtn');
     const buttonText = button.textContent;
+    const msgBox = document.getElementById('addBookMessage');
+    const preview = document.getElementById('imagePreview');
 
     button.disabled = true;
     button.textContent = 'Adding...';
-    const msgBox = document.getElementById('addBookMessage');
     msgBox.style.display = 'none';
 
-    fetch('${pageContext.request.contextPath}/api/bookkeeper/add-book', {
+    try {
+      const title = document.getElementById('title').value.trim();
+      const author = document.getElementById('author').value.trim();
+      const genre = document.getElementById('genre').value.trim();
+      const volume = document.getElementById('volume').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const fileInput = document.getElementById('bookImage');
+      const imageFile = fileInput.files[0];
+
+      let imageUrl = null;
+      if (imageFile) {
+        const imageFormData = new FormData();
+        imageFormData.append('image', imageFile);
+
+        const imageUploadResponse = await fetch('${pageContext.request.contextPath}/api/bookkeeper/upload-image', {
+          method: 'POST',
+          body: imageFormData
+        });
+
+        if (!imageUploadResponse.ok) throw new Error('Image upload failed');
+        const imageData = await imageUploadResponse.json();
+        imageUrl = imageData.url || imageData.imageUrl || imageData.path;
+      }
+
+      const bookData = {
+        title,
+        author,
+        genre,
+        volume,
+        description,
+      };
+
+      const bookCreateResponse = await fetch('${pageContext.request.contextPath}/api/bookkeeper/add-book', {
         method: 'POST',
-        body: data
-    })
-    .then(function(response) {
-        if (response.ok) {
-            msgBox.textContent = 'Book added successfully';
-            msgBox.className = 'message-area success';
-            msgBox.style.display = 'block';
-            form.reset();
-            const preview = document.getElementById('imagePreview');
-            if (preview && preview.classList.contains('show')) {
-              preview.classList.remove('show');
-            }
-            setTimeout(function() {
-                msgBox.style.display = 'none';
-            }, 5000);
-        } else {
-            msgBox.textContent = 'Failed to add book';
-            msgBox.className = 'message-area error';
-            msgBox.style.display = 'block';
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(bookData)
+      });
+
+      if (bookCreateResponse.ok) {
+        msgBox.textContent = 'Book added successfully';
+        msgBox.className = 'message-area success';
+        msgBox.style.display = 'block';
+        form.reset();
+        if (preview && preview.classList.contains('show')) {
+          preview.classList.remove('show');
         }
-    })
-    .catch(function(error) {
-        console.error(error);
-        msgBox.textContent = 'Error: Check your connection';
+        setTimeout(() => (msgBox.style.display = 'none'), 5000);
+      } else {
+        msgBox.textContent = 'Failed to add book';
         msgBox.className = 'message-area error';
         msgBox.style.display = 'block';
-    })
-    .finally(function() {
-        button.textContent = buttonText;
-        button.disabled = false;
-    });
+      }
+    } catch (error) {
+      console.error(error);
+      msgBox.textContent = 'Error: Check your connection or input';
+      msgBox.className = 'message-area error';
+      msgBox.style.display = 'block';
+    } finally {
+      button.textContent = buttonText;
+      button.disabled = false;
+    }
   });
 
-  document.getElementById('markBorrowedForm').addEventListener('submit', function(e) {
+
+  document.getElementById('markBorrowedForm').addEventListener('submit', function (e) {
     e.preventDefault();
-    
+
     const form = this;
-    const data = new FormData(form);
+    const orderPublicId = document.getElementById('orderPublicId').value.trim();
     const button = document.getElementById('markBorrowedBtn');
     const buttonText = button.textContent;
 
     button.disabled = true;
     button.textContent = 'Processing...';
-    
+
     const msgBox = document.getElementById('markBorrowedMessage');
     msgBox.style.display = 'none';
 
-    fetch('${pageContext.request.contextPath}/api/bookkeeper/mark-borrowed', {
-        method: 'POST',
-        body: data
-    })
-    .then(function(response) {
-        if (response.ok) {
-            msgBox.textContent = 'Order marked as borrowed';
-            msgBox.className = 'message-area success';
-            msgBox.style.display = 'block';
-            form.reset();
-            
-            setTimeout(function() {
-                msgBox.style.display = 'none';
-            }, 5000);
-        } else {
-            msgBox.textContent = 'Order not found';
-            msgBox.className = 'message-area error';
-            msgBox.style.display = 'block';
-        }
-    })
-    .catch(function(error) {
-        console.error(error);
-        msgBox.textContent = 'Error: Check your connection';
-        msgBox.className = 'message-area error';
-        msgBox.style.display = 'block';
-    })
-    .finally(function() {
-        button.textContent = buttonText;
-        button.disabled = false;
-    });
-  });
+    const payload = {
+      orderPublicId: orderPublicId
+    };
 
-  document.getElementById('banUserBtn').addEventListener('click', function() {
-    const username = document.getElementById('usernameInput').value;
+    fetch('${pageContext.request.contextPath}/api/bookkeeper/mark-borrowed', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    })
+            .then(function (response) {
+              if (response.ok) {
+                msgBox.textContent = 'Order marked as borrowed';
+                msgBox.className = 'message-area success';
+                msgBox.style.display = 'block';
+                form.reset();
+
+                setTimeout(function () {
+                  msgBox.style.display = 'none';
+                }, 5000);
+              } else {
+                msgBox.textContent = 'Order not found';
+                msgBox.className = 'message-area error';
+                msgBox.style.display = 'block';
+              }
+            })
+            .catch(function (error) {
+              console.error(error);
+              msgBox.textContent = 'Error: Check your connection';
+              msgBox.className = 'message-area error';
+              msgBox.style.display = 'block';
+            })
+            .finally(function () {
+              button.textContent = buttonText;
+              button.disabled = false;
+            });
+  });
+  ;
+
+  document.getElementById('banUserBtn').addEventListener('click', function () {
+    const username = document.getElementById('usernameInput').value.trim();
     const button = this;
     const buttonText = button.textContent;
 
     button.disabled = true;
     button.textContent = 'Banning...';
-    
+
     const msgBox = document.getElementById('userManagementMessage');
     msgBox.style.display = 'none';
 
-    const formData = new FormData();
-    formData.append('username', username);
+    const payload = {
+      username: username
+    };
 
     fetch('${pageContext.request.contextPath}/api/bookkeeper/ban-user', {
-        method: 'POST',
-        body: formData
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
     })
-    .then(function(response) {
-        if (response.ok) {
-            msgBox.textContent = 'User banned';
-            msgBox.className = 'message-area success';
-            msgBox.style.display = 'block';
-            document.getElementById('usernameInput').value = '';
-            refreshUsersList();
-            setTimeout(function() {
-                msgBox.style.display = 'none';
-            }, 5000);
-        } else {
-            msgBox.textContent = 'Failed to ban user';
-            msgBox.className = 'message-area error';
-            msgBox.style.display = 'block';
-        }
-    })
-    .catch(function(error) {
-        console.error(error);
-        msgBox.textContent = 'Error: Check your connection';
-        msgBox.className = 'message-area error';
-        msgBox.style.display = 'block';
-    })
-    .finally(function() {
-        button.textContent = buttonText;
-        button.disabled = false;
-    });
+            .then(function (response) {
+              if (response.ok) {
+                msgBox.textContent = 'User banned';
+                msgBox.className = 'message-area success';
+                msgBox.style.display = 'block';
+                document.getElementById('usernameInput').value = '';
+                refreshUsersList();
+                setTimeout(function () {
+                  msgBox.style.display = 'none';
+                }, 5000);
+              } else {
+                msgBox.textContent = 'Failed to ban user';
+                msgBox.className = 'message-area error';
+                msgBox.style.display = 'block';
+              }
+            })
+            .catch(function (error) {
+              console.error(error);
+              msgBox.textContent = 'Error: Check your connection';
+              msgBox.className = 'message-area error';
+              msgBox.style.display = 'block';
+            })
+            .finally(function () {
+              button.textContent = buttonText;
+              button.disabled = false;
+            });
   });
 
-  document.getElementById('unbanUserBtn').addEventListener('click', function() {
-    const username = document.getElementById('usernameInput').value;
+
+  document.getElementById('unbanUserBtn').addEventListener('click', function () {
+    const username = document.getElementById('usernameInput').value.trim();
     const button = this;
     const buttonText = button.textContent;
 
     button.disabled = true;
     button.textContent = 'Unbanning...';
-    
+
     const msgBox = document.getElementById('userManagementMessage');
     msgBox.style.display = 'none';
 
-    const formData = new FormData();
-    formData.append('username', username);
+    const payload = {
+      username: username
+    };
+
     fetch('${pageContext.request.contextPath}/api/bookkeeper/unban-user', {
-        method: 'POST',
-        body: formData
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
     })
-    .then(function(response) {
-        if (response.ok) {
-            msgBox.textContent = 'User unbanned';
-            msgBox.className = 'message-area success';
-            msgBox.style.display = 'block';
-            document.getElementById('usernameInput').value = '';
-            refreshUsersList();
-            setTimeout(function() {
-                msgBox.style.display = 'none';
-            }, 5000);
-        } else {
-            msgBox.textContent = 'Failed to unban user';
-            msgBox.className = 'message-area error';
-            msgBox.style.display = 'block';
-        }
-    })
-    .catch(function(error) {
-        console.error(error);
-        msgBox.textContent = 'Error: Check your connection';
-        msgBox.className = 'message-area error';
-        msgBox.style.display = 'block';
-    })
-    .finally(function() {
-        button.textContent = buttonText;
-        button.disabled = false;
-    });
+            .then(function (response) {
+              if (response.ok) {
+                msgBox.textContent = 'User unbanned';
+                msgBox.className = 'message-area success';
+                msgBox.style.display = 'block';
+                document.getElementById('usernameInput').value = '';
+                refreshUsersList();
+                setTimeout(function () {
+                  msgBox.style.display = 'none';
+                }, 5000);
+              } else {
+                msgBox.textContent = 'Failed to unban user';
+                msgBox.className = 'message-area error';
+                msgBox.style.display = 'block';
+              }
+            })
+            .catch(function (error) {
+              console.error(error);
+              msgBox.textContent = 'Error: Check your connection';
+              msgBox.className = 'message-area error';
+              msgBox.style.display = 'block';
+            })
+            .finally(function () {
+              button.textContent = buttonText;
+              button.disabled = false;
+            });
   });
+
 
   document.getElementById('deleteBookForm').addEventListener('submit', function(e) {
     e.preventDefault();
