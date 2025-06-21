@@ -34,7 +34,7 @@
 <div class="login-box">
     <h2>
         Sign Up as Bookkeeper
-        <img src="owl.jpg" alt="owl" class="owl-icon">
+        <img src="images/owl.jpg" alt="owl" class="owl-icon">
     </h2>
 
     <form id="registerForm">
