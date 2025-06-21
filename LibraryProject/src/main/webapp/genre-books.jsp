@@ -212,16 +212,16 @@
         </svg>
       </a>
       <div class="dropdown-content" id="browseDropdown">
+        <a href="genre-books.jsp?genre=classics" class="dropdown-item">Classics</a>
         <a href="genre-books.jsp?genre=fiction" class="dropdown-item">Fiction</a>
-        <a href="genre-books.jsp?genre=non-fiction" class="dropdown-item">Non-Fiction</a>
-        <a href="genre-books.jsp?genre=mystery" class="dropdown-item">Mystery & Thriller</a>
+        <a href="genre-books.jsp?genre=crime" class="dropdown-item">Crime</a>
+        <a href="genre-books.jsp?genre=mystery" class="dropdown-item">Mystery</a>
         <a href="genre-books.jsp?genre=romance" class="dropdown-item">Romance</a>
-        <a href="genre-books.jsp?genre=science-fiction" class="dropdown-item">Science Fiction</a>
+        <a href="genre-books.jsp?genre=memoir" class="dropdown-item">Memoir</a>
         <a href="genre-books.jsp?genre=fantasy" class="dropdown-item">Fantasy</a>
-        <a href="genre-books.jsp?genre=biography" class="dropdown-item">Biography</a>
+        <a href="genre-books.jsp?genre=horror" class="dropdown-item">Horror</a>
         <a href="genre-books.jsp?genre=history" class="dropdown-item">History</a>
-        <a href="genre-books.jsp?genre=self-help" class="dropdown-item">Self-Help</a>
-        <a href="genre-books.jsp?genre=children" class="dropdown-item">Children's Books</a>
+        <a href="genre-books.jsp?genre=poetry" class="dropdown-item">Poetry</a>
       </div>
     </div>
 
