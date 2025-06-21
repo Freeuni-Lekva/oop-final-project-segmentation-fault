@@ -10,6 +10,7 @@ import com.example.libraryproject.model.enums.UserStatus;
 import com.example.libraryproject.repository.BookRepository;
 import com.example.libraryproject.repository.OrderRepository;
 import com.example.libraryproject.repository.UserRepository;
+import com.example.libraryproject.utilities.Mappers;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Part;
 import lombok.RequiredArgsConstructor;
@@ -123,7 +124,7 @@ public class BookKeeperService {
         Set<User> users = userRepository.findAll();
         Set<UserDTO> usersWithStatus = new HashSet<>();
         for (User user : users) {
-            usersWithStatus.add(UserDTO.convertUser(user));
+            usersWithStatus.add(Mappers.convertUser(user));
         }
         return usersWithStatus;
     }
