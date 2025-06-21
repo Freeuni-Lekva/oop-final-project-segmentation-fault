@@ -11,7 +11,6 @@ import com.example.libraryproject.repository.BookRepository;
 import com.example.libraryproject.repository.OrderRepository;
 import com.example.libraryproject.repository.UserRepository;
 import com.example.libraryproject.utilities.Mappers;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Part;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -51,8 +50,8 @@ public class BookKeeperService {
             book.setDescription(bookRequest.description());
             book.setGenre(bookRequest.genre());
             book.setPublicId(bookRequest.title().replaceAll("[^a-zA-Z0-9.\\-]", "_"));
-            book.setImageUrl(bookRequest.imageUrl());
-
+            book.setImageUrl(bookRequest.title().replaceAll("[^a-zA-Z0-9.\\-]", "_") + ".jpg");
+            book.setVolume(bookRequest.volume());
             book.setAmountInLib(1L);
             bookRepository.save(book);
         }
@@ -129,7 +128,7 @@ public class BookKeeperService {
         return usersWithStatus;
     }
 
-    public String downloadImage(Part filePart, String contextPath) throws IOException, ServletException {
+    public String downloadImage(Part filePart ) throws IOException  {
         String submittedFileName = Path.of(filePart.getSubmittedFileName()).getFileName().toString();
         String safeFileName = submittedFileName.replaceAll("[^a-zA-Z0-9.\\-]", "_");
 
@@ -143,6 +142,6 @@ public class BookKeeperService {
 
         logger.info("Downloading image file: {}", filePath);
 
-        return contextPath + "/images/" + safeFileName;
+        return safeFileName;
     }
 }

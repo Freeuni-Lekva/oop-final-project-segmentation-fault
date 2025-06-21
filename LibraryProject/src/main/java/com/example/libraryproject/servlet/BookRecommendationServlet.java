@@ -3,7 +3,6 @@ package com.example.libraryproject.servlet;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.service.BookRecommendationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,7 +17,7 @@ public class BookRecommendationServlet extends HttpServlet {
 
 
     @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 import static com.example.libraryproject.configuration.ApplicationProperties.*;
