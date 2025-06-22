@@ -481,20 +481,29 @@
         }
 
         function createBookCard(book) {
+
             var contextPath = '<%= request.getContextPath() %>';
-
             var imageHtml = '';
-            if (book.imagePath) {
-                var imageName = book.imagePath.split('/').pop().split('\\').pop();
-                var imagePath = contextPath + '/images/' + imageName;
 
-                imageHtml = `<img src="${imagePath}" alt="${book.title || 'Book cover'}"
-                     onerror="this.style.display='none';
-                     this.nextElementSibling.style.display='flex'">
-                     <div class="book-cover-fallback" style="display:none">📚</div>`;
+            // Check if the book has an imageName field
+            if (book.imageUrl) {
+                // Construct the final, correct URL
+                // Example: /MyLibraryApp/book-images/xyz123.jpg
+                var imagePath = '/book-images/' + book.imageUrl;
+
+                console.log("Constructed Image Path: " + imagePath); // Crucial for debugging
+                console.log("Book Title: " + book.title); // Crucial for debugging
+
+                imageHtml = '<img src="' + imagePath + '" alt="' + (book.title || 'Book cover') + '"' +
+                    ' onerror="this.style.display=\'none\'; this.nextElementSibling.style.display=\'flex\'">' +
+                    '<div class="book-cover-fallback" style="display:none">📚</div>';
+
+                console.log(imageHtml)
             } else {
+                // This handles cases where a book has no image at all
                 imageHtml = '<div class="book-cover-fallback">📚</div>';
             }
+
 
             // Build rating stars
             var rating = book.rating || 0;
@@ -549,7 +558,7 @@
                 '</div>';
         }
 
-        // Enhanced image error handling
+// Enhanced image error handling - Updated for new path structure
         window.handleImageError = function(img, bookTitle, originalPath) {
             imageErrors++;
             updateDebugInfo();
@@ -559,12 +568,12 @@
             var contextPath = '<%= request.getContextPath() %>';
             var imageFileName = originalPath ? originalPath.split('/').pop() : '';
 
-            // Try alternative paths
+            // Updated alternative paths to use the new /book-images/ mapping
             var alternativePaths = [
-                contextPath + '/LibraryProject_war/images/' + imageFileName,
-                '/LibraryProject_war/images/' + imageFileName,
-                './images/' + imageFileName,
-                'images/' + imageFileName
+                contextPath + '/book-images/' + imageFileName,
+                '/book-images/' + imageFileName,
+                contextPath + '/images/' + imageFileName,  // Fallback to old path
+                './images/' + imageFileName
             ];
 
             var currentIndex = img.getAttribute('data-retry-index') || 0;

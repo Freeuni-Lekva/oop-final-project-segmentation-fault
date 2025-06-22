@@ -15,7 +15,7 @@ public class ApplicationProperties {
             "romance", "mystery", "fantasy", "science-fiction",
             "horror", "adventure", "comedy", "memoir", "poetry",
             "philosophy", "psychology", "art", "religion", "politics",
-            "history",
+            "history", "classics", "fiction"
     };
     public static final String GOOGLE_API_URL = "https://www.googleapis.com/books/v1/volumes";
     public static final int BOOKS_PER_REQUEST = 10;
