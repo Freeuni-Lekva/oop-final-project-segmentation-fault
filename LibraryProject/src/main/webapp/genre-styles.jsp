@@ -1,10 +1,3 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: elenejobava
-  Date: 6/22/25
-  Time: 00:35
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <style>
@@ -63,12 +56,29 @@
     .book-cover {
         width: 100%;
         height: 300px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .book-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .book-cover-fallback {
+        width: 100%;
+        height: 100%;
         background: linear-gradient(45deg, #e7edec, #a7cdcd);
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 48px;
         color: white;
+        position: absolute;
+        top: 0;
+        left: 0;
     }
 
     .book-info {
@@ -100,6 +110,7 @@
     .stars {
         color: #ffd700;
         font-size: 14px;
+        font-weight: bold;
     }
 
     .rating-text {
@@ -115,6 +126,21 @@
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;
+        margin-bottom: 12px;
+    }
+
+    .book-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: #718096;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 8px;
+    }
+
+    .book-volume,
+    .book-available {
+        font-weight: 500;
     }
 
     .filter-section {
@@ -140,6 +166,7 @@
         background: white;
         color: #4a5568;
         font-size: 14px;
+        cursor: pointer;
     }
 
     .results-count {
@@ -166,5 +193,78 @@
         width: 16px;
         height: 16px;
         fill: currentColor;
+    }
+
+    /* Loading indicator styles */
+    .loading-indicator {
+        text-align: center;
+        padding: 40px 20px;
+        color: #718096;
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #e2e8f0;
+        border-top: 4px solid #a7cdcd;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Error message styles */
+    .error-message {
+        text-align: center;
+        padding: 40px 20px;
+        color: #e53e3e;
+        background: #fed7d7;
+        border-radius: 8px;
+        margin-top: 20px;
+    }
+
+    /* No books message */
+    .no-books {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 60px 20px;
+        color: #718096;
+        font-size: 18px;
+        background: #f8fafa;
+        border-radius: 8px;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .filter-section {
+            flex-direction: column;
+            gap: 15px;
+            align-items: stretch;
+        }
+
+        .filter-left {
+            justify-content: center;
+        }
+
+        .results-count {
+            text-align: center;
+        }
+
+        .books-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .genre-title {
+            font-size: 28px;
+        }
+
+        .genre-description {
+            font-size: 16px;
+        }
     }
 </style>
