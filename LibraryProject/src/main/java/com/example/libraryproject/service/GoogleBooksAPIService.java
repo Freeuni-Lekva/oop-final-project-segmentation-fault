@@ -32,13 +32,6 @@ public class GoogleBooksAPIService {
     private static final Logger logger = LoggerFactory.getLogger(GoogleBooksAPIService.class);
 
 
-    public static List<String> getRandomGenres(int n) {
-        List<String> genreList = new ArrayList<>(Arrays.asList(GOOGLE_BOOKS_GENRES));
-        Collections.shuffle(genreList);
-        logger.info("Selected genres: {}", genreList.subList(0, n));
-        return genreList.subList(0, n);
-    }
-
     public void fetchAndSaveBooks() {
         if (!bookRepository.findAll().isEmpty()) {
             return;
@@ -153,12 +146,9 @@ public class GoogleBooksAPIService {
 
     HashSet<GoogleBooksResponse> fetchBooks() {
         HashSet<GoogleBooksResponse> allBooks = new HashSet<>();
-        int requestsNeeded = com.example.libraryproject.configuration.ApplicationProperties.TOTAL_BOOKS_TARGET / com.example.libraryproject.configuration.ApplicationProperties.BOOKS_PER_REQUEST;
 
-        List<String> chosenGenres = getRandomGenres(requestsNeeded);
-
-        for (int i = 0; i < requestsNeeded; i++) {
-            HashSet<GoogleBooksResponse> booksFromGenre = fetchBooksFromGenre(chosenGenres.get(i), com.example.libraryproject.configuration.ApplicationProperties.BOOKS_PER_REQUEST);
+        for (String chosenGenre : GOOGLE_BOOKS_GENRES) {
+            HashSet<GoogleBooksResponse> booksFromGenre = fetchBooksFromGenre(chosenGenre, BOOKS_PER_REQUEST);
             allBooks.addAll(booksFromGenre);
         }
         return allBooks;
@@ -168,6 +158,7 @@ public class GoogleBooksAPIService {
         HashSet<GoogleBooksResponse> books = new HashSet<>();
 
         try {
+
             String fullUrl = GOOGLE_API_URL + "?q=subject:" + genre + "&maxResults=" + booksPerRequest;
 
             HttpClient client = HttpClient.newHttpClient();
@@ -180,6 +171,7 @@ public class GoogleBooksAPIService {
             HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
 
             try (InputStream is = response.body();
+
                  JsonReader reader = Json.createReader(is)) {
 
                 JsonObject root = reader.readObject();
@@ -232,6 +224,7 @@ public class GoogleBooksAPIService {
     }
 
     void downloadAndSaveImage(String imageUrl, String title) throws Exception {
+
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(imageUrl))
