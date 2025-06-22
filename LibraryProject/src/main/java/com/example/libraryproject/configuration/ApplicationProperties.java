@@ -12,13 +12,12 @@ public class ApplicationProperties {
     public static final String OBJECT_MAPPER_ATTRIBUTE_NAME = "ObjectMapper";
 
     public static final String[] GOOGLE_BOOKS_GENRES = {
-            "romance", "mystery", "fantasy", "thriller", "science-fiction",
-            "horror", "adventure", "drama", "comedy",
-            "biography", "memoir", "poetry", "philosophy", "psychology",
-            "art", "music", "religion", "politics", "history"
+            "romance", "mystery", "fantasy", "science-fiction",
+            "horror", "adventure", "comedy", "memoir", "poetry",
+            "philosophy", "psychology", "art", "religion", "politics",
+            "history",
     };
     public static final String GOOGLE_API_URL = "https://www.googleapis.com/books/v1/volumes";
-    public static final int TOTAL_BOOKS_TARGET = 100;
     public static final int BOOKS_PER_REQUEST = 10;
     public static final String IMAGE_DIR = System.getProperty("user.dir") + "/src/main/webapp/images/";
 

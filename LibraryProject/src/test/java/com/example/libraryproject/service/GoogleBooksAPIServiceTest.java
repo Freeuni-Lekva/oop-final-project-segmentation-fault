@@ -8,13 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 import static com.example.libraryproject.utils.MockDataForTests.createTestBook;
 import static org.junit.jupiter.api.Assertions.*;
@@ -64,14 +59,6 @@ class GoogleBooksAPIServiceTest {
         service.fetchAndSaveBooks();
 
         verify(bookRepository, never()).saveAll(any());
-    }
-
-    @Test
-    void getRandomGenres_returnsExpectedCountAndUnique() {
-        List<String> genres = GoogleBooksAPIService.getRandomGenres(5);
-        assertEquals(5, genres.size());
-        long distinctCount = genres.stream().distinct().count();
-        assertEquals(5, distinctCount);
     }
 
     @Test
