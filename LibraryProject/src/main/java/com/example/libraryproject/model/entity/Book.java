@@ -19,11 +19,11 @@ public class Book {
     private Long id;
 
     @NonNull
-    @Column(name = "public_id", unique = true, nullable = false, length = 100)
+    @Column(name = "public_id", unique = true, nullable = false)
     private String publicId;
 
     @NonNull
-    @Column(name = "name", unique = true, nullable = false, length = 100)
+    @Column(name = "name", unique = true, nullable = false)
     private String name;
 
     @NonNull

@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static com.example.libraryproject.configuration.ApplicationProperties.*;
 
@@ -159,7 +160,8 @@ public class GoogleBooksAPIService {
 
         try {
 
-            String fullUrl = GOOGLE_API_URL + "?q=subject:" + genre + "&maxResults=" + booksPerRequest;
+            int random = ThreadLocalRandom.current().nextInt(0, GOOGLE_BOOKS_API_MAX_PAGE);
+            String fullUrl = GOOGLE_API_URL + "?q=subject:" + genre + "&startIndex=" + random +  "&maxResults=" + booksPerRequest;
 
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
@@ -239,7 +241,7 @@ public class GoogleBooksAPIService {
 
         String safeTitle = title.replaceAll("[^a-zA-Z0-9.\\-]", "_");
 
-        Path imagesDir = Paths.get(System.getenv("IMAGE_DIR"),"LibraryProject", "images");
+        Path imagesDir = Paths.get(System.getenv("IMAGE_DIR"));
 
         logger.info("Path: {}", imagesDir);
 
