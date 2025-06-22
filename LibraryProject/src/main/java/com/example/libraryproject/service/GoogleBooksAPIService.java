@@ -246,10 +246,12 @@ public class GoogleBooksAPIService {
 
         String safeTitle = title.replaceAll("[^a-zA-Z0-9.\\-]", "_");
 
-        String projectRoot = System.getProperty("user.dir");
-        Path imagesDir = Paths.get(projectRoot, "src", "main", "webapp", "images");
+        Path imagesDir = Paths.get(System.getenv("IMAGE_DIR"),"LibraryProject", "images");
+
+        logger.info("Path: {}", imagesDir);
 
         Files.createDirectories(imagesDir);
+
         Path filePath = imagesDir.resolve(safeTitle + ".jpg");
 
         try (InputStream is = response.body()) {
@@ -257,5 +259,4 @@ public class GoogleBooksAPIService {
             logger.info("Image saved to: {}", filePath);
         }
     }
-
 }
