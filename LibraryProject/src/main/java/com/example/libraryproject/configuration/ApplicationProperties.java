@@ -15,12 +15,12 @@ public class ApplicationProperties {
             "romance", "mystery", "fantasy", "fiction",
             "horror", "adventure", "comedy", "crime", "memoir", "poetry",
             "philosophy", "psychology", "art", "religion", "politics",
-            "history", "classics", "fiction"
+            "history", "classics"
     };
     public static final String GOOGLE_API_URL = "https://www.googleapis.com/books/v1/volumes";
     public static final int BOOKS_PER_REQUEST = 10;
     public static final String IMAGE_DIR = System.getProperty("user.dir") + "/src/main/webapp/images/";
-    public static final int GOOGLE_BOOKS_API_MAX_PAGE = 180;
+    public static final int GOOGLE_BOOKS_API_MAX_PAGE = 150;
 
     public static final int DEFAULT_RATING = 3;
     public static final int RECOMMENDED_COUNT = 3;

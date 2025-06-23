@@ -109,7 +109,7 @@ public class GoogleBooksAPIService {
 
                 String genre = "Unknown";
 
-                String safeTitle = bookTitle.replaceAll("[^a-zA-Z0-9.\\-ა-ჰ]", "_");
+                String safeTitle = bookTitle.replaceAll("[^a-zA-Z0-9.\\-]", "_");
                 String thumbnail = null;
                 JsonObject imageLinks = volumeInfo.getJsonObject("imageLinks");
                 if (imageLinks != null) {

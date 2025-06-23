@@ -31,7 +31,7 @@
     .genre-title {
         font-family: 'Playfair Display', serif;
         font-size: 2.8rem;
-        font-weight: 600;
+        font-weight: 400;
         margin: 0;
         color: #ffffff;
         letter-spacing: -0.5px;
