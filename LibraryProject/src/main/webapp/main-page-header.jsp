@@ -46,6 +46,10 @@
                 <a href="genre-books.jsp?genre=horror" class="dropdown-item">Horror</a>
                 <a href="genre-books.jsp?genre=history" class="dropdown-item">History</a>
                 <a href="genre-books.jsp?genre=poetry" class="dropdown-item">Poetry</a>
+                <a href="genre-books.jsp?genre=adventure" class="dropdown-item">Adventure</a>
+                <a href="genre-books.jsp?genre=comedy" class="dropdown-item">Comedy</a>
+                <a href="genre-books.jsp?genre=philosophy" class="dropdown-item">Philosophy</a>
+                <a href="genre-books.jsp?genre=psychology" class="dropdown-item">Psychology</a>
             </div>
         </div>
 

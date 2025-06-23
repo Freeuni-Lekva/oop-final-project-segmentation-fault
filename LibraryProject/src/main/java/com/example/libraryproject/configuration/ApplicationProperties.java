@@ -12,8 +12,8 @@ public class ApplicationProperties {
     public static final String OBJECT_MAPPER_ATTRIBUTE_NAME = "ObjectMapper";
 
     public static final String[] GOOGLE_BOOKS_GENRES = {
-            "romance", "mystery", "fantasy", "science-fiction",
-            "horror", "adventure", "comedy", "memoir", "poetry",
+            "romance", "mystery", "fantasy", "fiction",
+            "horror", "adventure", "comedy", "crime", "memoir", "poetry",
             "philosophy", "psychology", "art", "religion", "politics",
             "history", "classics", "fiction"
     };

@@ -85,8 +85,44 @@
 
     Map<String, String> poetry = new HashMap<>();
     poetry.put("name", "Poetry");
-    poetry.put("description", "Practical guides and motivational content to help you improve various aspects of your life, career, and personal development.");
+    poetry.put("description", "Poetry distills human emotion, experience, and thought into rhythmic, expressive language. Through verse, poets capture beauty, pain, love, and truth in ways that challenge, inspire, and move readers.");
     genreData.put("poetry", poetry);
+
+    Map<String, String> adventure = new HashMap<>();
+    adventure.put("name", "Adventure");
+    adventure.put("description", "Adventure stories are driven by action, risk, and excitement. Whether through treacherous journeys, uncharted lands, or daring missions, this genre celebrates courage, survival, and the thrill of the unknown.");
+    genreData.put("adventure", adventure);
+
+    Map<String, String> comedy = new HashMap<>();
+    comedy.put("name", "Comedy");
+    comedy.put("description", "Comedy is a genre crafted to entertain and provoke laughter. It highlights the absurdities of life and human behavior, often using wit, satire, and clever dialogue to explore serious topics through humor.");
+    genreData.put("comedy", comedy);
+
+    Map<String, String> philosophy = new HashMap<>();
+    philosophy.put("name", "Philosophy");
+    philosophy.put("description", "Philosophy delves into fundamental questions about existence, knowledge, ethics, and meaning. These works encourage critical thinking, reflection, and exploration of ideas that shape human understanding.");
+    genreData.put("philosophy", philosophy);
+
+    Map<String, String> psychology = new HashMap<>();
+    psychology.put("name", "Psychology");
+    psychology.put("description", "Psychology examines the human mind and behavior. This genre explores topics such as cognition, emotion, development, and mental health, providing insights into what drives thought and action.");
+    genreData.put("psychology", psychology);
+
+    Map<String, String> art = new HashMap<>();
+    art.put("name", "Art");
+    art.put("description", "Art books explore creativity, expression, and aesthetics through visual mediums. Covering everything from technique to history and theory, they celebrate human imagination across cultures and eras.");
+    genreData.put("art", art);
+
+    Map<String, String> religion = new HashMap<>();
+    religion.put("name", "Religion");
+    religion.put("description", "Religion books reflect humanity’s search for meaning, connection, and transcendence. They explore beliefs, traditions, sacred texts, and spiritual practices across diverse faiths and cultures.");
+    genreData.put("religion", religion);
+
+    Map<String, String> politics = new HashMap<>();
+    politics.put("name", "Politics");
+    politics.put("description", "Politics as a genre engages with power, governance, ideologies, and public life. These works investigate systems, policies, leaders, and social change, shaping how we understand and influence the world.");
+    genreData.put("politics", politics);
+
 
     request.setAttribute("genreData", genreData);
 %>
