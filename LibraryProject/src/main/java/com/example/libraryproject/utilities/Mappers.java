@@ -12,6 +12,8 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Random;
 
+import static com.example.libraryproject.configuration.ApplicationProperties.DEFAULT_RATING;
+
 public class Mappers {
 
     public static User mapRequestToUser(RegistrationRequest userRequest) {
@@ -57,7 +59,7 @@ public class Mappers {
         book.setVolume(googleBooksResponse.volume());
         Random random = new Random();
         book.setAmountInLib(random.nextLong(2,15));
-        book.setRating(0L);
+        book.setRating((long) DEFAULT_RATING);
 
         return book;
     }
