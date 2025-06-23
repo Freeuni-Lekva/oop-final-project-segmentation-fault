@@ -1,6 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="java.util.HashMap" %>
 <%@ include file="genre-data.jsp" %>
 <%
     String genre = request.getParameter("genre");
@@ -24,7 +23,7 @@
 </head>
 <body>
 
-<div class="genre-header">
+<div class="genre-header" style="background-image: url('images/<%= genre.replaceAll("[^a-zA-Z0-9_-]", "") %>.jpg');">
     <h1 class="genre-title"><%= genreDisplay %></h1>
     <p class="genre-description"><%= genreDescription %></p>
 </div>
