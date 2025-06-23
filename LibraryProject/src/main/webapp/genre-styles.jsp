@@ -15,10 +15,10 @@
     .genre-header {
         position: relative;
         width: 100%;
-        height: 190px;
+        height: 300px;
         background-image: url('images/image1.jpg');
         background-size: cover;
-        background-position: center 25%;
+        background-position: center 28%;
         background-repeat: no-repeat;
         overflow: hidden;
         display: flex;
