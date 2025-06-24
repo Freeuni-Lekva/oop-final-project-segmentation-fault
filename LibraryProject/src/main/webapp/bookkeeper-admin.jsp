@@ -234,7 +234,7 @@
       const volume = document.getElementById('volume').value.trim();
       const description = document.getElementById('description').value.trim();
       const currentAmount = document.getElementById('amount').value.trim();
-      const originalAmount = document.getElementById('originalAmount').value().trim;
+      const originalAmount = document.getElementById('originalAmount').value.trim();
       const fileInput = document.getElementById('bookImage');
       const imageFile = fileInput.files[0];
 
