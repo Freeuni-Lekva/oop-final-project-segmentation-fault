@@ -52,7 +52,7 @@ class GoogleBooksAPIServiceTest {
     @Test
     void fetchAndSaveBooks_whenRepositoryNotEmpty_doesNotSave() {
 
-        Book book1 = createTestBook("The Murder of Roger Ackroyd", "Agatha Christie", "Mystery", 5L, 5L, "theMurderOfRogerAckroyd.jph");
+        Book book1 = createTestBook("The Murder of Roger Ackroyd", "Agatha Christie", "Mystery", 5L, 5L, 5L,"theMurderOfRogerAckroyd.jph");
 
         when(bookRepository.findAll()).thenReturn(List.of(book1));
 

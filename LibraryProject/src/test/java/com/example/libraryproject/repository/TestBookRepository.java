@@ -44,7 +44,7 @@ public class TestBookRepository {
     @Test
     @DisplayName("Should save a new book successfully")
     void testSaveBook() {
-        Book book = createTestBook("Wuthering Heights", "Emily Bronte", "Classic", 5L, 10L, "wutheringHeights.jpg");
+        Book book = createTestBook("Wuthering Heights", "Emily Bronte", "Classic", 5L, 10L, 10L,"wutheringHeights.jpg");
         assertDoesNotThrow(() -> bookRepository.save(book));
         assertNotNull(book.getId());
         Optional<Book> savedBook = bookRepository.findById(book.getId());
@@ -54,6 +54,7 @@ public class TestBookRepository {
         assertEquals("Classic", savedBook.get().getGenre());
         assertEquals(5L, savedBook.get().getRating());
         assertEquals(10L, savedBook.get().getAmountInLib());
+        assertEquals(10L, savedBook.get().getCopiesInLib());
     }
 
     @Test
@@ -67,7 +68,7 @@ public class TestBookRepository {
     @Test
     @DisplayName("Should find book by ID")
     void testFindById() {
-        Book book = createTestBook("The Count of Monte Cristo", "Alexandre Dumas", "Historical", 5L, 10L, "countOfMonteCristo.jpg");
+        Book book = createTestBook("The Count of Monte Cristo", "Alexandre Dumas", "Historical", 5L, 10L, 20L,"countOfMonteCristo.jpg");
         bookRepository.save(book);
         Optional<Book> foundBook = bookRepository.findById(book.getId());
         assertTrue(foundBook.isPresent());
@@ -85,7 +86,7 @@ public class TestBookRepository {
     @Test
     @DisplayName("Should find book by title")
     void testFindByTitle() {
-        Book book = createTestBook("White Nights", "Fyodor Dostoevsky", "Romantic fiction", 5L, 2L, "whiteNights.jpg");
+        Book book = createTestBook("White Nights", "Fyodor Dostoevsky", "Romantic fiction", 5L, 2L, 10L,"whiteNights.jpg");
         bookRepository.save(book);
         Optional<Book> foundBook = bookRepository.findByTitle("White Nights");
 
@@ -104,9 +105,9 @@ public class TestBookRepository {
     @Test
     @DisplayName("Should find books by author")
     void testFindByAuthor() {
-        Book book1 = createTestBook("The Hobbit", "J.R.R. Tolkien", "Fantasy", 5L, 3L, "theHobbit.jpg");
-        Book book2 = createTestBook("The Lord of the Rings", "J.R.R. Tolkien", "Fantasy", 5L, 2L, "theLordOfTheRings.jpg");
-        Book book3 = createTestBook("The Chronicles of Narnia", "C.S. Lewis", "Fantasy", 4L, 4L, "theChroniclesOfNarnia.jpg");
+        Book book1 = createTestBook("The Hobbit", "J.R.R. Tolkien", "Fantasy", 5L, 3L, 5L,"theHobbit.jpg");
+        Book book2 = createTestBook("The Lord of the Rings", "J.R.R. Tolkien", "Fantasy", 5L, 2L, 5L,"theLordOfTheRings.jpg");
+        Book book3 = createTestBook("The Chronicles of Narnia", "C.S. Lewis", "Fantasy", 4L, 4L, 5L,"theChroniclesOfNarnia.jpg");
 
         bookRepository.save(book1);
         bookRepository.save(book2);
@@ -121,8 +122,8 @@ public class TestBookRepository {
     @Test
     @DisplayName("Should find books by genre")
     void testFindByGenre() {
-        Book book1 = createTestBook("The Murder of Roger Ackroyd", "Agatha Christie", "Mystery", 5L, 5L, "theMurderOfRogerAckroyd.jph");
-        Book book2 = createTestBook("The Golden Compass", "Philip Pullman", "Fantasy", 5L, 10L, "theGoldernCompass.jpg");
+        Book book1 = createTestBook("The Murder of Roger Ackroyd", "Agatha Christie", "Mystery", 5L, 5L, 5L,"theMurderOfRogerAckroyd.jph");
+        Book book2 = createTestBook("The Golden Compass", "Philip Pullman", "Fantasy", 5L, 10L, 5L,"theGoldernCompass.jpg");
 
         bookRepository.save(book1);
         bookRepository.save(book2);
@@ -135,9 +136,9 @@ public class TestBookRepository {
     @Test
     @DisplayName("Should find all books")
     void testFindAll() {
-        Book book1 = createTestBook("Book One", "Author One", "Genre One", 3L, 1L, "bookone.jpg");
-        Book book2 = createTestBook("Book Two", "Author Two", "Genre Two", 4L, 2L, "booktwo.jpg");
-        Book book3 = createTestBook("Book Three", "Author Three", "Genre Three", 5L, 3L, "bookthree.jpg");
+        Book book1 = createTestBook("Book One", "Author One", "Genre One", 3L, 1L, 5L,"bookone.jpg");
+        Book book2 = createTestBook("Book Two", "Author Two", "Genre Two", 4L, 2L, 5L,"booktwo.jpg");
+        Book book3 = createTestBook("Book Three", "Author Three", "Genre Three", 5L, 3L, 5L,"bookthree.jpg");
 
         bookRepository.save(book1);
         bookRepository.save(book2);
@@ -149,7 +150,7 @@ public class TestBookRepository {
     @Test
     @DisplayName("Should update book successfully")
     void testUpdateBook() {
-        Book book = createTestBook("Original Title", "Original Author", "Original Genre", 3L, 5L, "original.jpg");
+        Book book = createTestBook("Original Title", "Original Author", "Original Genre", 3L, 5L, 5L,"original.jpg");
         bookRepository.save(book);
         book.setName("Updated Title");
         book.setAuthor("Updated Author");
@@ -166,7 +167,7 @@ public class TestBookRepository {
     @Test
     @DisplayName("Should delete book successfully")
     void testDeleteBook() {
-        Book book = createTestBook("Book to Delete", "Author", "Genre", 3L, 1L, "deleteBook.jpg");
+        Book book = createTestBook("Book to Delete", "Author", "Genre", 3L, 1L, 5L,"deleteBook.jpg");
         bookRepository.save(book);
         Long bookId = book.getId();
 
@@ -180,7 +181,7 @@ public class TestBookRepository {
     @Test
     @DisplayName("Should handle exception during delete and rollback transaction")
     void testDeleteWithException() {
-        Book detachedBook = createTestBook("Book", "Author", "Genre", 3L, 1L, "detachedBook.jpg");
+        Book detachedBook = createTestBook("Book", "Author", "Genre", 3L, 1L, 5L,"detachedBook.jpg");
 
         try {
             java.lang.reflect.Field idField = Book.class.getDeclaredField("id");
@@ -235,7 +236,7 @@ public class TestBookRepository {
     @Test
     @DisplayName("Should find books with case sensitive search")
     void testCaseSensitiveSearch() {
-        Book book = createTestBook("Test Book", "Test Author", "Test Genre", 3L, 1L, "testBook.jpg");
+        Book book = createTestBook("Test Book", "Test Author", "Test Genre", 3L, 1L, 5L,"testBook.jpg");
         bookRepository.save(book);
 
         Optional<Book> foundBook = bookRepository.findByTitle("test book");
@@ -251,7 +252,7 @@ public class TestBookRepository {
     @Test
     @DisplayName("Should handle special characters in search")
     void testSpecialCharactersInSearch() {
-        Book book = createTestBook("Book's Title", "O'Connor", "Sci-Fi", 4L, 2L, "bookTitle.jpg");
+        Book book = createTestBook("Book's Title", "O'Connor", "Sci-Fi", 4L, 2L, 5L,"bookTitle.jpg");
         bookRepository.save(book);
 
         Optional<Book> foundBook = bookRepository.findByTitle("Book's Title");

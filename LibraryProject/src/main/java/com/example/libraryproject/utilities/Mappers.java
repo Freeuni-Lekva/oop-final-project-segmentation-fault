@@ -11,6 +11,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static com.example.libraryproject.configuration.ApplicationProperties.DEFAULT_RATING;
 
@@ -57,8 +58,9 @@ public class Mappers {
 
         book.setGenre(googleBooksResponse.genre());
         book.setVolume(googleBooksResponse.volume());
-        Random random = new Random();
-        book.setAmountInLib(random.nextLong(2,15));
+        long initialCopies = ThreadLocalRandom.current().nextLong(2, 16);
+        book.setAmountInLib(initialCopies);
+        book.setCopiesInLib(initialCopies);
         book.setRating((long) DEFAULT_RATING);
 
         return book;

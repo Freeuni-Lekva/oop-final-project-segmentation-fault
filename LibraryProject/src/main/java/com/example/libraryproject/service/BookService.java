@@ -31,6 +31,8 @@ public class BookService {
                 book.getGenre(),
                 book.getAuthor(),
                 book.getImageUrl(),
+                book.getCopiesInLib(),
+                book.getAmountInLib(),
                 book.getVolume(),
                 book.getRating()
         );
@@ -45,6 +47,8 @@ public class BookService {
                         book.getGenre(),
                         book.getAuthor(),
                         book.getImageUrl(),
+                        book.getCopiesInLib(),
+                        book.getAmountInLib(),
                         book.getVolume(),
                         book.getRating()
                 )
@@ -60,6 +64,8 @@ public class BookService {
                         book.getGenre(),
                         book.getAuthor(),
                         book.getImageUrl(),
+                        book.getCopiesInLib(),
+                        book.getAmountInLib(),
                         book.getVolume(),
                         book.getRating()
                 )
@@ -77,6 +83,8 @@ public class BookService {
                                 book.getGenre(),
                                 book.getAuthor(),
                                 book.getImageUrl(),
+                                book.getCopiesInLib(),
+                                book.getAmountInLib(),
                                 book.getVolume(),
                                 book.getRating()
                         )
