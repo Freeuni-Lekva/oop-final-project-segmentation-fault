@@ -56,6 +56,10 @@ public class Book {
     private Long amountInLib;
 
     @NonNull
+    @Column(name = "copies_in_library")
+    private Long copiesInLib;
+
+    @NonNull
     @Column(name = "rating")
     private Long rating;
 
@@ -74,6 +78,7 @@ public class Book {
                 ", volume=" + volume +
                 ", reviews=" + reviews +
                 ", amountInLib=" + amountInLib +
+                ", copiesInLib=" + copiesInLib +
                 ", rating=" + rating +
                 '}';
     }

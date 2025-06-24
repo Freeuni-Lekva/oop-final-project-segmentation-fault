@@ -46,7 +46,7 @@ public class UserServiceTest {
                 "Author A",
                 LocalDate.of(2020, 5, 10),
                 "A gripping tale of magic and destiny.",
-                1L, 1L, 4L, ""
+                300L, 1L, 1L, 4L, ""
         );
 
         book2 = new Book(
@@ -56,7 +56,7 @@ public class UserServiceTest {
                 "Author A",
                 LocalDate.of(2021, 6, 15),
                 "The saga continues with greater peril.",
-                2L, 0L, 5L, ""
+                300L, 2L, 0L, 5L, ""
         );
 
         book3 = new Book(
@@ -66,7 +66,7 @@ public class UserServiceTest {
                 "Author A",
                 LocalDate.of(2019, 4, 20),
                 "Ancient secrets resurface to test the realm.",
-                3L, 3L, 3L, ""
+                300L, 3L, 3L, 3L, ""
         );
 
         user = new User("rezi", "1234");

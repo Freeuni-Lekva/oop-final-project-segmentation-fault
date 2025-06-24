@@ -146,8 +146,10 @@
             var bookTitle = book.title || 'Unknown Title';
             var bookAuthor = book.author || 'Unknown Author';
             var bookDescription = book.description || '';
-            var totalCopies = book.totalCopies || 0;
-            var availableCopies = book.availableCopies || 0;
+            var currentAmount = book.currentAmount || 0;
+            var originalAmount = book.originalAmount || 0;
+
+
 
             var ratingHtml = '';
             if (rating > 0) {
@@ -162,12 +164,10 @@
                 descriptionHtml = '<p class="book-summary">' + bookDescription + '</p>';
             }
 
-            var availabilityClass = availableCopies > 0 ? 'available' : 'unavailable';
-            var availabilityText = availableCopies !== undefined ?
-                (availableCopies > 0 ? availableCopies + ' available' : 'Not available') :
-                'Availability unknown';
+            var availabilityClass = currentAmount > 0 ? 'available' : 'unavailable';
 
-            var volumeText = totalCopies ? totalCopies + ' copies' : 'Volume info N/A';
+            var totalCopiesText = originalAmount > 0 ? originalAmount + ' total copies' : 'No copies';
+            var currentCopiesText = currentAmount > 0 ? currentAmount + ' available' : 'None available';
 
             return '<div class="book-card" onclick="viewBookDetails(\'' + bookId + '\')">' +
                 '<div class="book-cover">' + imageHtml + '</div>' +
@@ -177,8 +177,8 @@
                 ratingHtml +
                 descriptionHtml +
                 '<div class="book-meta">' +
-                '<span class="book-volume">' + volumeText + '</span>' +
-                '<span class="book-available ' + availabilityClass + '">' + availabilityText + '</span>' +
+                '<span class="book-total-copies">' + totalCopiesText + '</span>' +
+                '<span class="book-available ' + availabilityClass + '">' + currentCopiesText + '</span>' +
                 '</div>' +
                 '</div>' +
                 '</div>';
@@ -207,7 +207,7 @@
                     break;
                 case 'available':
                     filteredBooks.sort(function(a, b) {
-                        return (b.availableCopies || 0) - (a.availableCopies || 0);
+                        return (b.amount || 0) - (a.amount || 0);
                     });
                     break;
             }

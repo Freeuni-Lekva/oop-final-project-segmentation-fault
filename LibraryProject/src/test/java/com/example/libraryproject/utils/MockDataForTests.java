@@ -6,7 +6,7 @@ import java.time.LocalDate;
 
 public class MockDataForTests {
 
-    public static  Book createTestBook(String name, String author, String genre, Long rating, Long amount, String imageUrl) {
+    public static  Book createTestBook(String name, String author, String genre, Long rating, Long originalAmount, Long currentAmount, String imageUrl) {
         return new Book(
                 name.replaceAll("[^a-zA-Z0-9.\\-]", "_"),
                 name,
@@ -15,7 +15,8 @@ public class MockDataForTests {
                 LocalDate.of(2023, 4, 1),
                 "Test description for " + name,
                 300L,
-                amount,
+                originalAmount,
+                currentAmount,
                 rating,
                 imageUrl
         );
