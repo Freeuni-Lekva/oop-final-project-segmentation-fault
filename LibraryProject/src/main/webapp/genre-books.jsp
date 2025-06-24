@@ -207,7 +207,7 @@
                     break;
                 case 'available':
                     filteredBooks.sort(function(a, b) {
-                        return (b.amount || 0) - (a.amount || 0);
+                        return (b.currentAmount || 0) - (a.currentAmount || 0);
                     });
                     break;
             }

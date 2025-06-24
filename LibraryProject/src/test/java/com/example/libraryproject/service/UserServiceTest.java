@@ -56,7 +56,7 @@ public class UserServiceTest {
                 "Author A",
                 LocalDate.of(2021, 6, 15),
                 "The saga continues with greater peril.",
-                300L, 2L, 0L, 5L, ""
+                300L, 0L, 2L, 5L, ""
         );
 
         book3 = new Book(
@@ -84,7 +84,7 @@ public class UserServiceTest {
         // Mock for non-existent entities
         when(userRepository.findByUsername("nonexistent")).thenReturn(Optional.empty());
         when(bookRepository.findByPublicId("nonexistent")).thenReturn(Optional.empty());
-        
+
         // Mock OrderRepository
         when(orderRepository.findOrdersByUserId(1L)).thenReturn(new HashSet<>());
     }
@@ -118,19 +118,19 @@ public class UserServiceTest {
                 user,
                 book1
         );
-        
+
         Set<Order> userOrders = new HashSet<>();
         userOrders.add(mockOrder);
-        
+
         // Mock OrderRepository
         when(orderRepository.findOrdersByUserId(1L)).thenReturn(userOrders);
-        
+
         // Test successful cancellation
         assertDoesNotThrow(() -> userService.cancelReservation(user.getUsername(), book1.getPublicId()));
 
         //return empty set for not reserved book
         when(orderRepository.findOrdersByUserId(1L)).thenReturn(new HashSet<>());
-        
+
         // Test cancellation when book is not reserved
         assertThrows(IllegalStateException.class,
                 () -> userService.cancelReservation(user.getUsername(), book3.getPublicId()));
