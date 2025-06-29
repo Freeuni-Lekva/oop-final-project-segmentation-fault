@@ -17,12 +17,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.*;
 
 import static com.example.libraryproject.configuration.ApplicationProperties.*;
 
@@ -31,14 +28,14 @@ public class GoogleBooksAPIService {
 
     private final BookRepository bookRepository;
     private static final Logger logger = LoggerFactory.getLogger(GoogleBooksAPIService.class);
-
+    private static final HttpClient httpClient = HttpClient.newHttpClient();
 
     public void fetchAndSaveBooks() {
         if (!bookRepository.findAll().isEmpty()) {
             return;
         }
 
-        HashSet<GoogleBooksResponse> googleBooks = fetchBooks();
+        Set<GoogleBooksResponse> googleBooks = fetchBooks();
         List<Book> books = googleBooks.stream()
                 .map(Mappers::mapGoogleBookToBook)
                 .toList();
@@ -46,7 +43,6 @@ public class GoogleBooksAPIService {
         bookRepository.saveAll(books);
     }
 
-    // Fetch and saves just a single book by title and author
     public boolean fetchBook(BookAdditionFromGoogleRequest request) {
         Book book = getBookFromGoogle(request.title(), request.author());
         if(book == null) {
@@ -70,16 +66,13 @@ public class GoogleBooksAPIService {
 
             query += "&maxResults=1";
 
-
-
-            HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(query))
                     .header("User-Agent", "LibraryProject/1.0")
                     .GET()
                     .build();
 
-            HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
 
             try (InputStream is = response.body(); JsonReader reader = Json.createReader(is)) {
                 JsonObject root = reader.readObject();
@@ -145,37 +138,47 @@ public class GoogleBooksAPIService {
     }
 
 
-    HashSet<GoogleBooksResponse> fetchBooks() {
-        HashSet<GoogleBooksResponse> allBooks = new HashSet<>();
+    Set<GoogleBooksResponse> fetchBooks() {
+        Set<GoogleBooksResponse> allBooks = ConcurrentHashMap.newKeySet();
+        ExecutorService executor = Executors.newFixedThreadPool(Math.min(10, GOOGLE_BOOKS_GENRES.length));
+        List<Callable<Void>> tasks = new ArrayList<>();
 
-        for (String chosenGenre : GOOGLE_BOOKS_GENRES) {
-            HashSet<GoogleBooksResponse> booksFromGenre = fetchBooksFromGenre(chosenGenre, BOOKS_PER_REQUEST);
-            allBooks.addAll(booksFromGenre);
+        for (String genre : GOOGLE_BOOKS_GENRES) {
+            tasks.add(() -> {
+                Set<GoogleBooksResponse> genreBooks = fetchBooksFromGenre(genre, BOOKS_PER_REQUEST);
+                allBooks.addAll(genreBooks);
+                return null;
+            });
+        }
+
+        try {
+            executor.invokeAll(tasks);
+        } catch (InterruptedException e) {
+            logger.error("Parallel genre fetching interrupted: {}", e.getMessage());
+            Thread.currentThread().interrupt();
+        } finally {
+            executor.shutdown();
         }
         return allBooks;
     }
 
-    HashSet<GoogleBooksResponse> fetchBooksFromGenre(String genre, int booksPerRequest) {
-        HashSet<GoogleBooksResponse> books = new HashSet<>();
+    Set<GoogleBooksResponse> fetchBooksFromGenre(String genre, int booksPerRequest) {
+        Set<GoogleBooksResponse> books = new HashSet<>();
 
         try {
 
             int random = ThreadLocalRandom.current().nextInt(0, GOOGLE_BOOKS_API_MAX_PAGE);
             String fullUrl = GOOGLE_API_URL + "?q=subject:" + genre + "&startIndex=" + random +  "&maxResults=" + booksPerRequest;
 
-            HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(fullUrl))
                     .header("User-Agent", "LibraryProject/1.0")
                     .GET()
                     .build();
 
-            HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
 
-            try (InputStream is = response.body();
-
-                 JsonReader reader = Json.createReader(is)) {
-
+            try (InputStream is = response.body(); JsonReader reader = Json.createReader(is)) {
                 JsonObject root = reader.readObject();
                 JsonArray items = root.getJsonArray("items");
 
@@ -200,7 +203,7 @@ public class GoogleBooksAPIService {
                         author = authors.getString(0);
                     }
                     String safeTitle = title.replaceAll("[^a-zA-Z0-9.\\-]", "_");
-                    String thumbnail;
+                    String thumbnail = null;
                     JsonObject imageLinks = volumeInfo.getJsonObject("imageLinks");
                     if (imageLinks != null) {
                         thumbnail = imageLinks.getString("thumbnail", null);
@@ -208,13 +211,22 @@ public class GoogleBooksAPIService {
                             try {
                                 downloadAndSaveImage(thumbnail, safeTitle);
                             } catch (Exception ex) {
-                                System.err.printf("Failed to download thumbnail for '%s': %s%n", title, ex.getMessage());
+                                logger.warn("Failed to download image for '{}': {}", title, ex.getMessage());
                             }
                         }
                     }
 
-                    books.add(new GoogleBooksResponse(title, publishedDate, author, description, safeTitle + ".jpg", genre, pageCount));
-                    logger.info("added {} to books table",  title);
+                    books.add(new GoogleBooksResponse(
+                            title,
+                            publishedDate,
+                            author,
+                            description,
+                            (thumbnail != null ? safeTitle + ".jpg" : "NOT_FOUND"),
+                            genre,
+                            pageCount
+                    ));
+
+                    logger.info("Added '{}' to books set", title);
                 }
             }
 
@@ -226,15 +238,13 @@ public class GoogleBooksAPIService {
     }
 
     void downloadAndSaveImage(String imageUrl, String title) throws Exception {
-
-        HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(imageUrl))
                 .header("User-Agent", "Mozilla/5.0")
                 .GET()
                 .build();
 
-        HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+        HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
 
         if (response.statusCode() != 200) {
             logger.info("Image download failed");
@@ -242,13 +252,8 @@ public class GoogleBooksAPIService {
         }
 
         String safeTitle = title.replaceAll("[^a-zA-Z0-9.\\-]", "_");
-
         Path imagesDir = Paths.get(System.getenv("IMAGE_DIR"));
-
-        logger.info("Path: {}", imagesDir);
-
         Files.createDirectories(imagesDir);
-
         Path filePath = imagesDir.resolve(safeTitle + ".jpg");
 
         try (InputStream is = response.body()) {
