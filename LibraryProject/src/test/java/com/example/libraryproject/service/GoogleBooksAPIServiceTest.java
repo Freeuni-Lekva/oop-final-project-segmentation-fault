@@ -53,10 +53,6 @@ class GoogleBooksAPIServiceTest {
         assertEquals("Fake Title", savedBooks.getFirst().getName());
     }
 
-    @Test
-    void downloadAndSaveImage_downloadsImages() {
-
-    }
 
     @Test
     void fetchAndSaveBooks_whenRepositoryNotEmpty_doesNotSave() {
