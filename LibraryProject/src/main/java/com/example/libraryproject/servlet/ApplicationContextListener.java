@@ -61,7 +61,7 @@ public class ApplicationContextListener implements ServletContextListener {
             logger.info("Hibernate schema created or validated successfully.");
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Failed to initialize Hibernate schema", e);
             throw new RuntimeException("Failed to initialize Hibernate schema", e);
         }
     }
