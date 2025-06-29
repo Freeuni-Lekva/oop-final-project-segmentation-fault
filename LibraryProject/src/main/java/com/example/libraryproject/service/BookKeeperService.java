@@ -130,7 +130,11 @@ public class BookKeeperService {
         String submittedFileName = Path.of(filePart.getSubmittedFileName()).getFileName().toString();
         String safeFileName = submittedFileName.replaceAll("[^a-zA-Z0-9.\\-]", "_");
 
-        Path imagesDir = Paths.get(System.getenv("IMAGE_DIR"));
+        String imageDirEnv = System.getenv("IMAGE_DIR");
+        if (imageDirEnv == null || imageDirEnv.isBlank()) {
+            throw new IllegalStateException("Environment variable 'IMAGE_DIR' is not set or is empty. Please configure it to specify the image directory.");
+        }
+        Path imagesDir = Paths.get(imageDirEnv);
         if (!Files.exists(imagesDir)) {
             Files.createDirectories(imagesDir);
         }
