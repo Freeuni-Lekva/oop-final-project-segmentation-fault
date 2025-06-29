@@ -19,7 +19,6 @@ public class ApplicationProperties {
     };
     public static final String GOOGLE_API_URL = "https://www.googleapis.com/books/v1/volumes";
     public static final int BOOKS_PER_REQUEST = 10;
-    public static final String IMAGE_DIR = System.getProperty("user.dir") + "/src/main/webapp/images/";
     public static final int GOOGLE_BOOKS_API_MAX_PAGE = 150;
 
     public static final int DEFAULT_RATING = 3;

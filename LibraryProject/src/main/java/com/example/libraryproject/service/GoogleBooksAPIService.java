@@ -230,12 +230,14 @@ public class GoogleBooksAPIService {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(imageUrl))
+                .header("User-Agent", "Mozilla/5.0")
                 .GET()
                 .build();
 
         HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
 
         if (response.statusCode() != 200) {
+            logger.info("Image download failed");
             throw new RuntimeException("Image download failed with status: " + response.statusCode());
         }
 
