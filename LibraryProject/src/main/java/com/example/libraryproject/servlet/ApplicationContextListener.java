@@ -8,6 +8,8 @@ import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
 import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.example.libraryproject.configuration.ApplicationProperties.*;
 
@@ -15,6 +17,7 @@ import static com.example.libraryproject.configuration.ApplicationProperties.*;
 @WebListener
 public class ApplicationContextListener implements ServletContextListener {
 
+    private static final Logger logger = LoggerFactory.getLogger(ApplicationContextListener.class);
 
     @Override
     public void contextInitialized(ServletContextEvent event) {
@@ -27,14 +30,8 @@ public class ApplicationContextListener implements ServletContextListener {
             OrderRepository orderRepository = new OrderRepository(sessionFactory);
             ReviewRepository reviewRepository = new ReviewRepository(sessionFactory);
 
-            GoogleBooksAPIService googleBooksAPIService = new GoogleBooksAPIService(bookRepository);
-            Thread fetcherThread = new Thread(googleBooksAPIService::fetchAndSaveBooks);
-            fetcherThread.setDaemon(true);
-            fetcherThread.start();
-
             AuthorizationService authorizationService = new AuthorizationService(userRepository, bookKeeperRepository);
             event.getServletContext().setAttribute(AUTHORIZATION_SERVICE_ATTRIBUTE_NAME, authorizationService);
-
 
             BookKeeperService bookKeeperService = new BookKeeperService(bookRepository, userRepository, orderRepository);
             event.getServletContext().setAttribute(BOOKKEEPER_SERVICE_ATTRIBUTE_NAME, bookKeeperService);
@@ -55,11 +52,17 @@ public class ApplicationContextListener implements ServletContextListener {
             ObjectMapper objectMapper = new ObjectMapper();
             event.getServletContext().setAttribute(OBJECT_MAPPER_ATTRIBUTE_NAME, objectMapper);
 
-            System.out.println("✅ Hibernate schema created or validated successfully.");
+            GoogleBooksAPIService googleBooksAPIService = new GoogleBooksAPIService(bookRepository);
+            event.getServletContext().setAttribute(GOOGLE_BOOKS_API_ATTRIBUTE_NAME, googleBooksAPIService);
+            Thread fetcherThread = new Thread(googleBooksAPIService::fetchAndSaveBooks);
+            fetcherThread.setDaemon(true);
+            fetcherThread.start();
+
+            logger.info("Hibernate schema created or validated successfully.");
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("❌ Failed to initialize Hibernate schema", e);
+            throw new RuntimeException("Failed to initialize Hibernate schema", e);
         }
     }
 

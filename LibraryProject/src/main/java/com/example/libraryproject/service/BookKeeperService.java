@@ -25,8 +25,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.example.libraryproject.configuration.ApplicationProperties.IMAGE_DIR;
-
 @RequiredArgsConstructor
 public class BookKeeperService {
 
@@ -132,7 +130,7 @@ public class BookKeeperService {
         String submittedFileName = Path.of(filePart.getSubmittedFileName()).getFileName().toString();
         String safeFileName = submittedFileName.replaceAll("[^a-zA-Z0-9.\\-]", "_");
 
-        Path imagesDir = Paths.get(IMAGE_DIR);
+        Path imagesDir = Paths.get(System.getenv("IMAGE_DIR"));
         if (!Files.exists(imagesDir)) {
             Files.createDirectories(imagesDir);
         }
