@@ -1,5 +1,6 @@
 package com.example.libraryproject.service.implementation;
 
+import com.example.libraryproject.model.dto.UserDTO;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.entity.Review;
@@ -10,6 +11,7 @@ import com.example.libraryproject.repository.OrderRepository;
 import com.example.libraryproject.repository.ReviewRepository;
 import com.example.libraryproject.repository.UserRepository;
 import com.example.libraryproject.service.UserService;
+import com.example.libraryproject.utilities.Mappers;
 import lombok.RequiredArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
@@ -161,5 +163,14 @@ public class UserServiceImpl implements UserService {
         user.setPassword(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
         userRepository.update(user);
         logger.info("User {} changed password successfully", username);
+    }
+
+    public UserDTO getUserInfo(String username) {
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isEmpty()) {
+            throw new IllegalArgumentException("user doesn't exist");
+        }
+        System.out.println("USER FOUND");
+        return Mappers.convertUser(user.get());
     }
 }

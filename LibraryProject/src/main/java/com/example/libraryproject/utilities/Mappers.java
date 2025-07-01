@@ -102,6 +102,8 @@ public class Mappers {
                         book.getGenre(),
                         book.getAuthor(),
                         book.getImageUrl(),
+                        book.getTotalAmount(),
+                        book.getCurrentAmount(),
                         book.getVolume(),
                         book.getRating()))
                 .collect(Collectors.toList());
