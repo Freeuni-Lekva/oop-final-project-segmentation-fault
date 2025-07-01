@@ -64,7 +64,6 @@ public class UserServiceImpl implements UserService {
         user.setReviews(updatedReviews);
 
         userRepository.update(user);
-        reviewRepository.save(review);
         logger.info("User {} reviewed book {} with rating {} and comment '{}'", username, publicId, rating, comment);
     }
 

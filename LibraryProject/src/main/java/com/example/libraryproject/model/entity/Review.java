@@ -36,7 +36,7 @@ public class Review {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "book_id", nullable = false)
     @NonNull
     private Book book;
 
