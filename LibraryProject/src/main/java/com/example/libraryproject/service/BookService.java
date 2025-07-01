@@ -31,8 +31,8 @@ public class BookService {
                 book.getGenre(),
                 book.getAuthor(),
                 book.getImageUrl(),
-                book.getCurrentAmount(),
                 book.getTotalAmount(),
+                book.getCurrentAmount(),
                 book.getVolume(),
                 book.getRating()
         );
