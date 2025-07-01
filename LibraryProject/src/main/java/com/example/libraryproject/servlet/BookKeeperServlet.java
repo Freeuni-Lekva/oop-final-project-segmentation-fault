@@ -5,7 +5,9 @@ import com.example.libraryproject.model.dto.BookAdditionFromGoogleRequest;
 import com.example.libraryproject.model.dto.BookAdditionRequest;
 import com.example.libraryproject.model.dto.UserDTO;
 import com.example.libraryproject.service.BookKeeperService;
-import com.example.libraryproject.service.GoogleBooksAPIService;
+import com.example.libraryproject.service.GoogleBooksApiService;
+import com.example.libraryproject.service.implementation.BookKeeperServiceImpl;
+import com.example.libraryproject.service.implementation.GoogleBooksApiServiceImpl;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
@@ -38,9 +40,10 @@ public class BookKeeperServlet extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        BookKeeperService bookKeeperService = (BookKeeperService) request.getServletContext()
+        BookKeeperService bookKeeperService = (BookKeeperServiceImpl) request.getServletContext()
                 .getAttribute(ApplicationProperties.BOOKKEEPER_SERVICE_ATTRIBUTE_NAME);
-        GoogleBooksAPIService googleBooksAPIService = (GoogleBooksAPIService) request.getServletContext()
+
+        GoogleBooksApiService googleBooksAPIService = (GoogleBooksApiServiceImpl) request.getServletContext()
                 .getAttribute(ApplicationProperties.GOOGLE_BOOKS_API_ATTRIBUTE_NAME);
 
         String path = request.getPathInfo();
@@ -89,7 +92,7 @@ public class BookKeeperServlet extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        BookKeeperService bookKeeperService = (BookKeeperService) request.getServletContext()
+        BookKeeperService bookKeeperService = (BookKeeperServiceImpl) request.getServletContext()
                 .getAttribute(ApplicationProperties.BOOKKEEPER_SERVICE_ATTRIBUTE_NAME);
         String path = request.getPathInfo();
 
@@ -101,7 +104,7 @@ public class BookKeeperServlet extends HttpServlet {
     }
 
     private void handleAddBookFromGoogleAPI(HttpServletRequest req,
-                                            GoogleBooksAPIService googleBooksAPIService) throws IOException {
+                                            GoogleBooksApiService googleBooksAPIService) throws IOException {
 
         JsonNode params = objectMapper.readTree(req.getReader());
 
@@ -116,7 +119,7 @@ public class BookKeeperServlet extends HttpServlet {
 
     @Override
     public void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        BookKeeperService bookKeeperService = (BookKeeperService) req.getServletContext()
+        BookKeeperService bookKeeperService = (BookKeeperServiceImpl) req.getServletContext()
                 .getAttribute(ApplicationProperties.BOOKKEEPER_SERVICE_ATTRIBUTE_NAME);
 
         String path = req.getPathInfo();

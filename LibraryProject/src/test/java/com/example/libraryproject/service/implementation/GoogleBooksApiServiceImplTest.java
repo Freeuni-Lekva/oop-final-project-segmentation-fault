@@ -1,4 +1,4 @@
-package com.example.libraryproject.service;
+package com.example.libraryproject.service.implementation;
 
 import com.example.libraryproject.model.dto.GoogleBooksResponse;
 import com.example.libraryproject.model.entity.Book;
@@ -8,10 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
 
@@ -19,16 +15,16 @@ import static com.example.libraryproject.utils.MockDataForTests.createTestBook;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class GoogleBooksAPIServiceTest {
+class GoogleBooksApiServiceImplTest {
 
     private BookRepository bookRepository;
-    private GoogleBooksAPIService service;
+    private GoogleBooksApiServiceImpl service;
 
     @BeforeEach
     void setUp() throws Exception {
         bookRepository = mock(BookRepository.class);
 
-        service = Mockito.spy(new GoogleBooksAPIService(bookRepository));
+        service = Mockito.spy(new GoogleBooksApiServiceImpl(bookRepository));
 
         doReturn(createFakeBooks()).when(service).fetchBooksFromGenre(anyString(), anyInt());
         doNothing().when(service).downloadAndSaveImage(anyString(), anyString());

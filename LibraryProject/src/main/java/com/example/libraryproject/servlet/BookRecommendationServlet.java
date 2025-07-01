@@ -2,6 +2,7 @@ package com.example.libraryproject.servlet;
 
 import com.example.libraryproject.model.dto.BookDTO;
 import com.example.libraryproject.service.BookRecommendationService;
+import com.example.libraryproject.service.implementation.BookRecommendationServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -26,10 +27,8 @@ public class BookRecommendationServlet extends HttpServlet {
 
         ObjectMapper objectMapper = (ObjectMapper) request.getServletContext().getAttribute(BOOK_RECOMMENDATION_SERVICE_ATTRIBUTE_NAME);
 
-        BookRecommendationService bookRecommendationService = (BookRecommendationService) getServletContext().
+        BookRecommendationService bookRecommendationService = (BookRecommendationServiceImpl) getServletContext().
                 getAttribute(BOOK_RECOMMENDATION_SERVICE_ATTRIBUTE_NAME);
-
-        String pathInfo = request.getPathInfo();
 
         String username = request.getAttribute("username").toString();
 

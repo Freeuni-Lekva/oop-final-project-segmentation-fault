@@ -1,6 +1,7 @@
 package com.example.libraryproject.servlet;
 
 import com.example.libraryproject.service.BookService;
+import com.example.libraryproject.service.implementation.BookServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -23,7 +24,7 @@ public class BookServlet extends HttpServlet {
 
         ObjectMapper objectMapper = (ObjectMapper) getServletContext().getAttribute(OBJECT_MAPPER_ATTRIBUTE_NAME);
 
-        BookService bookService = (BookService) getServletContext().getAttribute(BOOK_SERVICE_ATTRIBUTE_NAME);
+        BookService bookService = (BookServiceImpl) getServletContext().getAttribute(BOOK_SERVICE_ATTRIBUTE_NAME);
 
         String[] pathParts = request.getPathInfo().substring(1).split("/");
         String path = pathParts[0];

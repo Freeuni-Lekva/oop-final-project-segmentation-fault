@@ -1,4 +1,4 @@
-package com.example.libraryproject.service;
+package com.example.libraryproject.service.implementation;
 
 import com.example.libraryproject.model.dto.LoginRequest;
 import com.example.libraryproject.model.dto.RegistrationRequest;
@@ -16,9 +16,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class AuthorizationServiceTest {
+public class AuthorizationServiceImplTest {
 
-    private AuthorizationService authorizationService;
+    private AuthorizationServiceImpl authorizationServiceImpl;
     private UserRepository userRepository;
     private BookKeeperRepository bookKeeperRepository;
 
@@ -26,7 +26,7 @@ public class AuthorizationServiceTest {
     void setup() {
         userRepository = mock(UserRepository.class);
         bookKeeperRepository = mock(BookKeeperRepository.class);
-        authorizationService = new AuthorizationService(userRepository, bookKeeperRepository);
+        authorizationServiceImpl = new AuthorizationServiceImpl(userRepository, bookKeeperRepository);
     }
 
     @Test
@@ -36,7 +36,7 @@ public class AuthorizationServiceTest {
         when(userRepository.findByUsername("newuser")).thenReturn(Optional.empty());
         when(bookKeeperRepository.findByUsername("newuser")).thenReturn(Optional.empty());
 
-        authorizationService.register(request);
+        authorizationServiceImpl.register(request);
 
         verify(userRepository).save(any(User.class));
     }
@@ -47,7 +47,7 @@ public class AuthorizationServiceTest {
         when(userRepository.findByUsername("keeper")).thenReturn(Optional.empty());
         when(bookKeeperRepository.findByUsername("keeper")).thenReturn(Optional.empty());
 
-        authorizationService.register(request);
+        authorizationServiceImpl.register(request);
 
         verify(bookKeeperRepository).save(any(BookKeeper.class));
     }
@@ -58,7 +58,7 @@ public class AuthorizationServiceTest {
         when(userRepository.findByUsername("existing")).thenReturn(Optional.of(new User()));
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> authorizationService.register(request));
+                () -> authorizationServiceImpl.register(request));
 
         assertEquals("This username already exists", ex.getMessage());
     }
@@ -75,7 +75,7 @@ public class AuthorizationServiceTest {
 
         LoginRequest request = new LoginRequest("user1", "secret");
 
-        assertDoesNotThrow(() -> authorizationService.login(request));
+        assertDoesNotThrow(() -> authorizationServiceImpl.login(request));
     }
 
     @Test
@@ -90,7 +90,7 @@ public class AuthorizationServiceTest {
 
         LoginRequest request = new LoginRequest("user1", "wrong");
 
-        assertThrows(IllegalArgumentException.class, () -> authorizationService.login(request));
+        assertThrows(IllegalArgumentException.class, () -> authorizationServiceImpl.login(request));
     }
 
     @Test
@@ -100,6 +100,6 @@ public class AuthorizationServiceTest {
 
         LoginRequest request = new LoginRequest("ghost", "any");
 
-        assertThrows(IllegalArgumentException.class, () -> authorizationService.login(request));
+        assertThrows(IllegalArgumentException.class, () -> authorizationServiceImpl.login(request));
     }
 }

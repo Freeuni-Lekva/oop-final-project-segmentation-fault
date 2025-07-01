@@ -6,6 +6,7 @@ import com.example.libraryproject.model.dto.LoginResult;
 import com.example.libraryproject.model.dto.RegistrationRequest;
 import com.example.libraryproject.model.enums.Role;
 import com.example.libraryproject.service.AuthorizationService;
+import com.example.libraryproject.service.implementation.AuthorizationServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -26,7 +27,7 @@ public class AuthorizationServlet extends HttpServlet {
         ObjectMapper objectMapper = (ObjectMapper) request.getServletContext()
                 .getAttribute(ApplicationProperties.OBJECT_MAPPER_ATTRIBUTE_NAME);
 
-        AuthorizationService authorizationService = (AuthorizationService) request.getServletContext()
+        AuthorizationService authorizationService = (AuthorizationServiceImpl) request.getServletContext()
                 .getAttribute(ApplicationProperties.AUTHORIZATION_SERVICE_ATTRIBUTE_NAME);
 
         String path = request.getPathInfo();
