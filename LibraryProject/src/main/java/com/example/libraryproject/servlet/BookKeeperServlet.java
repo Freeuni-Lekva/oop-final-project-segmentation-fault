@@ -94,7 +94,7 @@ public class BookKeeperServlet extends HttpServlet {
         String path = request.getPathInfo();
 
         if ("/users".equals(path)) {
-            handleGetUsers(request, response, bookKeeperService);
+            handleGetUsers(response, bookKeeperService);
         } else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
@@ -191,13 +191,14 @@ public class BookKeeperServlet extends HttpServlet {
         JsonNode params = objectMapper.readTree(req.getReader());
 
         String username = params.get("username").asText();
+
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("Username is required to unban a user.");
         }
         bookKeeperService.unbanUser(username);
     }
 
-    private void handleGetUsers(HttpServletRequest req, HttpServletResponse resp, BookKeeperService bookKeeperService)
+    private void handleGetUsers(HttpServletResponse resp, BookKeeperService bookKeeperService)
             throws IOException {
 
         Set<UserDTO> users = bookKeeperService.getUsers();

@@ -53,8 +53,8 @@ public class TestBookRepository {
         assertEquals("Emily Bronte", savedBook.get().getAuthor());
         assertEquals("Classic", savedBook.get().getGenre());
         assertEquals(5L, savedBook.get().getRating());
-        assertEquals(10L, savedBook.get().getAmountInLib());
-        assertEquals(10L, savedBook.get().getCopiesInLib());
+        assertEquals(10L, savedBook.get().getTotalAmount());
+        assertEquals(10L, savedBook.get().getCurrentAmount());
     }
 
     @Test

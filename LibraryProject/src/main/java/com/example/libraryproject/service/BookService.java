@@ -31,8 +31,8 @@ public class BookService {
                 book.getGenre(),
                 book.getAuthor(),
                 book.getImageUrl(),
-                book.getCopiesInLib(),
-                book.getAmountInLib(),
+                book.getCurrentAmount(),
+                book.getTotalAmount(),
                 book.getVolume(),
                 book.getRating()
         );
@@ -47,8 +47,8 @@ public class BookService {
                         book.getGenre(),
                         book.getAuthor(),
                         book.getImageUrl(),
-                        book.getCopiesInLib(),
-                        book.getAmountInLib(),
+                        book.getCurrentAmount(),
+                        book.getTotalAmount(),
                         book.getVolume(),
                         book.getRating()
                 )
@@ -64,8 +64,8 @@ public class BookService {
                         book.getGenre(),
                         book.getAuthor(),
                         book.getImageUrl(),
-                        book.getCopiesInLib(),
-                        book.getAmountInLib(),
+                        book.getCurrentAmount(),
+                        book.getTotalAmount(),
                         book.getVolume(),
                         book.getRating()
                 )
@@ -75,7 +75,7 @@ public class BookService {
     public List<BookDTO> getAvailableBooks() {
         logger.info("Getting all available books");
         return bookRepository.findAll().stream()
-                .filter(book -> book.getAmountInLib() > 0)
+                .filter(book -> book.getTotalAmount() > 0)
                 .map(
                         book -> new BookDTO(
                                 book.getName(),
@@ -83,8 +83,8 @@ public class BookService {
                                 book.getGenre(),
                                 book.getAuthor(),
                                 book.getImageUrl(),
-                                book.getCopiesInLib(),
-                                book.getAmountInLib(),
+                                book.getCurrentAmount(),
+                                book.getTotalAmount(),
                                 book.getVolume(),
                                 book.getRating()
                         )

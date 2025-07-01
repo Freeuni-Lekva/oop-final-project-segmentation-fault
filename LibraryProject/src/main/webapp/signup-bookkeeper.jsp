@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -77,7 +77,8 @@
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ username, password, role })
+                body: JSON.stringify({ username, password, role }),
+                credentials: "include"
             });
 
             const result = await response.json();

@@ -5,7 +5,7 @@
   Time: 20:09
   To change this template use File | Settings | File Templates.
 --%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -73,7 +73,8 @@
       const response = await fetch("<%= request.getContextPath() %>/api/authorization/login", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password }),
+        credentials: "include"
       });
 
 

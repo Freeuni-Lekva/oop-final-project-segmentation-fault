@@ -5,6 +5,7 @@ import com.example.libraryproject.model.dto.LoginResult;
 import com.example.libraryproject.model.dto.RegistrationRequest;
 import com.example.libraryproject.model.entity.BookKeeper;
 import com.example.libraryproject.model.entity.User;
+import com.example.libraryproject.model.enums.UserStatus;
 import com.example.libraryproject.repository.BookKeeperRepository;
 import com.example.libraryproject.repository.UserRepository;
 import com.example.libraryproject.utilities.Mappers;
@@ -75,6 +76,20 @@ public class AuthorizationService {
             }
             return new LoginResult(username, com.example.libraryproject.model.enums.Role.USER);
         }
+    }
+
+    public boolean checkBookkeeper(String username) {
+
+        Optional<BookKeeper> optionalBookKeeper = bookKeeperRepository.findByUsername(username);
+
+        return optionalBookKeeper.isPresent();
+    }
+
+    public boolean checkUser(String username) {
+
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+
+        return optionalUser.isPresent() && optionalUser.get().getStatus() == UserStatus.ACTIVE;
     }
 
 }

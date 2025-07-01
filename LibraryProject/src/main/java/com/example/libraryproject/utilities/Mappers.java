@@ -1,5 +1,6 @@
 package com.example.libraryproject.utilities;
 
+import com.example.libraryproject.model.dto.BookDTO;
 import com.example.libraryproject.model.dto.GoogleBooksResponse;
 import com.example.libraryproject.model.dto.RegistrationRequest;
 import com.example.libraryproject.model.dto.UserDTO;
@@ -10,7 +11,6 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static com.example.libraryproject.configuration.ApplicationProperties.DEFAULT_RATING;
@@ -59,8 +59,8 @@ public class Mappers {
         book.setGenre(googleBooksResponse.genre());
         book.setVolume(googleBooksResponse.volume());
         long initialCopies = ThreadLocalRandom.current().nextLong(2, 16);
-        book.setAmountInLib(initialCopies);
-        book.setCopiesInLib(initialCopies);
+        book.setTotalAmount(initialCopies);
+        book.setCurrentAmount(initialCopies);
         book.setRating((long) DEFAULT_RATING);
 
         return book;
@@ -83,5 +83,18 @@ public class Mappers {
 
     public static UserDTO convertUser(User user) {
         return new UserDTO(user.getUsername(), user.getStatus().toString());
+    }
+    public static BookDTO mapBookToDTO(Book book) {
+        return new BookDTO(
+                book.getName(),
+                book.getDescription(),
+                book.getGenre(),
+                book.getAuthor(),
+                book.getImageUrl(),
+                book.getTotalAmount(),
+                book.getCurrentAmount(),
+                book.getVolume(),
+                book.getRating()
+        );
     }
 }

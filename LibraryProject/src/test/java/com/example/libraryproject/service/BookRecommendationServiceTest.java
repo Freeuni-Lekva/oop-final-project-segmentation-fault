@@ -1,11 +1,11 @@
 package com.example.libraryproject.service;
 
+import com.example.libraryproject.model.dto.BookDTO;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Review;
 import com.example.libraryproject.model.entity.User;
 import com.example.libraryproject.repository.BookRepository;
 import com.example.libraryproject.repository.UserRepository;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.jupiter.api.AfterEach;
@@ -26,7 +26,7 @@ public class BookRecommendationServiceTest {
     private BookRepository bookRepository;
     private BookRecommendationService recommendationService;
     private UserRepository userRepository;
-    private Set<Book> recommendedBooks;
+    private Set<BookDTO> recommendedBooks;
 
     private User user;
 
@@ -136,9 +136,8 @@ public class BookRecommendationServiceTest {
 
     @Test
     public void test2() {
-        List<Book> bookList = new ArrayList<>(recommendedBooks);
-        Set<Book> uniqueBooks = new HashSet<>(bookList);
-
+        List<BookDTO> bookList = new ArrayList<>(recommendedBooks);
+        Set<BookDTO> uniqueBooks = new HashSet<>(bookList);
         assertEquals(bookList.size(), uniqueBooks.size(), "Duplicate books found in recommendation set");
     }
 

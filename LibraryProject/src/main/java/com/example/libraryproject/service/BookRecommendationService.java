@@ -1,10 +1,12 @@
 package com.example.libraryproject.service;
 
+import com.example.libraryproject.model.dto.BookDTO;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Review;
 import com.example.libraryproject.model.entity.User;
 import com.example.libraryproject.repository.BookRepository;
 import com.example.libraryproject.repository.UserRepository;
+import com.example.libraryproject.utilities.Mappers;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,13 +147,17 @@ public class BookRecommendationService {
         return new ArrayList<>(result);
     }
 
-    public Set<Book> recommendBooks(String username){
+    public Set<BookDTO> recommendBooks(String username){
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         Set<Book> readBooks = user.getReadBooks();
         Set<Review> userReviews = user.getReviews();
+
         logger.info("Recommending books for user: {}", user.getUsername());
-        return getPreferredBooks(readBooks, userReviews);
+
+        Set<Book> recommendedBooks = getPreferredBooks(readBooks, userReviews);
+
+        return recommendedBooks.stream().map(Mappers::mapBookToDTO).collect(Collectors.toSet());
     }
 }
