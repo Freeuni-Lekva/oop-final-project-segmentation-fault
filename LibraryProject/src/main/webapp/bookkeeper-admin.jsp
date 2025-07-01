@@ -245,7 +245,8 @@
 
         const imageUploadResponse = await fetch('${pageContext.request.contextPath}/api/bookkeeper/upload-image', {
           method: 'POST',
-          body: imageFormData
+          body: imageFormData,
+          credentials: "include"
         });
 
         if (!imageUploadResponse.ok) throw new Error('Image upload failed');
@@ -268,7 +269,8 @@
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(bookData)
+        body: JSON.stringify(bookData),
+        credentials: "include"
       });
 
       if (bookCreateResponse.ok) {
@@ -320,7 +322,8 @@
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      credentials: "include"
     })
             .then(function (response) {
               if (response.ok) {
@@ -349,7 +352,6 @@
               button.disabled = false;
             });
   });
-  ;
 
   document.getElementById('banUserBtn').addEventListener('click', function () {
     const username = document.getElementById('usernameInput').value.trim();
@@ -371,7 +373,9 @@
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      credentials: "include"
+
     })
             .then(function (response) {
               if (response.ok) {
@@ -422,7 +426,8 @@
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      credentials: "include"
     })
             .then(function (response) {
               if (response.ok) {
@@ -506,7 +511,9 @@
 
   function loadUsersList() {
     const list = document.getElementById('usersList');
-    fetch('${pageContext.request.contextPath}/api/bookkeeper/users')
+    fetch('${pageContext.request.contextPath}/api/bookkeeper/users', {
+      credentials: "include"
+    })
             .then(function(response) {
               if (response.ok) {
                 return response.json();

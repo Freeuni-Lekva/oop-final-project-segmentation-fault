@@ -53,11 +53,11 @@ public class Book {
 
     @NonNull
     @Column(name = "amount_in_library")
-    private Long amountInLib;
+    private Long totalAmount;
 
     @NonNull
     @Column(name = "copies_in_library")
-    private Long copiesInLib;
+    private Long currentAmount;
 
     @NonNull
     @Column(name = "rating")
@@ -77,8 +77,8 @@ public class Book {
                 ", date=" + date +
                 ", volume=" + volume +
                 ", reviews=" + reviews +
-                ", amountInLib=" + amountInLib +
-                ", copiesInLib=" + copiesInLib +
+                ", total amount=" + totalAmount +
+                ", current amount=" + currentAmount +
                 ", rating=" + rating +
                 '}';
     }

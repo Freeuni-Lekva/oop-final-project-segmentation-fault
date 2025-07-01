@@ -11,6 +11,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -47,11 +48,16 @@ public class AuthorizationServlet extends HttpServlet {
                         redirectPath = redirectPath + "/bookkeeper-admin.jsp";
                     } else redirectPath = redirectPath + "/main-page.jsp";
 
+                    HttpSession session = request.getSession(true);
+                    session.setAttribute("username", registrationRequest.username());
+                    session.setAttribute("role", registrationRequest.role().name());
+
                     objectMapper.writeValue(response.getWriter(),
                             new JsonResponse(
                                     "Bookkeeper registered successfully",
                                     redirectPath)
                     );
+
                 } catch (Exception e) {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     objectMapper.writeValue(response.getWriter(),
@@ -72,10 +78,16 @@ public class AuthorizationServlet extends HttpServlet {
                         redirectPath = redirectPath + "/main-page.jsp";
                     }
 
+                    HttpSession session = request.getSession(true);
+                    session.setAttribute("username", loginRequest.username());
+                    session.setAttribute("role", loginResult.role().name());
+
                     response.setStatus(HttpServletResponse.SC_OK);
                     objectMapper.writeValue(response.getWriter(),
                             new JsonResponse("Login successful", redirectPath)
                     );
+
+
                 } catch (Exception e) {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     objectMapper.writeValue(response.getWriter(),

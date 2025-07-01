@@ -39,7 +39,7 @@ public class BookKeeperService {
 
         if (existingBook.isPresent()) {
             Book bookInLibrary = existingBook.get();
-            bookInLibrary.setAmountInLib(bookInLibrary.getAmountInLib() + 1);
+            bookInLibrary.setTotalAmount(bookInLibrary.getTotalAmount() + 1);
             bookRepository.update(bookInLibrary);
         } else {
             Book book = new Book();
@@ -50,7 +50,7 @@ public class BookKeeperService {
             book.setPublicId(bookRequest.title().replaceAll("[^a-zA-Z0-9.\\-]", "_"));
             book.setImageUrl(bookRequest.title().replaceAll("[^a-zA-Z0-9.\\-]", "_") + ".jpg");
             book.setVolume(bookRequest.volume());
-            book.setAmountInLib(1L);
+            book.setTotalAmount(1L);
             bookRepository.save(book);
         }
         logger.info("Book with title '{}' added successfully", bookRequest.title());
@@ -65,9 +65,9 @@ public class BookKeeperService {
         Optional<Book> existingBook = bookRepository.findByTitle(book.getName());
         if (existingBook.isPresent()) {
             Book bookInLibrary = existingBook.get();
-            long amount = bookInLibrary.getAmountInLib();
+            long amount = bookInLibrary.getTotalAmount();
             if (amount > 1) {
-                bookInLibrary.setAmountInLib(amount - 1);
+                bookInLibrary.setTotalAmount(amount - 1);
                 bookRepository.update(bookInLibrary);
             } else {
                 bookRepository.delete(bookInLibrary);

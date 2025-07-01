@@ -31,8 +31,7 @@ public class UserServlet extends HttpServlet {
 
         try {
             JsonNode jsonNode = objectMapper.readTree(req.getReader());
-            String username = jsonNode.get("username").asText();
-
+            String username = req.getAttribute("username").toString();
             Map<String, Object> response = new HashMap<>();
 
             switch (path) {

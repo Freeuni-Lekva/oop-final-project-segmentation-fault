@@ -80,7 +80,7 @@ public class UserService {
         }
         Book book = optionalBook.get();
         User user = optionalUser.get();
-        if (book.getAmountInLib() <= 0) {
+        if (book.getTotalAmount() <= 0) {
             logger.info("Book with publicId {} is not available for reservation", publicId);
             throw new IllegalStateException("book not in storage");
         }
@@ -105,7 +105,7 @@ public class UserService {
                 book
         );
 
-        book.setAmountInLib(book.getAmountInLib() - 1);
+        book.setTotalAmount(book.getTotalAmount() - 1);
         bookRepository.update(book);
         orderRepository.save(order);
         logger.info("User {} reserved book {} with order ID {}", username, publicId, order.getPublicId());
@@ -138,7 +138,7 @@ public class UserService {
             throw new IllegalStateException("book is not reserved");
         }
 
-        book.setAmountInLib(book.getAmountInLib() + 1);
+        book.setTotalAmount(book.getTotalAmount() + 1);
         bookRepository.update(book);
         orderRepository.delete(reservation.get());
         logger.info("User {} canceled reservation for book {}", username, publicId);
