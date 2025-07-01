@@ -1,5 +1,6 @@
 package com.example.libraryproject.utilities;
 
+import com.example.libraryproject.model.dto.*;
 import com.example.libraryproject.model.dto.BookDTO;
 import com.example.libraryproject.model.dto.GoogleBooksResponse;
 import com.example.libraryproject.model.dto.RegistrationRequest;
@@ -11,6 +12,9 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static com.example.libraryproject.configuration.ApplicationProperties.DEFAULT_RATING;
@@ -82,7 +86,34 @@ public class Mappers {
     }
 
     public static UserDTO convertUser(User user) {
-        return new UserDTO(user.getUsername(), user.getStatus().toString());
+        List<ReviewDTO> reviewDTOs = user.getReviews().stream()
+                .map(review -> new ReviewDTO(
+                        review.getBook().getName(),
+                        review.getBook().getAuthor(),
+                        review.getRating(),
+                        review.getComment()))
+                .collect(Collectors.toList());
+
+
+        List<BookDTO> currentlyReadingDTOs = user.getBorrowedBooks().stream()
+                .map(book -> new BookDTO(
+                        book.getName(),
+                        book.getDescription(),
+                        book.getGenre(),
+                        book.getAuthor(),
+                        book.getImageUrl(),
+                        book.getVolume(),
+                        book.getRating()))
+                .collect(Collectors.toList());
+
+        return new UserDTO(
+                user.getUsername(),
+                user.getBio(),
+                user.getReadBooks().size(),
+                reviewDTOs.size(),
+                reviewDTOs,
+                currentlyReadingDTOs
+        );
     }
     public static BookDTO mapBookToDTO(Book book) {
         return new BookDTO(

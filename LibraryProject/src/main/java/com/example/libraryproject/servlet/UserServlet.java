@@ -1,6 +1,7 @@
 package com.example.libraryproject.servlet;
 
 import com.example.libraryproject.configuration.ApplicationProperties;
+import com.example.libraryproject.model.dto.UserDTO;
 import com.example.libraryproject.service.UserService;
 import com.example.libraryproject.service.implementation.UserServiceImpl;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -17,6 +18,41 @@ import static com.example.libraryproject.configuration.ApplicationProperties.OBJ
 
 @WebServlet(name = "UserServlet", urlPatterns = "/api/user/*")
 public class UserServlet extends HttpServlet {
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+
+        ObjectMapper objectMapper = (ObjectMapper) getServletContext().getAttribute(OBJECT_MAPPER_ATTRIBUTE_NAME);
+        UserService userService = (UserService) req.getServletContext().getAttribute(ApplicationProperties.USER_SERVICE_ATTRIBUTE_NAME);
+
+        String pathInfo = req.getPathInfo();
+        System.out.println("IT GOT HERE");
+        if (pathInfo == null || pathInfo.equals("/")) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("error", "Username is missing in URL");
+            objectMapper.writeValue(resp.getWriter(), error);
+            return;
+        }
+        String username = pathInfo.substring(1);
+        System.out.println("USERNAME IS "+username);
+
+        try {
+            UserDTO userDTO = userService.getUserInfo(username);
+            System.out.println(userDTO);
+            System.out.println("Serialized JSON: " + objectMapper.writeValueAsString(userDTO));
+            objectMapper.writeValue(resp.getWriter(), userDTO);
+        } catch (Exception e) {
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("error", "User not found");
+            objectMapper.writeValue(resp.getWriter(), error);
+        }
+    }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
