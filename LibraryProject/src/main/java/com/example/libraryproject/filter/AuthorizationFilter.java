@@ -1,7 +1,7 @@
 package com.example.libraryproject.filter;
 
 import com.example.libraryproject.model.enums.Role;
-import com.example.libraryproject.service.AuthorizationService;
+import com.example.libraryproject.service.implementation.AuthorizationServiceImpl;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,7 +23,7 @@ public class AuthorizationFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         HttpSession session = request.getSession(false);
 
-        AuthorizationService authorizationService = (AuthorizationService) request.getServletContext().getAttribute(AUTHORIZATION_SERVICE_ATTRIBUTE_NAME);
+        AuthorizationServiceImpl authorizationServiceImpl = (AuthorizationServiceImpl) request.getServletContext().getAttribute(AUTHORIZATION_SERVICE_ATTRIBUTE_NAME);
 
         String username;
         if (session == null) {
@@ -37,10 +37,10 @@ public class AuthorizationFilter implements Filter {
 
         Role role =  Role.valueOf(session.getAttribute("role").toString());
         if (path.equals("user") && role == Role.USER) {
-            authenticated = authorizationService.checkUser(username);
+            authenticated = authorizationServiceImpl.checkUser(username);
         }
         else if (path.equals("bookkeeper") && role == Role.BOOKKEEPER) {
-            authenticated = authorizationService.checkBookkeeper(username);
+            authenticated = authorizationServiceImpl.checkBookkeeper(username);
         }
         if (authenticated) {
             request.setAttribute("username", username);

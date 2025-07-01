@@ -3,6 +3,7 @@ package com.example.libraryproject.servlet;
 import com.example.libraryproject.configuration.DBConnectionConfig;
 import com.example.libraryproject.repository.*;
 import com.example.libraryproject.service.*;
+import com.example.libraryproject.service.implementation.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
@@ -30,30 +31,31 @@ public class ApplicationContextListener implements ServletContextListener {
             OrderRepository orderRepository = new OrderRepository(sessionFactory);
             ReviewRepository reviewRepository = new ReviewRepository(sessionFactory);
 
-            AuthorizationService authorizationService = new AuthorizationService(userRepository, bookKeeperRepository);
+            AuthorizationService authorizationService = new AuthorizationServiceImpl(userRepository, bookKeeperRepository);
             event.getServletContext().setAttribute(AUTHORIZATION_SERVICE_ATTRIBUTE_NAME, authorizationService);
 
-            BookKeeperService bookKeeperService = new BookKeeperService(bookRepository, userRepository, orderRepository);
+            BookKeeperService bookKeeperService = new BookKeeperServiceImpl(bookRepository, userRepository, orderRepository);
             event.getServletContext().setAttribute(BOOKKEEPER_SERVICE_ATTRIBUTE_NAME, bookKeeperService);
 
-            SchedulerService schedulerService = new SchedulerService(userRepository, orderRepository);
+            SchedulerService schedulerService = new SchedulerServiceImpl(userRepository, orderRepository);
             event.getServletContext().setAttribute(SCHEDULER_SERVICE_ATTRIBUTE_NAME, schedulerService);
             schedulerService.start();
 
-            BookService bookService = new BookService(bookRepository, reviewRepository);
+            BookService bookService = new BookServiceImpl(bookRepository);
             event.getServletContext().setAttribute(BOOK_SERVICE_ATTRIBUTE_NAME, bookService);
 
-            BookRecommendationService bookRecomendationService = new BookRecommendationService(bookRepository, userRepository);
-            event.getServletContext().setAttribute(BOOK_RECOMMENDATION_SERVICE_ATTRIBUTE_NAME, bookRecomendationService);
+            BookRecommendationService bookRecommendationService = new BookRecommendationServiceImpl(bookRepository, userRepository);
+            event.getServletContext().setAttribute(BOOK_RECOMMENDATION_SERVICE_ATTRIBUTE_NAME, bookRecommendationService);
 
-            UserService userService = new UserService(userRepository, bookRepository, reviewRepository, orderRepository);
+            UserService userService = new UserServiceImpl(userRepository, bookRepository, reviewRepository, orderRepository);
             event.getServletContext().setAttribute(USER_SERVICE_ATTRIBUTE_NAME, userService);
 
             ObjectMapper objectMapper = new ObjectMapper();
             event.getServletContext().setAttribute(OBJECT_MAPPER_ATTRIBUTE_NAME, objectMapper);
 
-            GoogleBooksAPIService googleBooksAPIService = new GoogleBooksAPIService(bookRepository);
+            GoogleBooksApiService googleBooksAPIService = new GoogleBooksApiServiceImpl(bookRepository);
             event.getServletContext().setAttribute(GOOGLE_BOOKS_API_ATTRIBUTE_NAME, googleBooksAPIService);
+
             Thread fetcherThread = new Thread(googleBooksAPIService::fetchAndSaveBooks);
             fetcherThread.setDaemon(true);
             fetcherThread.start();

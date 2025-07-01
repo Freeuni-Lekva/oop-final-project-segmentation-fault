@@ -1,9 +1,10 @@
-package com.example.libraryproject.service;
+package com.example.libraryproject.service.implementation;
 
 import com.example.libraryproject.model.dto.BookAdditionFromGoogleRequest;
 import com.example.libraryproject.model.dto.GoogleBooksResponse;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.repository.BookRepository;
+import com.example.libraryproject.service.GoogleBooksApiService;
 import com.example.libraryproject.utilities.Mappers;
 import jakarta.json.*;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +25,10 @@ import java.util.concurrent.*;
 import static com.example.libraryproject.configuration.ApplicationProperties.*;
 
 @RequiredArgsConstructor
-public class GoogleBooksAPIService {
+public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
 
     private final BookRepository bookRepository;
-    private static final Logger logger = LoggerFactory.getLogger(GoogleBooksAPIService.class);
+    private static final Logger logger = LoggerFactory.getLogger(GoogleBooksApiServiceImpl.class);
     private static final HttpClient httpClient = HttpClient.newHttpClient();
 
     public void fetchAndSaveBooks() {

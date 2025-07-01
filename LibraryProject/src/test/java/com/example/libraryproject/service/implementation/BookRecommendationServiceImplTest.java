@@ -1,4 +1,4 @@
-package com.example.libraryproject.service;
+package com.example.libraryproject.service.implementation;
 
 import com.example.libraryproject.model.dto.BookDTO;
 import com.example.libraryproject.model.entity.Book;
@@ -21,10 +21,10 @@ import java.util.Set;
 import static com.example.libraryproject.configuration.ApplicationProperties.RECOMMENDED_COUNT;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BookRecommendationServiceTest {
+public class BookRecommendationServiceImplTest {
     private SessionFactory sessionFactory;
     private BookRepository bookRepository;
-    private BookRecommendationService recommendationService;
+    private BookRecommendationServiceImpl recommendationService;
     private UserRepository userRepository;
     private Set<BookDTO> recommendedBooks;
 
@@ -46,7 +46,7 @@ public class BookRecommendationServiceTest {
 
         bookRepository = new BookRepository(sessionFactory);
         UserRepository userRepository = new UserRepository(sessionFactory);
-        recommendationService = new BookRecommendationService(bookRepository, userRepository);
+        recommendationService = new BookRecommendationServiceImpl(bookRepository, userRepository);
 
         Book book1 = new Book(
                 "Shadow_Realms",

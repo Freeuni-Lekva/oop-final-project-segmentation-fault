@@ -1,4 +1,4 @@
-package com.example.libraryproject.service;
+package com.example.libraryproject.service.implementation;
 
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Order;
@@ -19,11 +19,11 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class UserServiceTest {
+public class UserServiceImplTest {
     private UserRepository userRepository;
     private BookKeeperRepository bookKeeperRepository;
     private ReviewRepository reviewRepository;
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
     private BookRepository bookRepository;
     private OrderRepository orderRepository;
     private User user;
@@ -37,7 +37,7 @@ public class UserServiceTest {
         reviewRepository = mock(ReviewRepository.class);
         bookRepository = mock(BookRepository.class);
         orderRepository = mock(OrderRepository.class);
-        userService = new UserService(userRepository, bookRepository, reviewRepository, orderRepository);
+        userServiceImpl = new UserServiceImpl(userRepository, bookRepository, reviewRepository, orderRepository);
 
         book1 = new Book(
                 "Shadow_Realms",
@@ -92,19 +92,19 @@ public class UserServiceTest {
     @Test
     public void testReserve() {
         // Test successful reservation
-        assertDoesNotThrow(() -> userService.reserveBook(user.getUsername(), book1.getPublicId()));
+        assertDoesNotThrow(() -> userServiceImpl.reserveBook(user.getUsername(), book1.getPublicId()));
 
         // Test reservation when book is already reserved (book2 has 0 amount)
         assertThrows(IllegalStateException.class,
-                () -> userService.reserveBook(user.getUsername(), book2.getPublicId()));
+                () -> userServiceImpl.reserveBook(user.getUsername(), book2.getPublicId()));
 
         // Test reservation with non-existent user
         assertThrows(IllegalArgumentException.class,
-                () -> userService.reserveBook("nonexistent", book1.getPublicId()));
+                () -> userServiceImpl.reserveBook("nonexistent", book1.getPublicId()));
 
         // Test reservation with non-existent book
         assertThrows(IllegalArgumentException.class,
-                () -> userService.reserveBook(user.getUsername(), "nonexistent"));
+                () -> userServiceImpl.reserveBook(user.getUsername(), "nonexistent"));
     }
 
     @Test
@@ -126,37 +126,37 @@ public class UserServiceTest {
         when(orderRepository.findOrdersByUserId(1L)).thenReturn(userOrders);
 
         // Test successful cancellation
-        assertDoesNotThrow(() -> userService.cancelReservation(user.getUsername(), book1.getPublicId()));
+        assertDoesNotThrow(() -> userServiceImpl.cancelReservation(user.getUsername(), book1.getPublicId()));
 
         //return empty set for not reserved book
         when(orderRepository.findOrdersByUserId(1L)).thenReturn(new HashSet<>());
 
         // Test cancellation when book is not reserved
         assertThrows(IllegalStateException.class,
-                () -> userService.cancelReservation(user.getUsername(), book3.getPublicId()));
+                () -> userServiceImpl.cancelReservation(user.getUsername(), book3.getPublicId()));
 
         // Test cancellation with non-existent user
         assertThrows(IllegalArgumentException.class,
-                () -> userService.cancelReservation("nonexistent", book1.getPublicId()));
+                () -> userServiceImpl.cancelReservation("nonexistent", book1.getPublicId()));
 
         // Test cancellation with non-existent book
         assertThrows(IllegalArgumentException.class,
-                () -> userService.cancelReservation(user.getUsername(), "nonexistent"));
+                () -> userServiceImpl.cancelReservation(user.getUsername(), "nonexistent"));
     }
 
     @Test
     public void testChangePassword() {
         // Test with wrong old password
         assertThrows(IllegalArgumentException.class,
-                () -> userService.changePassword(user.getUsername(), "wrongPassword", "newPassword"));
+                () -> userServiceImpl.changePassword(user.getUsername(), "wrongPassword", "newPassword"));
 
         // Test with correct old password
-        assertDoesNotThrow(() -> userService.changePassword(user.getUsername(), "1234", "newPassword"));
+        assertDoesNotThrow(() -> userServiceImpl.changePassword(user.getUsername(), "1234", "newPassword"));
         assertTrue(BCrypt.checkpw("newPassword", user.getPassword()));
 
         // Test with non-existent user
         assertThrows(IllegalArgumentException.class,
-                () -> userService.changePassword("nonexistent", "1234", "newPassword"));
+                () -> userServiceImpl.changePassword("nonexistent", "1234", "newPassword"));
     }
 
     @Test
@@ -168,17 +168,17 @@ public class UserServiceTest {
 
         // Test review for book not read by user
         assertThrows(IllegalStateException.class,
-                () -> userService.reviewBook(user.getUsername(), book2.getPublicId(), 4, "good"));
+                () -> userServiceImpl.reviewBook(user.getUsername(), book2.getPublicId(), 4, "good"));
 
         // Test successful review for read book
-        assertDoesNotThrow(() -> userService.reviewBook(user.getUsername(), book1.getPublicId(), 4, "good"));
+        assertDoesNotThrow(() -> userServiceImpl.reviewBook(user.getUsername(), book1.getPublicId(), 4, "good"));
 
         // Test review with non-existent user
         assertThrows(IllegalArgumentException.class,
-                () -> userService.reviewBook("nonexistent", book1.getPublicId(), 4, "good"));
+                () -> userServiceImpl.reviewBook("nonexistent", book1.getPublicId(), 4, "good"));
 
         // Test review with non-existent book
         assertThrows(IllegalArgumentException.class,
-                () -> userService.reviewBook(user.getUsername(), "nonexistent", 4, "good"));
+                () -> userServiceImpl.reviewBook(user.getUsername(), "nonexistent", 4, "good"));
     }
 }

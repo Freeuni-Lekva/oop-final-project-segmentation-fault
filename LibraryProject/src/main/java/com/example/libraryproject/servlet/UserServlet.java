@@ -2,6 +2,7 @@ package com.example.libraryproject.servlet;
 
 import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.service.UserService;
+import com.example.libraryproject.service.implementation.UserServiceImpl;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.annotation.WebServlet;
@@ -24,7 +25,7 @@ public class UserServlet extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
 
         ObjectMapper objectMapper = (ObjectMapper) getServletContext().getAttribute(OBJECT_MAPPER_ATTRIBUTE_NAME);
-        UserService userService = (UserService) req.getServletContext()
+        UserService userService = (UserServiceImpl) req.getServletContext()
                 .getAttribute(ApplicationProperties.USER_SERVICE_ATTRIBUTE_NAME);
 
         String path = req.getPathInfo();
