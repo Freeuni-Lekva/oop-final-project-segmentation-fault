@@ -28,7 +28,7 @@ public class UserServlet extends HttpServlet {
         UserService userService = (UserService) req.getServletContext().getAttribute(ApplicationProperties.USER_SERVICE_ATTRIBUTE_NAME);
 
         String pathInfo = req.getPathInfo();
-        System.out.println("IT GOT HERE");
+        String sessionUsername = req.getAttribute("username").toString();
         if (pathInfo == null || pathInfo.equals("/")) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             Map<String, Object> error = new HashMap<>();
@@ -38,13 +38,16 @@ public class UserServlet extends HttpServlet {
             return;
         }
         String username = pathInfo.substring(1);
-        System.out.println("USERNAME IS "+username);
 
         try {
             UserDTO userDTO = userService.getUserInfo(username);
-            System.out.println(userDTO);
-            System.out.println("Serialized JSON: " + objectMapper.writeValueAsString(userDTO));
-            objectMapper.writeValue(resp.getWriter(), userDTO);
+            boolean isSelf = sessionUsername != null && sessionUsername.equals(username);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("user", userDTO);
+            response.put("isSelf", isSelf);
+
+            objectMapper.writeValue(resp.getWriter(), response);
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             Map<String, Object> error = new HashMap<>();
@@ -103,6 +106,13 @@ public class UserServlet extends HttpServlet {
                     userService.changePassword(username, oldPassword, newPassword);
                     response.put("success", true);
                     response.put("message", "Password changed successfully.");
+                }
+                case "/change-bio" -> {
+                    String newBio = jsonNode.get("newBio").asText();
+
+                    userService.changeBio(username, newBio);
+                    response.put("success", true);
+                    response.put("message", "Bio changed successfully.");
                 }
                 default -> {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);

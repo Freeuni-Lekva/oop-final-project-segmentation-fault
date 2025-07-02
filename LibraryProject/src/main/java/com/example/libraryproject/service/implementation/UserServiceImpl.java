@@ -69,6 +69,20 @@ public class UserServiceImpl implements UserService {
         logger.info("User {} reviewed book {} with rating {} and comment '{}'", username, publicId, rating, comment);
     }
 
+    public void changeBio(String username, String bio){
+        User user;
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if (optionalUser.isEmpty()) {
+            logger.info("bio change attempt failed for non-existing user: {}", username);
+            throw new IllegalArgumentException("user doesn't exist");
+        }
+        user = optionalUser.get();
+
+        user.setBio(bio);
+        userRepository.update(user);
+        logger.info("User {} changed bio successfully", username);
+    }
+
     public void reserveBook(String username, String publicId) {
         Optional<Book> optionalBook = bookRepository.findByPublicId(publicId);
         if (optionalBook.isEmpty()) {
@@ -170,7 +184,7 @@ public class UserServiceImpl implements UserService {
         if (user.isEmpty()) {
             throw new IllegalArgumentException("user doesn't exist");
         }
-        System.out.println("USER FOUND");
+
         return Mappers.convertUser(user.get());
     }
 }

@@ -12,5 +12,7 @@ public interface UserService {
 
     void changePassword(String username, String oldPassword, String newPassword);
 
+    void changeBio(String username, String bio);
+
     UserDTO getUserInfo(String username);
 }

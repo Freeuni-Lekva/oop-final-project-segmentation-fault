@@ -35,11 +35,11 @@
             left: 0;
             width: 100vw;
             height: 300px;
-            background-image: url('images/image.jpg'); /* Ensure correct path */
+            background-image: url('/LibraryProject_war_exploded/images/image.jpg');
             background-size: cover;
             background-position: center 30%;
             background-repeat: no-repeat;
-            z-index: -1; /* behind all content */
+            z-index: -1;
         }
 
 
@@ -335,7 +335,7 @@
 
 <div class="top-line1"></div>
 
-<a href="#home" class="home-button" aria-label="Go to Home">
+<a href="/LibraryProject_war_exploded/main-page.jsp" id="homeButtonPlease" class="home-button" aria-label="Go to Home">
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
         <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
     </svg>
@@ -345,7 +345,7 @@
 <div class="profile-main">
     <div class="left-side">
         <div class="profile-header">
-            <img src="https://i.pravatar.cc/180" alt="User profile picture" class="profile-pic" />
+            <img src="/LibraryProject_war_exploded/images/circle_owl.png" alt="User profile picture" class="profile-pic" />
             <div class="profile-info">
                 <div class="user-name">Elenejobava</div>
                 <div class="user-bio">Passionate reader and book lover. Always looking for new stories to dive into!</div>
@@ -441,8 +441,6 @@
 </div>
 
 </body>
-</html>
-
 <script>
     const segments = window.location.pathname.split("/");
     const userIndex = segments.indexOf("user");
@@ -452,13 +450,22 @@
     if (!username) {
         console.error("Username not found in URL");
     } else {
-        fetch(`/${contextPath}/api/user/${username}`)
+        fetch(`/${contextPath}/api/user/${username}`, {
+            method: 'GET',
+            credentials: 'include'
+        })
             .then(res => {
                 if (!res.ok) throw new Error("User not found");
                 return res.json();
             })
-            .then(user => {
+            .then(data => {
+                const user = data.user;
+                const isSelf = data.isSelf;
                 console.log("Received user object:", user);
+                console.log("is self is ", isSelf);
+                if (!isSelf) {
+                    document.querySelector(".edit-profile").style.display = "none";
+                }
                 // Fill basic info
                 document.querySelector(".user-name").textContent = user.username;
                 document.querySelector(".user-bio").textContent = user.bio;
@@ -512,6 +519,11 @@
             });
     }
 
+    // document.getElementById('homeButton').addEventListener('click', function(e) {
+    //     e.preventDefault();
+    //     window.location.href = `${contextPath}/main-page.jsp`;
+    // });
+
     document.getElementById("passwordForm").addEventListener("submit", function (e) {
         e.preventDefault();
 
@@ -524,7 +536,8 @@
             return;
         }
 
-        fetch("/user/change-password", {
+
+        fetch(`/${contextPath}/api/user/change-password`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -533,7 +546,8 @@
                 username: "Elenejobava",
                 oldPassword: oldPassword,
                 newPassword: newPassword
-            })
+            }),
+            credentials: "include"
         })
             .then(res => res.json())
             .then(data => {
@@ -553,9 +567,8 @@
         e.preventDefault();
 
         const newBio = document.getElementById("newBio").value.trim();
-        const username = "Elenejobava"; // Replace with session or DOM value if needed
 
-        fetch("/user/change-bio", {
+        fetch(`/${contextPath}/api/user/change-bio`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -563,7 +576,8 @@
             body: JSON.stringify({
                 username: username,
                 newBio: newBio
-            })
+            }),
+            credentials: "include"
         })
             .then(res => res.json())
             .then(data => {
@@ -580,3 +594,5 @@
             });
     });
 </script>
+</html>
+
