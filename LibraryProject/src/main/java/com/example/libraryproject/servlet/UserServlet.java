@@ -1,6 +1,7 @@
 package com.example.libraryproject.servlet;
 
 import com.example.libraryproject.configuration.ApplicationProperties;
+import com.example.libraryproject.model.dto.UserDTO;
 import com.example.libraryproject.service.UserService;
 import com.example.libraryproject.service.implementation.UserServiceImpl;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -17,6 +18,44 @@ import static com.example.libraryproject.configuration.ApplicationProperties.OBJ
 
 @WebServlet(name = "UserServlet", urlPatterns = "/api/user/*")
 public class UserServlet extends HttpServlet {
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+
+        ObjectMapper objectMapper = (ObjectMapper) getServletContext().getAttribute(OBJECT_MAPPER_ATTRIBUTE_NAME);
+        UserService userService = (UserService) req.getServletContext().getAttribute(ApplicationProperties.USER_SERVICE_ATTRIBUTE_NAME);
+
+        String pathInfo = req.getPathInfo();
+        String sessionUsername = req.getAttribute("username").toString();
+        if (pathInfo == null || pathInfo.equals("/")) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("error", "Username is missing in URL");
+            objectMapper.writeValue(resp.getWriter(), error);
+            return;
+        }
+        String username = pathInfo.substring(1);
+
+        try {
+            UserDTO userDTO = userService.getUserInfo(username);
+            boolean isSelf = sessionUsername != null && sessionUsername.equals(username);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("user", userDTO);
+            response.put("isSelf", isSelf);
+
+            objectMapper.writeValue(resp.getWriter(), response);
+        } catch (Exception e) {
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("error", "User not found");
+            objectMapper.writeValue(resp.getWriter(), error);
+        }
+    }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -67,6 +106,13 @@ public class UserServlet extends HttpServlet {
                     userService.changePassword(username, oldPassword, newPassword);
                     response.put("success", true);
                     response.put("message", "Password changed successfully.");
+                }
+                case "/change-bio" -> {
+                    String newBio = jsonNode.get("newBio").asText();
+
+                    userService.changeBio(username, newBio);
+                    response.put("success", true);
+                    response.put("message", "Bio changed successfully.");
                 }
                 default -> {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);

@@ -1,5 +1,6 @@
 package com.example.libraryproject.service.implementation;
 
+import com.example.libraryproject.model.dto.UserDTO;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.entity.Review;
@@ -10,6 +11,7 @@ import com.example.libraryproject.repository.OrderRepository;
 import com.example.libraryproject.repository.ReviewRepository;
 import com.example.libraryproject.repository.UserRepository;
 import com.example.libraryproject.service.UserService;
+import com.example.libraryproject.utilities.Mappers;
 import lombok.RequiredArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
@@ -65,6 +67,20 @@ public class UserServiceImpl implements UserService {
 
         userRepository.update(user);
         logger.info("User {} reviewed book {} with rating {} and comment '{}'", username, publicId, rating, comment);
+    }
+
+    public void changeBio(String username, String bio){
+        User user;
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if (optionalUser.isEmpty()) {
+            logger.info("bio change attempt failed for non-existing user: {}", username);
+            throw new IllegalArgumentException("user doesn't exist");
+        }
+        user = optionalUser.get();
+
+        user.setBio(bio);
+        userRepository.update(user);
+        logger.info("User {} changed bio successfully", username);
     }
 
     public void reserveBook(String username, String publicId) {
@@ -161,5 +177,14 @@ public class UserServiceImpl implements UserService {
         user.setPassword(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
         userRepository.update(user);
         logger.info("User {} changed password successfully", username);
+    }
+
+    public UserDTO getUserInfo(String username) {
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isEmpty()) {
+            throw new IllegalArgumentException("user doesn't exist");
+        }
+
+        return Mappers.convertUser(user.get());
     }
 }

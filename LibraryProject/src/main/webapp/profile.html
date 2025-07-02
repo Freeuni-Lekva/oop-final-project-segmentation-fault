@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>User Profile - Freeuni Library</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            /*overflow-x: hidden;*/
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+            width: 100%;
+        }
+
+        body {
+            max-width: 1800px;
+            margin: 250px 1rem 3rem 0; /* Leave space for fixed header */
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 1rem;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Full width top background */
+        .top-line1 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 300px;
+            background-image: url('/LibraryProject_war_exploded/images/image.jpg');
+            background-size: cover;
+            background-position: center 30%;
+            background-repeat: no-repeat;
+            z-index: -1;
+        }
+
+
+        /* Home button */
+        .home-button {
+            position: absolute;
+            top: -220px;
+            left: 1rem;
+            background-color: #66aa9b;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            user-select: none;
+            transition: background-color 0.3s ease;
+            z-index: 10;
+        }
+        .home-button:hover {
+            background-color: #437e6e;
+        }
+        .home-button svg {
+            fill: white;
+            width: 18px;
+            height: 18px;
+            margin-right: 6px;
+        }
+
+        h1 {
+            text-align: left;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        /* Main profile container: left and right columns */
+        .profile-main {
+            margin-top: 1rem;
+            display: flex;
+            gap: 2rem;
+        }
+
+        /* Left side: profile pic, username, bio, stats, currently reading */
+        .left-side {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .profile-pic {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 0 10px rgba(102,170,155,0.5);
+            margin-bottom: 1.5rem;
+            align-self: flex-start;
+            margin-top: 1rem;
+        }
+
+        .user-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 0.25rem;
+        }
+
+        .user-bio {
+            font-size: 1rem;
+            color: #4a5568;
+            margin-bottom: 1.8rem;
+        }
+
+        .stats p {
+            margin: 0rem 0 0.3rem 0;
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .scrollable-frame {
+            background-color: #f0f8f7;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            box-sizing: border-box;
+            max-height: 350px;
+            overflow-y: auto;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+            width: 100%;
+        }
+
+        .scrollable-frame h2 {
+            margin-top: 0;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: #333333;
+        }
+
+        .book-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 0.5rem;
+        }
+
+        .author {
+            font-style: italic;
+            font-weight: 400;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        /* Right side: reviews only */
+        .right-side {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .right-side h2 {
+            margin-left: 20px; /* adjust value as needed */
+        }
+
+        /* Reviews styling */
+        .review {
+            background-color: rgba(44, 71, 65, 0.25);
+            padding: 1rem 1.2rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .review-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.4rem;
+            font-size: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .book-name {
+            flex-shrink: 0;
+        }
+
+        .author {
+            flex-shrink: 0;
+            margin-left: -0.2rem;
+        }
+
+        .rating-stars {
+            color: #ffa200;
+            font-size: 1.2rem;
+        }
+
+        .rating-value {
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+
+        .review-text {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #4a5568;
+        }
+
+        .profile-header {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .profile-info {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .edit-profile {
+            display: flex;
+            gap: 2rem;
+            width: 100%;
+        }
+
+        .change-password,
+
+        .change-bio {
+            flex: 1;
+            background-color: #f7faf9;
+            padding: 1.5rem 2rem;
+            border-radius: 12px;
+            box-sizing: border-box;
+            margin-top: 2rem;
+        }
+
+        .change-bio textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Change Password Form */
+        .change-password {
+            margin-top: 2rem;
+            width: 100%;
+            background-color: #f7faf9;
+            padding: 1.5rem 2rem;
+            border-radius: 12px;
+            box-sizing: border-box;
+        }
+
+        .change-password h2 {
+            margin-bottom: 1rem;
+            color: #2d3748;
+        }
+
+        .change-password label {
+            display: block;
+            margin: 1rem 0 0.5rem;
+            font-weight: 600;
+            color: #444;
+        }
+
+        .change-password input[type="password"] {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        button.update-password {
+            margin-top: 1.5rem;
+            width: 100%;
+            background-color: #66aa9b;
+            border: none;
+            padding: 12px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 5px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            user-select: none;
+            transition: background-color 0.3s ease;
+        }
+        button.update-password:hover {
+            background-color: #437e6e;
+        }
+        button.update-password svg {
+            fill: white;
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            body {
+                margin: 200px 1rem 3rem 1rem; /* reset left margin */
+            }
+            h1 {
+                text-align: center;
+                margin-bottom: 1rem;
+            }
+            .profile-main {
+                flex-direction: column;
+            }
+            .left-side, .right-side {
+                width: 100%;
+            }
+            .scrollable-frame {
+                max-height: 200px;
+            }
+            .profile-pic {
+                margin: 0 auto 1rem;
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-line1"></div>
+
+<a href="/LibraryProject_war_exploded/main-page.jsp" id="homeButtonPlease" class="home-button" aria-label="Go to Home">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+    </svg>
+    Home
+</a>
+
+<div class="profile-main">
+    <div class="left-side">
+        <div class="profile-header">
+            <img src="/LibraryProject_war_exploded/images/circle_owl.png" alt="User profile picture" class="profile-pic" />
+            <div class="profile-info">
+                <div class="user-name">Elenejobava</div>
+                <div class="user-bio">Passionate reader and book lover. Always looking for new stories to dive into!</div>
+                <div class="stats">
+                    <p class="books-read">Books Read: 0</p>
+                    <p class="reviews-given">Reviews Given: 0</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="scrollable-frame" id="currentlyReading">
+            <h2>Currently Reading</h2>
+            <div class="book-item">The Hobbit <span class="author">by J.R.R. Tolkien</span></div>
+            <div class="book-item">Sapiens: A Brief History of Humankind <span class="author">by Yuval Noah Harari</span></div>
+            <div class="book-item">Atomic Habits <span class="author">by James Clear</span></div>
+            <div class="book-item">Educated <span class="author">by Tara Westover</span></div>
+            <div class="book-item">The Catcher in the Rye <span class="author">by J.D. Salinger</span></div>
+            <div class="book-item">1984 <span class="author">by George Orwell</span></div>
+        </div>
+    </div>
+
+    <div class="right-side">
+        <h2>User Reviews</h2>
+        <div class="scrollable-frame" id="reviewsSection" style="flex-grow: 1;">
+            <div class="review">
+                <div class="review-header">
+                    <span class="book-name">The Great Gatsby</span>
+                    <span class="author">by F. Scott Fitzgerald</span>
+                    <span class="rating-stars">★★★★☆</span>
+                    <span class="rating-value">(4.0)</span>
+                </div>
+                <p class="review-text">Loved the story and characters. A classic!</p>
+            </div>
+
+            <div class="review">
+                <div class="review-header">
+                    <span class="book-name">1984</span>
+                    <span class="author">by George Orwell</span>
+                    <span class="rating-stars">★★★☆☆</span>
+                    <span class="rating-value">(3.0)</span>
+                </div>
+                <p class="review-text">Interesting but a bit depressing.</p>
+            </div>
+
+            <div class="review">
+                <div class="review-header">
+                    <span class="book-name">Pride and Prejudice</span>
+                    <span class="author">by Jane Austen</span>
+                    <span class="rating-stars">★★★★★</span>
+                    <span class="rating-value">(5.0)</span>
+                </div>
+                <p class="review-text">Absolutely loved the romance and wit!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="edit-profile">
+    <div class="change-password">
+        <h2>Change Password</h2>
+        <form id="passwordForm">
+            <label for="currentPassword">Current Password</label>
+            <input type="password" id="currentPassword" name="currentPassword" required />
+
+            <label for="newPassword">New Password</label>
+            <input type="password" id="newPassword" name="newPassword" required />
+
+            <label for="confirmPassword">Confirm New Password</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" required />
+
+            <button type="submit" class="update-password" aria-label="Update Password">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M12 4v1H6.59L19 17.41 17.59 19 5 6.59V12H4V4h8z" />
+                </svg>
+                Update Password
+            </button>
+        </form>
+    </div>
+    <div class="change-bio">
+        <h2>Change Bio</h2>
+        <form id="bioForm">
+            <label for="newBio">New Bio</label>
+            <textarea id="newBio" name="newBio" rows="4" required></textarea>
+
+            <button type="submit" class="update-password" aria-label="Update Bio">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M12 4v1H6.59L19 17.41 17.59 19 5 6.59V12H4V4h8z" />
+                </svg>
+                Update Bio
+            </button>
+        </form>
+    </div>
+</div>
+
+</body>
+<script>
+    const segments = window.location.pathname.split("/");
+    const userIndex = segments.indexOf("user");
+    const username = segments[userIndex + 1];
+    const contextPath = segments[1];
+
+    if (!username) {
+        console.error("Username not found in URL");
+    } else {
+        fetch(`/${contextPath}/api/user/${username}`, {
+            method: 'GET',
+            credentials: 'include'
+        })
+            .then(res => {
+                if (!res.ok) throw new Error("User not found");
+                return res.json();
+            })
+            .then(data => {
+                const user = data.user;
+                const isSelf = data.isSelf;
+                console.log("Received user object:", user);
+                console.log("is self is ", isSelf);
+                if (!isSelf) {
+                    document.querySelector(".edit-profile").style.display = "none";
+                }
+                // Fill basic info
+                document.querySelector(".user-name").textContent = user.username;
+                document.querySelector(".user-bio").textContent = user.bio;
+                document.querySelector(".books-read").textContent = `Books Read: ${user.booksRead}`;
+                document.querySelector(".reviews-given").textContent = `Reviews Given: ${user.reviewsGiven}`;
+
+                const current = document.getElementById("currentlyReading");
+                current.innerHTML = "<h2>Currently Reading</h2>";
+
+                if (user.currentlyReading.length === 0) {
+                    const noBooks = document.createElement("p");
+                    noBooks.textContent = "No books currently reading.";
+                    current.appendChild(noBooks);
+                } else {
+                    user.currentlyReading.forEach(book => {
+                        const div = document.createElement("div");
+                        div.className = "book-item";
+                        div.innerHTML = `${book.title} <span class="author">by ${book.author}</span>`;
+                        current.appendChild(div);
+                    });
+                }
+
+// Reviews
+                const reviews = document.getElementById("reviewsSection");
+                reviews.innerHTML = "";
+
+                if (user.reviews.length === 0) {
+                    const noReviews = document.createElement("p");
+                    noReviews.textContent = "No reviews yet.";
+                    reviews.appendChild(noReviews);
+                } else {
+                    user.reviews.forEach(r => {
+                        const div = document.createElement("div");
+                        div.className = "review";
+                        div.innerHTML = `
+      <div class="review-header">
+        <span class="book-name">${r.bookTitle}</span>
+        <span class="author">by ${r.bookAuthor}</span>
+        <span class="rating-stars">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</span>
+        <span class="rating-value">(${r.rating}.0)</span>
+      </div>
+      <p class="review-text">${r.comment}</p>
+    `;
+                        reviews.appendChild(div);
+                    });
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert(`Could not load user data for user ${username}`);
+            });
+    }
+
+    // document.getElementById('homeButton').addEventListener('click', function(e) {
+    //     e.preventDefault();
+    //     window.location.href = `${contextPath}/main-page.jsp`;
+    // });
+
+    document.getElementById("passwordForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const oldPassword = document.getElementById("currentPassword").value.trim();
+        const newPassword = document.getElementById("newPassword").value.trim();
+        const confirmPassword = document.getElementById("confirmPassword").value.trim();
+
+        if (newPassword !== confirmPassword) {
+            alert('Passwords do not match, please try again');
+            return;
+        }
+
+
+        fetch(`/${contextPath}/api/user/change-password`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: "Elenejobava",
+                oldPassword: oldPassword,
+                newPassword: newPassword
+            }),
+            credentials: "include"
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Password updated!");
+                } else {
+                    alert("Error: " + data.error);
+                }
+            })
+            .catch(err => {
+                alert("Something went wrong!");
+                console.error(err);
+            });
+    });
+
+    document.getElementById("bioForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const newBio = document.getElementById("newBio").value.trim();
+
+        fetch(`/${contextPath}/api/user/change-bio`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: username,
+                newBio: newBio
+            }),
+            credentials: "include"
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Bio updated!");
+                    document.querySelector(".user-bio").textContent = newBio;
+                } else {
+                    alert("Error: " + data.error);
+                }
+            })
+            .catch(err => {
+                alert("Something went wrong!");
+                console.error(err);
+            });
+    });
+</script>
+</html>
+
