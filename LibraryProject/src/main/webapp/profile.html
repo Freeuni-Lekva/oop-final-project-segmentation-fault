@@ -659,6 +659,7 @@
             .then(data => {
                 if (data.success) {
                     alert("Password updated!");
+                    document.getElementById("passwordForm").reset()
                 } else {
                     alert("Error: " + data.error);
                 }
@@ -690,6 +691,8 @@
                 if (data.success) {
                     alert("Bio updated!");
                     document.querySelector(".user-bio").textContent = newBio;
+                    document.getElementById("newBio").value = "";
+                    document.getElementById("bioForm").reset();
                 } else {
                     alert("Error: " + data.error);
                 }
