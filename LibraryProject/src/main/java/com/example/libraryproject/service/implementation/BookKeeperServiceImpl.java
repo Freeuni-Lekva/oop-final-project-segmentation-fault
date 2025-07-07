@@ -2,6 +2,7 @@ package com.example.libraryproject.service.implementation;
 
 import com.example.libraryproject.model.dto.BookAdditionRequest;
 import com.example.libraryproject.model.dto.UserDTO;
+import com.example.libraryproject.model.dto.BookDTO;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.entity.User;
@@ -23,6 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -146,5 +148,14 @@ public class BookKeeperServiceImpl implements BookKeeperService {
         logger.info("Downloading image file: {}", filePath);
 
         return safeFileName;
+    }
+
+    public Set<BookDTO> getBooks() {
+        List<Book> books = bookRepository.findAll();
+        Set<BookDTO> bookDTOs = new HashSet<>();
+        for (Book book : books) {
+            bookDTOs.add(Mappers.mapBookToDTO(book));
+        }
+        return bookDTOs;
     }
 }

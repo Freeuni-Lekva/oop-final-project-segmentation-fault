@@ -1,7 +1,8 @@
 package com.example.libraryproject.model.dto;
 
 public record BookDTO(
-        String title,
+        String publicId,
+        String name,
         String description,
         String genre,
         String author,
@@ -9,7 +10,6 @@ public record BookDTO(
         Long originalAmount,
         Long currentAmount,
         Long volume,
-        Long rating
-) {
-
-}
+        Long rating,
+        String date
+) {}

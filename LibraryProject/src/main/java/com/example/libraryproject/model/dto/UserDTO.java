@@ -8,5 +8,6 @@ public record UserDTO(
         int booksRead,
         int reviewsGiven,
         List<ReviewDTO> reviews,
-        List<BookDTO> currentlyReading
+        List<BookDTO> currentlyReading,
+        String status
 ) {}

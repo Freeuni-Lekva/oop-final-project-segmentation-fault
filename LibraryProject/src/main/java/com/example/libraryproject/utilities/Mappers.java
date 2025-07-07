@@ -13,7 +13,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
+
 import java.util.stream.Collectors;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -97,6 +97,7 @@ public class Mappers {
 
         List<BookDTO> currentlyReadingDTOs = user.getBorrowedBooks().stream()
                 .map(book -> new BookDTO(
+                        book.getPublicId(),
                         book.getName(),
                         book.getDescription(),
                         book.getGenre(),
@@ -105,7 +106,8 @@ public class Mappers {
                         book.getTotalAmount(),
                         book.getCurrentAmount(),
                         book.getVolume(),
-                        book.getRating()))
+                        book.getRating(),
+                        book.getDate() != null ? book.getDate().toString() : ""))
                 .collect(Collectors.toList());
 
         return new UserDTO(
@@ -114,20 +116,23 @@ public class Mappers {
                 user.getReadBooks().size(),
                 reviewDTOs.size(),
                 reviewDTOs,
-                currentlyReadingDTOs
+                currentlyReadingDTOs,
+                user.getStatus().name()
         );
     }
     public static BookDTO mapBookToDTO(Book book) {
         return new BookDTO(
-                book.getName(),
-                book.getDescription(),
-                book.getGenre(),
-                book.getAuthor(),
-                book.getImageUrl(),
-                book.getTotalAmount(),
-                book.getCurrentAmount(),
-                book.getVolume(),
-                book.getRating()
+                book.getPublicId() != null ? book.getPublicId() : "",
+                book.getName() != null ? book.getName() : "Unknown Title",
+                book.getDescription() != null ? book.getDescription() : "",
+                book.getGenre() != null ? book.getGenre() : "Unknown",
+                book.getAuthor() != null ? book.getAuthor() : "Unknown Author",
+                book.getImageUrl() != null ? book.getImageUrl() : "",
+                book.getTotalAmount() != null ? book.getTotalAmount() : 0L,
+                book.getCurrentAmount() != null ? book.getCurrentAmount() : 0L,
+                book.getVolume() != null ? book.getVolume() : 0L,
+                book.getRating() != null ? book.getRating() : 0L,
+                book.getDate() != null ? book.getDate().toString() : ""
         );
     }
 }
