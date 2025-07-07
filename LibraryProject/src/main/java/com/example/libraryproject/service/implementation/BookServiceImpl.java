@@ -25,6 +25,7 @@ public class BookServiceImpl implements BookService {
         }
         Book book = bookOptional.get();
         return new BookDTO(
+                book.getPublicId(),
                 book.getName(),
                 book.getDescription(),
                 book.getGenre(),
@@ -33,7 +34,8 @@ public class BookServiceImpl implements BookService {
                 book.getTotalAmount(),
                 book.getCurrentAmount(),
                 book.getVolume(),
-                book.getRating()
+                book.getRating(),
+                book.getDate() != null ? book.getDate().toString() : ""
         );
     }
 
@@ -41,6 +43,7 @@ public class BookServiceImpl implements BookService {
         logger.info("Getting books by genre: {}", genre);
         return bookRepository.findByGenre(genre).stream().map(
                 book -> new BookDTO(
+                        book.getPublicId(),
                         book.getName(),
                         book.getDescription(),
                         book.getGenre(),
@@ -49,7 +52,8 @@ public class BookServiceImpl implements BookService {
                         book.getCurrentAmount(),
                         book.getTotalAmount(),
                         book.getVolume(),
-                        book.getRating()
+                        book.getRating(),
+                        book.getDate() != null ? book.getDate().toString() : ""
                 )
         ).toList();
     }
@@ -58,6 +62,7 @@ public class BookServiceImpl implements BookService {
         logger.info("Getting all books");
         return bookRepository.findAll().stream().map(
                 book -> new BookDTO(
+                        book.getPublicId(),
                         book.getName(),
                         book.getDescription(),
                         book.getGenre(),
@@ -66,7 +71,8 @@ public class BookServiceImpl implements BookService {
                         book.getCurrentAmount(),
                         book.getTotalAmount(),
                         book.getVolume(),
-                        book.getRating()
+                        book.getRating(),
+                        book.getDate() != null ? book.getDate().toString() : ""
                 )
         ).toList();
     }
@@ -77,6 +83,7 @@ public class BookServiceImpl implements BookService {
                 .filter(book -> book.getTotalAmount() > 0)
                 .map(
                         book -> new BookDTO(
+                                book.getPublicId(),
                                 book.getName(),
                                 book.getDescription(),
                                 book.getGenre(),
@@ -85,7 +92,8 @@ public class BookServiceImpl implements BookService {
                                 book.getCurrentAmount(),
                                 book.getTotalAmount(),
                                 book.getVolume(),
-                                book.getRating()
+                                book.getRating(),
+                                book.getDate() != null ? book.getDate().toString() : ""
                         )
                 ).toList();
     }

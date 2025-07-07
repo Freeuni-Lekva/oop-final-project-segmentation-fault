@@ -671,6 +671,179 @@
         100% { transform: rotate(360deg); }
     }
 
+
+
+
+
+    .book-management-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .search-filters-row {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+    }
+
+    .book-search-input {
+        flex: 1;
+        padding: 10px 12px;
+        border: 1px solid #d1d9d8;
+        border-radius: 6px;
+        font-size: 14px;
+        background: white;
+        min-width: 250px;
+    }
+
+    .book-search-input:focus {
+        outline: none;
+        border-color: #a7cdcd;
+        box-shadow: 0 0 0 2px rgba(167, 205, 205, 0.1);
+    }
+
+    .filter-buttons {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .filter-select {
+        padding: 8px 12px;
+        border: 1px solid #d1d9d8;
+        border-radius: 6px;
+        font-size: 14px;
+        background: white;
+        color: #4a5568;
+        cursor: pointer;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: #a7cdcd;
+        box-shadow: 0 0 0 2px rgba(167, 205, 205, 0.1);
+    }
+
+    .books-list-section {
+        background: #f8fafa;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #e7edec;
+    }
+
+    .books-list {
+        max-height: 500px;
+        overflow-y: auto;
+        border: 1px solid #e7edec;
+        border-radius: 6px;
+        background: white;
+    }
+
+    .book-item {
+        padding: 15px;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+    }
+
+    .book-item:hover {
+        background-color: #f8fafa;
+    }
+
+    .book-item:last-child {
+        border-bottom: none;
+    }
+
+    .book-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .book-image {
+        flex-shrink: 0;
+        width: 50px;
+        height: 70px;
+        border-radius: 4px;
+        overflow: hidden;
+        background: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .book-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+
+    .book-details {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .book-name {
+        font-weight: 600;
+        color: #4a5568;
+        font-size: 16px;
+        margin-bottom: 4px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .book-author {
+        color: #798e8b;
+        font-size: 14px;
+        margin-bottom: 6px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .book-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: #a7b8b6;
+        flex-wrap: wrap;
+    }
+
+    .book-genre,
+    .book-volume,
+    .book-year,
+    .book-amount {
+        white-space: nowrap;
+    }
+
+    .book-actions {
+        flex-shrink: 0;
+    }
+
+    .btn-small {
+        padding: 6px 12px;
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .btn-small svg {
+        width: 12px;
+        height: 12px;
+    }
+
     @media (max-width: 768px) {
         .admin-tabs {
             flex-direction: column;
@@ -687,6 +860,30 @@
 
         .user-management-grid {
             grid-template-columns: 1fr;
+        }
+
+        .search-filters-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .book-search-input {
+            min-width: auto;
+        }
+
+        .book-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .book-info {
+            width: 100%;
+        }
+
+        .book-actions {
+            width: 100%;
+            text-align: right;
         }
     }
 </style>

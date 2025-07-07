@@ -3,6 +3,7 @@ package com.example.libraryproject.servlet;
 import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.model.dto.BookAdditionFromGoogleRequest;
 import com.example.libraryproject.model.dto.BookAdditionRequest;
+import com.example.libraryproject.model.dto.BookDTO;
 import com.example.libraryproject.model.dto.UserDTO;
 import com.example.libraryproject.service.BookKeeperService;
 import com.example.libraryproject.service.GoogleBooksApiService;
@@ -98,6 +99,8 @@ public class BookKeeperServlet extends HttpServlet {
 
         if ("/users".equals(path)) {
             handleGetUsers(response, bookKeeperService);
+        } else if ("/books".equals(path)) {
+            handleGetBooks(response, bookKeeperService);
         } else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
@@ -171,7 +174,7 @@ public class BookKeeperServlet extends HttpServlet {
         String bookPublicId = params.get("bookPublicId").asText();
 
         if (bookPublicId == null) {
-            throw new IllegalArgumentException("Order Public ID is required to add a new book.");
+            throw new IllegalArgumentException("Book ID is required to delete a book.");
         }
 
         bookKeeperService.deleteBook(bookPublicId);
@@ -203,9 +206,16 @@ public class BookKeeperServlet extends HttpServlet {
 
     private void handleGetUsers(HttpServletResponse resp, BookKeeperService bookKeeperService)
             throws IOException {
-
         Set<UserDTO> users = bookKeeperService.getUsers();
         objectMapper.writeValue(resp.getWriter(), users);
+        resp.setStatus(HttpServletResponse.SC_OK);
+    }
+
+    private void handleGetBooks(HttpServletResponse resp, BookKeeperService bookKeeperService)
+            throws IOException {
+        Set<BookDTO> books = bookKeeperService.getBooks();
+        objectMapper.writeValue(resp.getWriter(), books);
+        resp.setStatus(HttpServletResponse.SC_OK);
     }
 
 }

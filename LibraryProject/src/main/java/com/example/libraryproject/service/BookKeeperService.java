@@ -2,6 +2,7 @@ package com.example.libraryproject.service;
 
 import com.example.libraryproject.model.dto.BookAdditionRequest;
 import com.example.libraryproject.model.dto.UserDTO;
+import com.example.libraryproject.model.dto.BookDTO;
 import jakarta.servlet.http.Part;
 
 import java.io.IOException;
@@ -20,6 +21,8 @@ public interface BookKeeperService {
     void unbanUser(String username);
 
     Set<UserDTO> getUsers();
+
+    Set<BookDTO> getBooks();
 
     String downloadImage(Part filePart) throws IOException;
 
