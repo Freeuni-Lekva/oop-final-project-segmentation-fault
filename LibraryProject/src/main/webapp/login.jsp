@@ -19,7 +19,7 @@
     #signup-options button {
       margin: 6px;
       padding: 10px 15px;
-      background-color: #66aa9b;
+      background-color: #af8d8d;
       color: white;
       border: none;
       border-radius: 5px;
@@ -27,7 +27,7 @@
     }
 
     #signup-options button:hover {
-      background-color: #437e6e;
+      background-color: #9c6262;
     }
   </style>
 </head>
@@ -35,7 +35,7 @@
 
 <h1 class="header-text">Explore the world's knowledge, cultures and ideas</h1>
 
-<img src="${pageContext.request.contextPath}/images/image4.jpg" alt="Centered Banner" class="login-image"/>
+<img src="${pageContext.request.contextPath}/images/rococo.jpg" alt="Centered Banner" class="login-image"/>
 
 <div class="login-box">
   <h2>Sign in to Freeuni Library</h2>

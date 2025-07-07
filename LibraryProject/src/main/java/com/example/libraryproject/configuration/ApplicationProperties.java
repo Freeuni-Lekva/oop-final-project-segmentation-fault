@@ -22,7 +22,7 @@ public class ApplicationProperties {
     public static final int GOOGLE_BOOKS_API_MAX_PAGE = 150;
 
     public static final int DEFAULT_RATING = 3;
-    public static final int RECOMMENDED_COUNT = 3;
+    public static final int RECOMMENDED_COUNT = 25;
     public static final int TOP_AUTHORS_COUNT = 3;
     public static final int TOP_GENRE_COUNT = 3;
 
