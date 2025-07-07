@@ -160,7 +160,7 @@
       document.getElementById('recommendationsSection').style.display = 'none';
     }
 
-
+    fetchRecommendations();
     fetchOurCollection();
     fetchRecentBooks();
     fetchPopularBooks();
@@ -232,12 +232,13 @@
                 console.log('Unique genres:', Array.from(genres));
                 document.getElementById('totalGenres').textContent = genres.size;
 
+                // Additional debug info
                 console.log('Stats Debug Info:');
                 console.log('Total books:', books.length);
                 console.log('Available books:', availableCount);
                 console.log('Unique genres:', genres.size);
 
-
+                // Log books with availability issues
                 var booksWithIssues = books.filter(function(book) {
                   var current = book.currentAmount ? Number(book.currentAmount) : 0;
                   return isNaN(current) || current < 0;
@@ -248,7 +249,7 @@
               })
               .catch(function(error) {
                 console.error('Error fetching stats:', error);
-
+                // Set default values on error
                 document.getElementById('totalBooks').textContent = '0';
                 document.getElementById('availableBooks').textContent = '0';
                 document.getElementById('totalGenres').textContent = '0';
