@@ -33,7 +33,7 @@ public class ImageServlet extends HttpServlet {
             Path externalPath = Paths.get(imageDir, fileName);
             File image = externalPath.toFile();
             if (image.exists()) {
-                serveFileFromDisk(image, response);
+                bookCoverImages(image, response);
                 return;
             }
         }
@@ -41,14 +41,14 @@ public class ImageServlet extends HttpServlet {
         String webappImagePath = "/images/" + fileName;
         InputStream imageStream = getServletContext().getResourceAsStream(webappImagePath);
         if (imageStream != null) {
-            serveFileFromStream(imageStream, fileName, response);
+            backgroundImages(imageStream, fileName, response);
         } else {
             System.out.println("Image not found: " + fileName);
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
 
-    private void serveFileFromDisk(File image, HttpServletResponse response) throws IOException {
+    private void bookCoverImages(File image, HttpServletResponse response) throws IOException {
         String contentType = getServletContext().getMimeType(image.getName());
         if (contentType == null) {
             contentType = "application/octet-stream";
@@ -66,7 +66,7 @@ public class ImageServlet extends HttpServlet {
         }
     }
 
-    private void serveFileFromStream(InputStream imageStream, String fileName, HttpServletResponse response) throws IOException {
+    private void backgroundImages(InputStream imageStream, String fileName, HttpServletResponse response) throws IOException {
         String contentType = getServletContext().getMimeType(fileName);
         if (contentType == null) {
             contentType = "application/octet-stream";
