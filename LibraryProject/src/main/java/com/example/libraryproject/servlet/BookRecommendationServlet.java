@@ -21,24 +21,12 @@ public class BookRecommendationServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
+
         HttpSession session = request.getSession(false);
-
-        if (session == null || session.getAttribute("username") == null) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("{\"error\": \"User not authenticated\"}");
-            return;
-        }
-
         String username = session.getAttribute("username").toString();
 
         BookRecommendationService bookRecommendationService =
                 (BookRecommendationService) getServletContext().getAttribute(BOOK_RECOMMENDATION_SERVICE_ATTRIBUTE_NAME);
-
-        if (bookRecommendationService == null) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write("{\"error\": \"Recommendation service not available\"}");
-            return;
-        }
 
         try {
             Set<BookDTO> recommendedBooks = bookRecommendationService.recommendBooks(username);
