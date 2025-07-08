@@ -38,12 +38,12 @@
 </head>
 <body>
 
-<img src="${pageContext.request.contextPath}/images/image4.jpg" alt="Centered Banner" class="login-image"/>
+<img src="${pageContext.request.contextPath}/images/rococo.jpg" alt="Centered Banner" class="login-image"/>
 
 <div class="login-box">
     <h2>
         Sign Up as User
-        <img src="images/owl.jpg" alt="owl" class="owl-icon">
+        <img src="images/cropped_circle_image.jpg" alt="owl" class="owl-icon">
     </h2>
 
     <!-- Removed form action and method, using JS -->

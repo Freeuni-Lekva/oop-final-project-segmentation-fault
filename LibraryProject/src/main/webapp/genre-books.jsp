@@ -128,13 +128,32 @@
             var contextPath = '<%= request.getContextPath() %>';
             var imageHtml = '';
 
+            var defaultCovers = [
+                contextPath + '/images/noCover1.jpg',
+                contextPath + '/images/noCover2.jpg',
+                contextPath + '/images/noCover3.jpg',
+                contextPath + '/images/noCover4.jpg',
+                contextPath + '/images/noCover5.jpg',
+                contextPath + '/images/noCover6.jpg',
+                contextPath + '/images/noCover7.jpg',
+                contextPath + '/images/noCover8.jpg',
+                contextPath + '/images/noCover9.jpg',
+                contextPath + '/images/noCover10.jpg',
+                contextPath + '/images/noCover11.jpg',
+                contextPath + '/images/noCover12.jpg'
+            ];
+
+            function getRandomDefaultCover() {
+                var randomIndex = Math.floor(Math.random() * defaultCovers.length);
+                return defaultCovers[randomIndex];
+            }
+
             if (book.imageUrl) {
                 var imagePath = '/images/' + book.imageUrl;
                 imageHtml = '<img src="' + imagePath + '" alt="' + (book.title || 'Book cover') + '"' +
-                    ' onerror="this.style.display=\'none\'; this.nextElementSibling.style.display=\'flex\'">' +
-                    '<div class="book-cover-fallback" style="display:none">📚</div>';
+                    ' onerror="this.src=\'' + getRandomDefaultCover() + '\'">';
             } else {
-                imageHtml = '<div class="book-cover-fallback">📚</div>';
+                imageHtml = '<img src="' + getRandomDefaultCover() + '" alt="No book cover">';
             }
 
             var rating = book.rating || 0;
@@ -148,8 +167,6 @@
             var bookDescription = book.description || '';
             var currentAmount = book.currentAmount || 0;
             var originalAmount = book.originalAmount || 0;
-
-
 
             var ratingHtml = '';
             if (rating > 0) {

@@ -16,7 +16,6 @@
         position: relative;
         width: 100%;
         height: 300px;
-        background-image: url('images/image1.jpg');
         background-size: cover;
         background-position: center 28%;
         background-repeat: no-repeat;
@@ -226,7 +225,7 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        color: #a7cdcd;
+        color: #b4d1d1;
         text-decoration: none;
         font-weight: 500;
         margin-bottom: 20px;
@@ -235,7 +234,7 @@
     }
 
     .back-link:hover {
-        color: #7ba8a8;
+        color: #729a9a;
     }
 
     .back-arrow {

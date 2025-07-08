@@ -8,19 +8,18 @@
         html, body {
             margin: 0;
             padding: 0;
-            /*overflow-x: hidden;*/
             box-sizing: border-box;
             font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
+            background-color: #faf8f0;
             width: 100%;
         }
 
         body {
             max-width: 1800px;
-            margin: 250px 1rem 3rem 0; /* Leave space for fixed header */
-            background: white;
+            margin: 250px 1rem 3rem 0;
+            background: #fefdf8;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(189,167,107,0.1);
             padding: 1rem;
             position: relative;
             display: flex;
@@ -28,32 +27,32 @@
             gap: 1.5rem;
         }
 
-        /* Full width top background */
+
         .top-line1 {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 300px;
-            background-image: url('/LibraryProject_war_exploded/images/image.jpg');
+            background-image: url('/LibraryProject_war_exploded/images/image0.jpg');
             background-size: cover;
-            background-position: center 30%;
+            background-position: center 60%;
             background-repeat: no-repeat;
             z-index: -1;
         }
 
 
-        /* Home button */
         .home-button {
             position: absolute;
             top: -220px;
             left: 1rem;
-            background-color: #66aa9b;
+            background-color: rgba(189,167,107,0.9);
             color: white;
             border: none;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 400;
+            font-size: 0.85rem;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -61,31 +60,37 @@
             user-select: none;
             transition: background-color 0.3s ease;
             z-index: 10;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(189,167,107,0.2);
         }
+
         .home-button:hover {
-            background-color: #437e6e;
+            background-color: rgba(167,147,92,0.95);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(189,167,107,0.3);
         }
+
         .home-button svg {
             fill: white;
-            width: 18px;
+            width: 16px;
             height: 18px;
             margin-right: 6px;
         }
 
         h1 {
             text-align: left;
-            color: #333;
+            color: #5d4e37;
             margin-bottom: 1rem;
         }
 
-        /* Main profile container: left and right columns */
+
         .profile-main {
             margin-top: 1rem;
             display: flex;
             gap: 2rem;
         }
 
-        /* Left side: profile pic, username, bio, stats, currently reading */
+
         .left-side {
             flex: 1;
             display: flex;
@@ -98,65 +103,108 @@
             height: 150px;
             border-radius: 50%;
             object-fit: cover;
-            box-shadow: 0 0 10px rgba(102,170,155,0.5);
+            box-shadow: 0 0 10px rgba(160,130,98,0.5);
             margin-bottom: 1.5rem;
             align-self: flex-start;
             margin-top: 1rem;
         }
 
         .user-name {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #2d3748;
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #5d4e37;
             margin-bottom: 0.25rem;
         }
 
         .user-bio {
-            font-size: 1rem;
-            color: #4a5568;
+            font-size: 0.8rem;
+            color: #8b7355;
             margin-bottom: 1.8rem;
         }
 
         .stats p {
-            margin: 0rem 0 0.3rem 0;
-            color: #4a5568;
+            margin: 0 0 0.3rem 0;
+            color: #8b7355;
             font-weight: 600;
         }
 
         .scrollable-frame {
-            background-color: #f0f8f7;
-            border-radius: 12px;
-            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, #f9f7f4 0%, #f7f3f0 100%);
+            border-radius: 16px;
+            padding: 1.5rem;
             box-sizing: border-box;
             max-height: 350px;
             overflow-y: auto;
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(160,130,98,0.1);
             margin-bottom: 1rem;
             width: 100%;
         }
 
         .scrollable-frame h2 {
             margin-top: 0;
-            margin-bottom: 0.75rem;
+            margin-bottom: 1rem;
             font-weight: 600;
-            color: #333333;
+            color: #5d4e37;
+            font-size: 1.2rem;
+        }
+        /* Add this to your style section */
+        .scrollable-frame::-webkit-scrollbar {
+            width: 8px; /* width of the scrollbar */
+        }
+
+        .scrollable-frame::-webkit-scrollbar-track {
+            background: #f5f0e6; /* color of the track */
+            border-radius: 4px;
+        }
+
+        .scrollable-frame::-webkit-scrollbar-thumb {
+            background-color: #bda76b; /* color of the scroll thumb */
+            border-radius: 4px; /* roundness of the scroll thumb */
+        }
+
+        .scrollable-frame::-webkit-scrollbar-thumb:hover {
+            background-color: #685936; /* color when hovered */
+        }
+
+        .no-content-message {
+            text-align: center;
+            color: #a0865c;
+            font-size: 0.9rem;
+            font-weight: 400;
+            font-style: italic;
+            padding: 2rem 1rem;
+            background: rgba(255,255,255,0.6);
+            border-radius: 12px;
+            border: 1px dashed rgba(160,130,98,0.2);
+            margin: 1rem 0;
         }
 
         .book-item {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.8rem;
+            padding: 0.5rem;
+            background: rgba(255,255,255,0.7);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 450;
+            color: #5d4e37;
+        }
+
+        .book-item:hover {
+            background: rgba(255,255,255,0.9);
+            transform: translateY(-1px);
         }
 
         .author {
             font-style: italic;
             font-weight: 400;
-            color: #718096;
-            font-size: 0.9rem;
+            color: #b8a76b;
+            font-size: 0.8rem;
         }
 
-        /* Right side: reviews only */
         .right-side {
             flex: 1;
             display: flex;
@@ -164,15 +212,38 @@
         }
 
         .right-side h2 {
-            margin-left: 20px; /* adjust value as needed */
+            margin-left: 20px;
+            color: #5d4e37;
+            font-size: 1.4rem;
+            font-weight: 600;
         }
 
-        /* Reviews styling */
+
         .review {
-            background-color: rgba(44, 71, 65, 0.25);
-            padding: 1rem 1.2rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
+            background: #fffbf5;
+            border: 1px solid rgba(245, 196, 94, 0.3);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px rgba(245, 196, 94, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .review::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #e6cb58, #face28);
+        }
+
+        .review:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(189,167,107,0.12);
         }
 
         .review-header {
@@ -180,35 +251,47 @@
             align-items: center;
             gap: 10px;
             font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 0.4rem;
+            color: #5d4e37;
+            margin-bottom: 0.8rem;
             font-size: 1rem;
             flex-wrap: wrap;
         }
 
         .book-name {
             flex-shrink: 0;
+            color: #7a6a3e;
+            font-weight: 570;
+            font-size: 0.9rem;
         }
 
-        .author {
+        .review-author {
             flex-shrink: 0;
             margin-left: -0.2rem;
+            color: #8b7355;
+            font-weight: 400;
+            font-size: 0.8rem;
         }
 
         .rating-stars {
-            color: #ffa200;
-            font-size: 1.2rem;
+            color: #ffd700;
+            font-size: 0.9rem;
         }
 
         .rating-value {
-            color: #4a5568;
+            color: #b8a76b;
             font-size: 0.9rem;
+            background: rgba(189,167,107,0.1);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 500;
         }
 
         .review-text {
             margin: 0;
-            font-size: 0.95rem;
-            color: #4a5568;
+            font-size: 0.9rem;
+            color: #b8a76b;
+            line-height: 1.5;
+            font-weight: 400;
         }
 
         .profile-header {
@@ -227,79 +310,117 @@
             display: flex;
             gap: 2rem;
             width: 100%;
+            margin-top: 2rem;
         }
 
         .change-password,
-
         .change-bio {
             flex: 1;
-            background-color: #f7faf9;
-            padding: 1.5rem 2rem;
-            border-radius: 12px;
+            background: linear-gradient(135deg, #fdfcfb 0%, #f9f6f2 100%);
+            border: 1px solid rgba(160,130,98,0.15);
+            border-radius: 20px;
+            padding: 2rem;
             box-sizing: border-box;
-            margin-top: 2rem;
+            box-shadow: 0 8px 24px rgba(160,130,98,0.08);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .change-password::before,
+        .change-bio::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #e6c229, #d4af37);
+        }
+
+        .change-password:hover,
+        .change-bio:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(160,130,98,0.12);
+        }
+
+        .change-password h2,
+        .change-bio h2 {
+            margin-bottom: 1.5rem;
+            color: #5d4e37;
+            font-size: 1.1rem;
+            font-weight: 570;
+        }
+
+        .change-password label,
+        .change-bio label {
+            display: block;
+            margin: 1.2rem 0 0.6rem;
+            font-weight: 500;
+            color: #8b7355;
+            font-size: 0.87rem;
+        }
+
+        .change-password input[type="password"],
+        .change-bio textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 2px solid rgba(160,130,98,0.2);
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+            color: #5d4e37;
+        }
+
+        .change-password input[type="password"]:focus,
+        .change-bio textarea:focus {
+            outline: none;
+            border-color: #a08262;
+            box-shadow: 0 0 0 3px rgba(160,130,98,0.1);
+            background: white;
         }
 
         .change-bio textarea {
-            width: 100%;
-            padding: 8px 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        /* Change Password Form */
-        .change-password {
-            margin-top: 2rem;
-            width: 100%;
-            background-color: #f7faf9;
-            padding: 1.5rem 2rem;
-            border-radius: 12px;
-            box-sizing: border-box;
-        }
-
-        .change-password h2 {
-            margin-bottom: 1rem;
-            color: #2d3748;
-        }
-
-        .change-password label {
-            display: block;
-            margin: 1rem 0 0.5rem;
-            font-weight: 600;
-            color: #444;
-        }
-
-        .change-password input[type="password"] {
-            width: 100%;
-            padding: 8px 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
+            resize: vertical;
+            min-height: 100px;
         }
 
         button.update-password {
-            margin-top: 1.5rem;
+            margin-top: 2rem;
             width: 100%;
-            background-color: #66aa9b;
+            background: linear-gradient(135deg, #F5C45E 0%, #E8B850 100%);
             border: none;
-            padding: 12px;
+            padding: 14px 20px;
             color: white;
-            font-size: 1rem;
+            font-size: 0.9rem;
+            font-weight: 550;
             cursor: pointer;
-            border-radius: 5px;
-
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
             user-select: none;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(245, 196, 94, 0.3);
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
         }
+
         button.update-password:hover {
-            background-color: #437e6e;
+            background: linear-gradient(135deg, #E8B850 0%, #DBAC48 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(219, 172, 72, 0.4);
+            color: #4a3d2b;
         }
+
+        button.update-password:active {
+            transform: translateY(0);
+            background: linear-gradient(135deg, #DBAC48 0%, #CEA040 100%);
+        }
+
         button.update-password svg {
             fill: white;
             width: 18px;
@@ -328,6 +449,10 @@
                 margin: 0 auto 1rem;
                 display: block;
             }
+            .edit-profile {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
         }
     </style>
 </head>
@@ -345,7 +470,7 @@
 <div class="profile-main">
     <div class="left-side">
         <div class="profile-header">
-            <img src="/LibraryProject_war_exploded/images/circle_owl.png" alt="User profile picture" class="profile-pic" />
+            <img src="/LibraryProject_war_exploded/images/cropped_circle_image.jpg" alt="User profile picture" class="profile-pic" />
             <div class="profile-info">
                 <div class="user-name">Elenejobava</div>
                 <div class="user-bio">Passionate reader and book lover. Always looking for new stories to dive into!</div>
@@ -373,7 +498,7 @@
             <div class="review">
                 <div class="review-header">
                     <span class="book-name">The Great Gatsby</span>
-                    <span class="author">by F. Scott Fitzgerald</span>
+                    <span class="review-author">by F. Scott Fitzgerald</span>
                     <span class="rating-stars">★★★★☆</span>
                     <span class="rating-value">(4.0)</span>
                 </div>
@@ -383,7 +508,7 @@
             <div class="review">
                 <div class="review-header">
                     <span class="book-name">1984</span>
-                    <span class="author">by George Orwell</span>
+                    <span class="review-author">by George Orwell</span>
                     <span class="rating-stars">★★★☆☆</span>
                     <span class="rating-value">(3.0)</span>
                 </div>
@@ -393,7 +518,7 @@
             <div class="review">
                 <div class="review-header">
                     <span class="book-name">Pride and Prejudice</span>
-                    <span class="author">by Jane Austen</span>
+                    <span class="review-author">by Jane Austen</span>
                     <span class="rating-stars">★★★★★</span>
                     <span class="rating-value">(5.0)</span>
                 </div>
@@ -428,11 +553,11 @@
         <h2>Change Bio</h2>
         <form id="bioForm">
             <label for="newBio">New Bio</label>
-            <textarea id="newBio" name="newBio" rows="4" required></textarea>
+            <textarea id="newBio" name="newBio" rows="4" required placeholder="Tell us about yourself..."></textarea>
 
             <button type="submit" class="update-password" aria-label="Update Bio">
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path d="M12 4v1H6.59L19 17.41 17.59 19 5 6.59V12H4V4h8z" />
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 Update Bio
             </button>
@@ -476,14 +601,15 @@
                 current.innerHTML = "<h2>Currently Reading</h2>";
 
                 if (user.currentlyReading.length === 0) {
-                    const noBooks = document.createElement("p");
+                    const noBooks = document.createElement("div");
+                    noBooks.className = "no-content-message";
                     noBooks.textContent = "No books currently reading.";
                     current.appendChild(noBooks);
                 } else {
                     user.currentlyReading.forEach(book => {
                         const div = document.createElement("div");
                         div.className = "book-item";
-                        div.innerHTML = `${book.title} <span class="author">by ${book.author}</span>`;
+                        div.innerHTML = `${book.title} <span class="review-author">by ${book.author}</span>`;
                         current.appendChild(div);
                     });
                 }
@@ -493,8 +619,9 @@
                 reviews.innerHTML = "";
 
                 if (user.reviews.length === 0) {
-                    const noReviews = document.createElement("p");
-                    noReviews.textContent = "No reviews yet.";
+                    const noReviews = document.createElement("div");
+                    noReviews.className = "no-content-message";
+                    noReviews.textContent = "No reviews written yet.";
                     reviews.appendChild(noReviews);
                 } else {
                     user.reviews.forEach(r => {
@@ -553,6 +680,7 @@
             .then(data => {
                 if (data.success) {
                     alert("Password updated!");
+                    document.getElementById("passwordForm").reset()
                 } else {
                     alert("Error: " + data.error);
                 }
@@ -584,6 +712,8 @@
                 if (data.success) {
                     alert("Bio updated!");
                     document.querySelector(".user-bio").textContent = newBio;
+                    document.getElementById("newBio").value = "";
+                    document.getElementById("bioForm").reset();
                 } else {
                     alert("Error: " + data.error);
                 }
@@ -595,4 +725,3 @@
     });
 </script>
 </html>
-

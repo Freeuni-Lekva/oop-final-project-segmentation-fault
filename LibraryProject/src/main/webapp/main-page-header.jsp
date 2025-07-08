@@ -14,7 +14,7 @@
     <div class="library-title">
         <span class="pale-text">Freeuni</span>
         <span class="highlight-text">Library</span>
-        <img src="images/cropped_circle_image.png" alt="owl" class="owl-icon">
+        <img src="images/cropped_circle_image.jpg" alt="owl" class="owl-icon">
     </div>
 
     <div class="nav-container">

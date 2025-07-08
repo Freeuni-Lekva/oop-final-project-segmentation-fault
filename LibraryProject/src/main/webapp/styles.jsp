@@ -68,7 +68,7 @@
     .login-box button {
         width: 100%;
         padding: 10px;
-        background-color: #66aa9b;
+        background-color: #af8d8d;
         color: white;
         border: none;
         border-radius: 5px;
@@ -77,7 +77,7 @@
     }
 
     .login-box button:hover {
-        background-color: #437e6e;
+        background-color: #d39797;
     }
 
     .signup-section, .signin-section {
