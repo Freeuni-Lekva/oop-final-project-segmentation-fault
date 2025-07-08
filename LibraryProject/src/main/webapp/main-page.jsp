@@ -160,7 +160,7 @@
       document.getElementById('recommendationsSection').style.display = 'none';
     }
 
-    fetchRecommendations();
+
     fetchOurCollection();
     fetchRecentBooks();
     fetchPopularBooks();
