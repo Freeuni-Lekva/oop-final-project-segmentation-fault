@@ -2,188 +2,623 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Details - Library</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="book-details-styles.jsp">
+    <%@ include file="main-page-styles.jsp" %>
+    <%@ include file="book-details-styles.jsp" %>
+    <title>Book Details - Freeuni Library</title>
 </head>
 <body>
-<div class="book-details-header">
-    <h1 class="book-title" id="bookTitle">Loading...</h1>
-    <p class="book-author" id="bookAuthor"></p>
-</div>
+<%@ include file="main-page-header.jsp" %>
 
-<div class="main-content">
-    <div class="book-details-container">
-        <a href="javascript:history.back()" class="back-link">
-            <svg class="back-arrow" viewBox="0 0 24 24">
-                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path>
-            </svg>
-            Back to Books
-        </a>
+<div class="book-details-container">
+    <div id="loading" class="loading">Loading book details...</div>
+    <div id="error" class="error" style="display: none;">Failed to load book details. Please try again.</div>
 
-        <div class="book-details-content">
-            <div class="book-cover-section">
-                <div class="book-cover" id="bookCover">
-                    <div class="book-cover-fallback">📚</div>
-                </div>
-                <div class="book-meta">
-                    <span class="book-total-copies" id="bookTotalCopies"></span>
-                    <span class="book-available" id="bookAvailable"></span>
-                    <button class="reserve-button" id="reserveButton" disabled>Reserve Book</button>
+    <div class="book-details" id="bookDetails" style="display: none;">
+        <div class="book-cover-large">
+            <img id="bookImage" src="" alt="Book cover" onerror="handleImageError(this)">
+        </div>
+
+        <div class="book-info-details">
+            <!-- Header Section -->
+            <div class="book-header-section">
+                <h1 class="book-title-large" id="bookTitle">Loading...</h1>
+                <p class="book-author-large" id="bookAuthor">by Loading...</p>
+
+                <div class="book-rating-large">
+                    <span class="stars-large" id="bookStars">☆☆☆☆☆</span>
+                    <span class="rating-text-large" id="bookRating">(No rating)</span>
                 </div>
             </div>
-            <div class="book-info-section">
-                <div class="book-rating" id="bookRating"></div>
-                <p class="book-description" id="bookDescription"></p>
-                <div class="book-details-meta">
-                    <p><strong>Genre:</strong> <span id="bookGenre"></span></p>
-                    <p><strong>Volume:</strong> <span id="bookVolume"></span></p>
-                    <p><strong>Published:</strong> <span id="bookDate"></span></p>
+
+            <!-- Book Information Grid -->
+            <div class="book-metadata-grid">
+                <div class="metadata-section">
+                    <h3 class="section-title">Book Details</h3>
+                    <div class="book-meta-details">
+                        <div class="book-meta-item">
+                            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                            <span><strong>Genre:</strong> <span id="bookGenre">Loading...</span></span>
+                        </div>
+                        <div class="book-meta-item">
+                            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"></path></svg>
+                            <span><strong>Volume:</strong> <span id="bookVolume">Loading...</span></span>
+                        </div>
+                        <div class="book-meta-item">
+                            <svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"></path></svg>
+                            <span><strong>Date:</strong> <span id="bookDate">Loading...</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="availability-section">
+                    <h3 class="section-title">Availability</h3>
+                    <div class="availability-status" id="availabilityStatus">
+                        Loading availability...
+                    </div>
+                    <div class="availability-details">
+                        <p><strong>Available Copies:</strong> <span id="availableCopies">-</span></p>
+                        <p><strong>Status:</strong> <span id="bookStatus">-</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions Section -->
+            <div class="actions-section">
+                <h3 class="section-title">Actions</h3>
+                <div class="action-buttons">
+                    <button class="reserve-button" id="reserveButton" disabled onclick="reserveBook()">
+                        <svg viewBox="0 0 24 24" class="nav-icon">
+                            <path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"></path>
+                        </svg>
+                        <span id="reserveButtonText">Reserve Book</span>
+                    </button>
+                    <button class="review-button" onclick="toggleReviewForm()">
+                        <svg viewBox="0 0 24 24" class="nav-icon">
+                            <path d="M21 5h-2.64l1.14-3.14L17.15 1l-1.46 4H3v14h18V5zm-5 12.86L12 15.44 8 17.86l1.29-5.52L5 8.62h5.48L12 3.43l1.52 5.19H19l-4.29 3.72 1.29 5.51z"></path>
+                        </svg>
+                        Write a Review
+                    </button>
+                </div>
+
+                <div class="review-form" id="reviewForm">
+                    <form id="reviewFormSubmit" action="<%= request.getContextPath() %>/api/reviews/submit" method="POST">
+                        <input type="hidden" name="bookId" id="reviewBookId" value="">
+                        <input type="hidden" name="rating" id="selectedRating" value="">
+                        
+                        <textarea name="reviewText" placeholder="Write your review here..." required></textarea>
+                        
+                        <div class="star-rating-container">
+                            <label class="rating-label">Rating:</label>
+                            <div class="star-rating" id="starRating">
+                                <span class="star" data-rating="1">☆</span>
+                                <span class="star" data-rating="2">☆</span>
+                                <span class="star" data-rating="3">☆</span>
+                                <span class="star" data-rating="4">☆</span>
+                                <span class="star" data-rating="5">☆</span>
+                            </div>
+                            <span class="rating-text" id="ratingText">Click to rate</span>
+                        </div>
+                        
+                        <button type="submit" class="submit-review">Submit Review</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Description Section -->
+            <div class="description-section">
+                <h3 class="section-title">Description</h3>
+                <div class="book-description" id="bookDescription">
+                    Loading description...
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="review-section">
-            <h2>Write a Review</h2>
-            <div class="review-form">
-                <label for="reviewRating">Rating:</label>
-                <select id="reviewRating" class="review-select">
-                    <option value="1">1 Star</option>
-                    <option value="2">2 Stars</option>
-                    <option value="3">3 Stars</option>
-                    <option value="4">4 Stars</option>
-                    <option value="5">5 Stars</option>
-                </select>
-                <textarea id="reviewText" placeholder="Write your review here..." rows="5"></textarea>
-                <button class="submit-review-button" id="submitReviewButton">Submit Review</button>
-            </div>
-        </div>
-
-        <div class="loading-indicator" id="loadingIndicator">
-            <div class="spinner"></div>
-            <p>Loading book details...</p>
-        </div>
-
-        <div class="error-message" id="errorMessage" style="display: none;">
-            <h3>Error Loading Book</h3>
-            <p id="errorText">Unable to load book details. Please try again later.</p>
+    <!-- Reviews Section -->
+    <div class="reviews-section" id="reviewsSection" style="display: none;">
+        <h3 class="section-title">Reviews</h3>
+        <div id="reviewsLoading" class="reviews-loading">Loading reviews...</div>
+        <div id="reviewsContainer" class="reviews-container"></div>
+        <div id="noReviews" class="no-reviews" style="display: none;">
+            <p>No reviews yet. Be the first to write a review!</p>
         </div>
     </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const bookId = new URLSearchParams(window.location.search).get('id');
-        console.log('Book ID from URL:', bookId);
+    let currentBook = null;
 
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        const errorMessage = document.getElementById('errorMessage');
-        const bookTitle = document.getElementById('bookTitle');
-        const bookAuthor = document.getElementById('bookAuthor');
-        const bookCover = document.getElementById('bookCover');
-        const bookTotalCopies = document.getElementById('bookTotalCopies');
-        const bookAvailable = document.getElementById('bookAvailable');
-        const reserveButton = document.getElementById('reserveButton');
-        const bookRating = document.getElementById('bookRating');
-        const bookDescription = document.getElementById('bookDescription');
-        const bookGenre = document.getElementById('bookGenre');
-        const bookVolume = document.getElementById('bookVolume');
-        const bookDate = document.getElementById('bookDate');
-        const submitReviewButton = document.getElementById('submitReviewButton');
+    const defaultCovers = [
+        '<%= request.getContextPath() %>/images/noCover1.jpg',
+        '<%= request.getContextPath() %>/images/noCover2.jpg',
+        '<%= request.getContextPath() %>/images/noCover3.jpg',
+        '<%= request.getContextPath() %>/images/noCover4.jpg',
+        '<%= request.getContextPath() %>/images/noCover5.jpg',
+        '<%= request.getContextPath() %>/images/noCover6.jpg',
+        '<%= request.getContextPath() %>/images/noCover7.jpg',
+        '<%= request.getContextPath() %>/images/noCover8.jpg',
+        '<%= request.getContextPath() %>/images/noCover9.jpg',
+        '<%= request.getContextPath() %>/images/noCover10.jpg',
+        '<%= request.getContextPath() %>/images/noCover11.jpg',
+        '<%= request.getContextPath() %>/images/noCover12.jpg'
+    ];
 
-        function capitalizeWords(str) {
-            if (!str) return str;
-            return str.replace(/\b\w/g, char => char.toUpperCase());
+    function getRandomDefaultCover() {
+        return defaultCovers[Math.floor(Math.random() * defaultCovers.length)];
+    }
+
+    function handleImageError(img) {
+        img.src = getRandomDefaultCover();
+    }
+
+    function capitalizeFirstLetter(string) {
+        if (!string) return string;
+        return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+    }
+
+    function formatVolume(volume) {
+        if (!volume || volume === 'N/A') return 'N/A';
+        return volume + ' Pages';
+    }
+
+    function getBookIdFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const bookId = urlParams.get('id');
+        if (!bookId) {
+            const pathParts = window.location.pathname.split('/');
+            return pathParts[pathParts.length - 1];
+        }
+        return bookId;
+    }
+
+    function renderStars(rating) {
+        const fullStars = Math.floor(rating);
+        const hasHalfStar = rating % 1 >= 0.5;
+        const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+        return '★'.repeat(fullStars) + (hasHalfStar ? '☆' : '') + '☆'.repeat(emptyStars);
+    }
+
+    function loadBookDetails() {
+        const bookId = getBookIdFromUrl();
+
+        if (!bookId) {
+            showError('No book ID provided');
+            return;
         }
 
-        function fetchBookDetails() {
-            if (!bookId) {
-                loadingIndicator.style.display = 'none';
-                errorMessage.style.display = 'block';
-                document.getElementById('errorText').textContent = 'No book ID provided in the URL.';
+        fetch('<%= request.getContextPath() %>/api/books/details/' + encodeURIComponent(bookId))
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch book details');
+                }
+                return response.json();
+            })
+            .then(book => {
+                currentBook = book;
+                displayBookDetails(book);
+                loadBookReviews(book.publicId);
+                // Check reservation status AFTER displaying details to ensure proper button state
+                return checkReservationStatus(book.publicId);
+            })
+            .catch(error => {
+                console.error('Error loading book details:', error);
+                showError('Failed to load book details. Please try again.');
+            });
+    }
+
+    function checkReservationStatus(bookId) {
+        return fetch('<%= request.getContextPath() %>/api/books/check-reservation/' + encodeURIComponent(bookId))
+            .then(response => response.json())
+            .then(data => {
+                updateReserveButtonState(data.reserved);
+                return data.reserved;
+            })
+            .catch(error => {
+                console.error('Error checking reservation status:', error);
+                // Don't change button state if check fails
+                return false;
+            });
+    }
+
+    function updateReserveButtonState(isReserved) {
+        const reserveButton = document.getElementById('reserveButton');
+        const reserveButtonText = document.getElementById('reserveButtonText');
+
+        // Clear all existing classes and states first
+        reserveButton.classList.remove('cancel-button', 'reserved');
+        
+        if (isReserved) {
+            reserveButtonText.textContent = 'Cancel Reservation';
+            reserveButton.disabled = false;
+            reserveButton.classList.add('cancel-button');
+            reserveButton.onclick = cancelReservation;
+        } else {
+            // Only set to reserve state if book is available
+            if (currentBook && currentBook.currentAmount > 0) {
+                reserveButtonText.textContent = 'Reserve Book';
+                reserveButton.disabled = false;
+                reserveButton.onclick = reserveBook;
+            } else {
+                reserveButtonText.textContent = 'Unavailable';
+                reserveButton.disabled = true;
+                reserveButton.onclick = null;
+            }
+        }
+    }
+
+    function loadBookReviews(bookId) {
+        if (!bookId) return;
+
+        fetch('<%= request.getContextPath() %>/api/books/book/' + encodeURIComponent(bookId))
+            .then(response => {
+                if (!response.ok) {
+                    document.getElementById('reviewsLoading').style.display = 'none';
+                    document.getElementById('noReviews').style.display = 'block';
+                    document.getElementById('reviewsSection').style.display = 'block';
+                    return;
+                }
+                return response.json();
+            })
+            .then(reviews => {
+                if (reviews) {
+                    displayReviews(reviews);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading reviews:', error);
+                document.getElementById('reviewsLoading').style.display = 'none';
+                document.getElementById('noReviews').style.display = 'block';
+                document.getElementById('reviewsSection').style.display = 'block';
+            });
+    }
+
+    function displayReviews(reviews) {
+        const reviewsSection = document.getElementById('reviewsSection');
+        const reviewsLoading = document.getElementById('reviewsLoading');
+        const reviewsContainer = document.getElementById('reviewsContainer');
+        const noReviews = document.getElementById('noReviews');
+
+        reviewsSection.style.display = 'block';
+        reviewsLoading.style.display = 'none';
+
+        if (!reviews || reviews.length === 0) {
+            noReviews.style.display = 'block';
+            reviewsContainer.innerHTML = '';
+            return;
+        }
+
+        noReviews.style.display = 'none';
+
+        let reviewsHtml = '';
+        reviews.forEach(function(review) {
+            const author = escapeHtml(review.username || 'Anonymous');
+            const rating = renderStars(review.rating || 0);
+            const date = formatDate(review.date || review.createdAt || review.reviewDate || Date.now());
+            const text = escapeHtml(review.comment || '');
+
+            reviewsHtml += '<div class="review-item">' +
+                '<div class="review-header">' +
+                '<div class="review-author">' + author + '</div>' +
+                '<div class="review-rating">' + rating + '</div>' +
+                '<div class="review-date">' + date + '</div>' +
+                '</div>' +
+                '<div class="review-text">' + text + '</div>' +
+                '</div>';
+        });
+
+        reviewsContainer.innerHTML = reviewsHtml;
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function formatDate(dateString) {
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        } catch (e) {
+            return 'Unknown date';
+        }
+    }
+
+    function displayBookDetails(book) {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('error').style.display = 'none';
+        document.getElementById('bookDetails').style.display = 'block';
+
+        const imageSrc = book.imageUrl ?
+            '<%= request.getContextPath() %>/images/' + book.imageUrl :
+            getRandomDefaultCover();
+        document.getElementById('bookImage').src = imageSrc;
+        document.getElementById('bookImage').alt = book.name || 'Book cover';
+
+        document.getElementById('bookTitle').textContent = book.name || 'Unknown Title';
+        document.getElementById('bookAuthor').textContent = 'by ' + (book.author || 'Unknown Author');
+        document.getElementById('bookGenre').textContent = capitalizeFirstLetter(book.genre) || 'Unknown Genre';
+        document.getElementById('bookVolume').textContent = formatVolume(book.volume);
+        document.getElementById('bookDate').textContent = book.date || 'Unknown Date';
+
+        const rating = book.rating || 0;
+        document.getElementById('bookStars').textContent = renderStars(rating);
+        document.getElementById('bookRating').textContent = rating > 0 ?
+            '(' + rating.toFixed(1) + ')' : '(No rating)';
+
+        const availabilityElement = document.getElementById('availabilityStatus');
+
+        if (book.currentAmount && book.currentAmount > 0) {
+            availabilityElement.textContent = 'Available to reserve';
+            availabilityElement.className = 'availability-status available';
+            document.getElementById('bookStatus').textContent = 'Available';
+        } else {
+            availabilityElement.textContent = 'Currently unavailable';
+            availabilityElement.className = 'availability-status unavailable';
+            document.getElementById('bookStatus').textContent = 'Unavailable';
+        }
+
+        document.getElementById('availableCopies').textContent = book.currentAmount || '0';
+        document.getElementById('bookDescription').textContent =
+            book.description || 'No description available.';
+        
+        // Set the review book ID and add debugging
+        const reviewBookIdField = document.getElementById('reviewBookId');
+        const bookPublicId = book.publicId || '';
+        reviewBookIdField.value = bookPublicId;
+        
+        // Don't set button state here - let checkReservationStatus handle it
+    }
+
+    function showError(message) {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('bookDetails').style.display = 'none';
+        document.getElementById('error').style.display = 'block';
+        document.getElementById('error').textContent = message;
+    }
+
+    function reserveBook() {
+        if (!currentBook || !currentBook.publicId) {
+            alert('Unable to reserve book. Please refresh the page and try again.');
+            return;
+        }
+
+        fetch('<%= request.getContextPath() %>/api/books/reserve', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ bookId: currentBook.publicId })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to reserve book');
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert('Book reserved successfully!');
+                updateReserveButtonState(true);
+                // Removed loadBookDetails() call to prevent flickering
+            })
+            .catch(error => {
+                console.error('Error reserving book:', error);
+                alert('Failed to reserve book. Please try again.');
+            });
+    }
+
+    function cancelReservation() {
+        if (!currentBook || !currentBook.publicId) {
+            alert('Unable to cancel reservation. Please refresh the page and try again.');
+            return;
+        }
+
+        fetch('<%= request.getContextPath() %>/api/books/cancel-reservation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ bookId: currentBook.publicId })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to cancel reservation');
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert('Reservation cancelled successfully!');
+                updateReserveButtonState(false);
+            })
+            .catch(error => {
+                console.error('Error cancelling reservation:', error);
+                alert('Failed to cancel reservation. Please try again.');
+            });
+    }
+
+    function toggleReviewForm() {
+        document.getElementById('reviewForm').classList.toggle('show');
+    }
+
+    function initializeStarRating() {
+        const stars = document.querySelectorAll('.star');
+        const ratingText = document.getElementById('ratingText');
+        const selectedRatingInput = document.getElementById('selectedRating');
+        let currentRating = 0;
+
+        stars.forEach((star, index) => {
+            // Mouse hover effect
+            star.addEventListener('mouseenter', function() {
+                resetStars();
+                highlightStars(index + 1);
+                const rating = index + 1;
+                ratingText.textContent = getRatingText(rating);
+            });
+
+            // Click to select rating
+            star.addEventListener('click', function() {
+                currentRating = index + 1;
+                selectedRatingInput.value = currentRating;
+                resetStars();
+                fillStars(currentRating);
+                ratingText.textContent = getRatingText(currentRating);
+                ratingText.classList.add('selected');
+            });
+        });
+
+        // Reset to current rating on mouse leave
+        document.getElementById('starRating').addEventListener('mouseleave', function() {
+            resetStars();
+            if (currentRating > 0) {
+                fillStars(currentRating);
+                ratingText.textContent = getRatingText(currentRating);
+                ratingText.classList.add('selected');
+            } else {
+                ratingText.textContent = 'Click to rate';
+                ratingText.classList.remove('selected');
+            }
+        });
+
+        function resetStars() {
+            stars.forEach(star => {
+                star.classList.remove('filled', 'hovered');
+            });
+        }
+
+        function highlightStars(rating) {
+            for (let i = 0; i < rating; i++) {
+                stars[i].classList.add('hovered');
+            }
+        }
+
+        function fillStars(rating) {
+            for (let i = 0; i < rating; i++) {
+                stars[i].classList.add('filled');
+            }
+        }
+
+        function getRatingText(rating) {
+            const ratingTexts = {
+                1: '1 Star - Poor',
+                2: '2 Stars - Fair', 
+                3: '3 Stars - Good',
+                4: '4 Stars - Very Good',
+                5: '5 Stars - Excellent'
+            };
+            return ratingTexts[rating] || 'Click to rate';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadBookDetails();
+        initializeStarRating();
+
+        document.getElementById('reviewFormSubmit').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            // Check if bookId is present
+            const bookId = formData.get('bookId');
+            if (!bookId || bookId.trim() === '') {
+                alert('Error: Book ID is missing. Please refresh the page and try again.');
                 return;
             }
-
-            loadingIndicator.style.display = 'block';
-            errorMessage.style.display = 'none';
-
-            const contextPath = '<%= request.getContextPath() %>';
-            const apiUrl = contextPath + '/api/books/details/' + encodeURIComponent(bookId);
-            console.log('Fetching book details from:', apiUrl);
-
-            fetch(apiUrl)
+            
+            // Check if reviewText is present
+            const reviewText = formData.get('reviewText');
+            if (!reviewText || reviewText.trim() === '') {
+                alert('Error: Please write a review.');
+                return;
+            }
+            
+            // Check if rating is present
+            const rating = formData.get('rating');
+            if (!rating || rating === '') {
+                alert('Error: Please select a star rating.');
+                return;
+            }
+            
+            // Convert FormData to URLSearchParams for proper encoding
+            const urlParams = new URLSearchParams();
+            for (let [key, value] of formData.entries()) {
+                urlParams.append(key, value);
+            }
+            
+            fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: urlParams
+            })
                 .then(response => {
-                    console.log('Response status:', response.status);
                     if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
+                        return response.text().then(text => {
+                            throw new Error('Failed to submit review: ' + text);
+                        });
                     }
                     return response.json();
                 })
-                .then(book => {
-                    console.log('Book data received:', book);
-                    if (!book) {
-                        throw new Error('No book data returned');
+                .then(data => {
+                    alert('Review submitted successfully!');
+                    document.getElementById('reviewForm').classList.remove('show');
+                    this.reset();
+                    // Reset star rating
+                    document.querySelectorAll('.star').forEach(star => {
+                        star.classList.remove('filled');
+                    });
+                    document.getElementById('selectedRating').value = '';
+                    document.getElementById('ratingText').textContent = 'Click to rate';
+                    document.getElementById('ratingText').classList.remove('selected');
+                    
+                    if (currentBook && currentBook.publicId) {
+                        loadBookReviews(currentBook.publicId);
                     }
-                    displayBookDetails(book);
-                    loadingIndicator.style.display = 'none';
                 })
                 .catch(error => {
-                    console.error('Error fetching book details:', error);
-                    loadingIndicator.style.display = 'none';
-                    errorMessage.style.display = 'block';
-                    document.getElementById('errorText').textContent =
-                        'Unable to load book details: ' + error.message;
+                    console.error('Error submitting review:', error);
+                    alert('Failed to submit review. Please try again. Error: ' + error.message);
                 });
-        }
-
-        function displayBookDetails(book) {
-            bookTitle.textContent = capitalizeWords(book.name) || 'Unknown Title';
-            bookAuthor.textContent = capitalizeWords(book.author) || 'Unknown Author';
-
-            if (book.imageUrl) {
-                bookCover.innerHTML = `<img src="/images/${book.imageUrl}" alt="${book.name || 'Book cover'}"
-                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                    <div class="book-cover-fallback">📚</div>`;
-            } else {
-                bookCover.innerHTML = '<div class="book-cover-fallback">📚</div>';
-            }
-
-            bookTotalCopies.textContent = book.originalAmount != null ? `Total Copies: ${book.originalAmount}` : 'Total Copies: 0';
-            bookAvailable.textContent = book.currentAmount > 0 ? 'Available' : 'Not Available';
-            bookAvailable.className = 'book-available ' + (book.currentAmount > 0 ? 'available' : 'unavailable');
-            reserveButton.disabled = !book.currentAmount || book.currentAmount <= 0;
-
-            const rating = book.rating;
-            if (rating != null && rating > 0) {
-                const fullStars = Math.floor(rating);
-                const hasHalfStar = rating % 1 >= 0.5;
-                const stars = '★'.repeat(fullStars) + (hasHalfStar ? '☆' : '') + '☆'.repeat(5 - fullStars - (hasHalfStar ? 1 : 0));
-                bookRating.innerHTML = `<span class="stars">${stars}</span><span class="rating-text">(${rating.toFixed(1)})</span>`;
-            } else {
-                bookRating.innerHTML = 'No reviews yet';
-            }
-
-            bookDescription.textContent = book.description || 'No description available';
-            bookGenre.textContent = capitalizeWords(book.genre) || 'Unknown';
-            bookVolume.textContent = book.volume != null ? book.volume : 'N/A';
-            bookDate.textContent = capitalizeWords(book.date) || 'N/A';
-        }
-
-        reserveButton.addEventListener('click', function() {
-            alert('Book reservation functionality to be implemented');
         });
-
-        submitReviewButton.addEventListener('click', function() {
-            const rating = document.getElementById('reviewRating').value;
-            const reviewText = document.getElementById('reviewText').value;
-            alert(`Review submission: ${rating} stars, ${reviewText}`);
-        });
-
-        fetchBookDetails();
     });
+
+    // Navigation functionality
+    function toggleDropdown(event) {
+        event.preventDefault();
+        const dropdown = document.getElementById('browseDropdown');
+        dropdown.classList.toggle('show');
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        var dropdown = document.getElementById('browseDropdown');
+        var browseButton = event.target.closest('.browse-dropdown');
+
+        if (!browseButton) {
+            dropdown.classList.remove('show');
+        }
+    });
+
+    // Handle dropdown item clicks
+    window.onclick = function(event) {
+        if (!event.target.matches('.nav-box') && !event.target.closest('.browse-dropdown')) {
+            const dropdown = document.getElementById('browseDropdown');
+            if (dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+            }
+        }
+
+        if (event.target.classList.contains('dropdown-item')) {
+            window.location.href = event.target.getAttribute('href');
+        }
+    };
 </script>
+
 </body>
 </html>

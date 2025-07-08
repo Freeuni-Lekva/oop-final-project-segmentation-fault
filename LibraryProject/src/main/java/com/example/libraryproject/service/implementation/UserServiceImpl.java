@@ -33,25 +33,39 @@ public class UserServiceImpl implements UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
 
-    public void reviewBook(String username, String publicId, int rating, String comment) {
+    public boolean reviewBook(String username, String publicId, int rating, String comment) {
+        // Check if user is logged in
+        if (username == null) {
+            logger.info("Review attempt failed: no user logged in");
+            return false;
+        }
+        
         User user;
         Book book;
         Optional<Book> optionalBook = bookRepository.findByPublicId(publicId);
         if (optionalBook.isEmpty()) {
             logger.info("Book with publicId {} not found", publicId);
-            throw new IllegalArgumentException("book doesn't exist");
+            return false;
         }
         Optional<User> optionalUser = userRepository.findByUsername(username);
         if (optionalUser.isEmpty()) {
             logger.info("User with username {} not found", username);
-            throw new IllegalArgumentException("user doesn't exist");
+            return false;
         }
         book = optionalBook.get();
         user = optionalUser.get();
-        
-        if (!user.getReadBooks().contains(book)) {
-            logger.info("User {} hasn't read book {}", username, publicId);
-            throw new IllegalStateException("user hasn't read the book");
+
+        // COMMENT THIS TO WRITE REVIEWS
+//       if (!user.getReadBooks().contains(book)) {
+//           logger.info("User {} hasn't read book {}", username, publicId);
+//           return false;
+//       }
+
+        Set<Review> reviews = user.getReviews();
+
+        if(!reviews.stream().filter(r -> r.getBook().equals(book)).toList().isEmpty()) {
+            logger.info("User {} already left a review for book {}", username, publicId);
+            return false;
         }
 
         Review review = new Review();
@@ -61,12 +75,16 @@ public class UserServiceImpl implements UserService {
         review.setRating(rating);
         review.setComment(comment);
 
+        // Save the review to the repository
+        reviewRepository.save(review);
+
         Set<Review> updatedReviews = new HashSet<>(user.getReviews());
         updatedReviews.add(review);
         user.setReviews(updatedReviews);
 
         userRepository.update(user);
         logger.info("User {} reviewed book {} with rating {} and comment '{}'", username, publicId, rating, comment);
+        return true;
     }
 
     public void changeBio(String username, String bio){
@@ -83,22 +101,22 @@ public class UserServiceImpl implements UserService {
         logger.info("User {} changed bio successfully", username);
     }
 
-    public void reserveBook(String username, String publicId) {
+    public boolean reserveBook(String username, String publicId) {
         Optional<Book> optionalBook = bookRepository.findByPublicId(publicId);
         if (optionalBook.isEmpty()) {
             logger.info("Book with publicId {} not found", publicId);
-            throw new IllegalArgumentException("book doesn't exist");
+            return false;
         }
         Optional<User> optionalUser = userRepository.findByUsername(username);
         if (optionalUser.isEmpty()) {
             logger.info("User with username {} not found", username);
-            throw new IllegalArgumentException("user doesn't exist");
+            return false;
         }
         Book book = optionalBook.get();
         User user = optionalUser.get();
         if (book.getTotalAmount() <= 0) {
             logger.info("Book with publicId {} is not available for reservation", publicId);
-            throw new IllegalStateException("book not in storage");
+            return false;
         }
 
         Set<Order> userOrders = orderRepository.findOrdersByUserId(user.getId());
@@ -108,7 +126,7 @@ public class UserServiceImpl implements UserService {
         );
         if (hasActiveOrder) {
             logger.info("User {} already has an active order for book {}", username, publicId);
-            throw new IllegalStateException("user already has an active order for this book");
+            return false;
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -121,22 +139,23 @@ public class UserServiceImpl implements UserService {
                 book
         );
 
-        book.setTotalAmount(book.getTotalAmount() - 1);
+        book.setCurrentAmount(book.getCurrentAmount() - 1);
         bookRepository.update(book);
         orderRepository.save(order);
         logger.info("User {} reserved book {} with order ID {}", username, publicId, order.getPublicId());
+        return true;
     }
 
-    public void cancelReservation(String username, String publicId) {
+    public boolean cancelReservation(String username, String publicId) {
         Optional<Book> optionalBook = bookRepository.findByPublicId(publicId);
         if (optionalBook.isEmpty()) {
             logger.info("Book with publicId {} not found", publicId);
-            throw new IllegalArgumentException("book doesn't exist");
+            return false;
         }
         Optional<User> optionalUser = userRepository.findByUsername(username);
         if (optionalUser.isEmpty()) {
             logger.info("User with username {} not found", username);
-            throw new IllegalArgumentException("user doesn't exist");
+            return false;
         }
         Book book = optionalBook.get();
         User user = optionalUser.get();
@@ -151,13 +170,14 @@ public class UserServiceImpl implements UserService {
 
         if (reservation.isEmpty()) {
             logger.info("User {} does not have book {} reserved", username, publicId);
-            throw new IllegalStateException("book is not reserved");
+            return false;
         }
 
-        book.setTotalAmount(book.getTotalAmount() + 1);
+        book.setCurrentAmount(book.getCurrentAmount() + 1);
         bookRepository.update(book);
         orderRepository.delete(reservation.get());
         logger.info("User {} canceled reservation for book {}", username, publicId);
+        return true;
     }
 
     public void changePassword(String username, String oldPassword, String newPassword) {
@@ -187,4 +207,29 @@ public class UserServiceImpl implements UserService {
 
         return Mappers.convertUser(user.get());
     }
+
+    @Override
+    public boolean hasUserReservedBook(String username, String bookId) {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if (optionalUser.isEmpty()) {
+            logger.info("User with username {} not found", username);
+            return false;
+        }
+        
+        Optional<Book> optionalBook = bookRepository.findByPublicId(bookId);
+        if (optionalBook.isEmpty()) {
+            logger.info("Book with publicId {} not found", bookId);
+            return false;
+        }
+        
+        User user = optionalUser.get();
+        Set<Order> userOrders = orderRepository.findOrdersByUserId(user.getId());
+        
+        return userOrders.stream().anyMatch(order -> 
+            order.getBook().getPublicId().equals(bookId) && 
+            order.getStatus() == OrderStatus.RESERVED
+        );
+    }
+
+
 }

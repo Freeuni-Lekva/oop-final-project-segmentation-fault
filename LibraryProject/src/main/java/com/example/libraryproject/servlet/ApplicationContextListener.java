@@ -41,7 +41,7 @@ public class ApplicationContextListener implements ServletContextListener {
             event.getServletContext().setAttribute(SCHEDULER_SERVICE_ATTRIBUTE_NAME, schedulerService);
             schedulerService.start();
 
-            BookService bookService = new BookServiceImpl(bookRepository);
+            BookService bookService = new BookServiceImpl(bookRepository, reviewRepository);
             event.getServletContext().setAttribute(BOOK_SERVICE_ATTRIBUTE_NAME, bookService);
 
             BookRecommendationService bookRecommendationService = new BookRecommendationServiceImpl(bookRepository, userRepository);

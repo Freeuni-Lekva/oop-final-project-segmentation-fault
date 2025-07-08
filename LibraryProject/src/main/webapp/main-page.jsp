@@ -1,10 +1,3 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: elenejobava
-  Date: 6/17/25
-  Time: 22:49
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html>
@@ -423,8 +416,8 @@
       var hasHalfStar = rating % 1 >= 0.5;
       var stars = '★'.repeat(fullStars) + (hasHalfStar ? '☆' : '') + '☆'.repeat(5 - fullStars - (hasHalfStar ? 1 : 0));
 
-      var bookId = book.id || book.title;
-      var bookTitle = book.title || 'Unknown Title';
+      var bookId = book.publicId;
+      var bookTitle = book.name || 'Unknown Title';
       var bookAuthor = book.author || 'Unknown Author';
       var currentAmount = book.currentAmount || 0;
       var originalAmount = book.originalAmount || 0;

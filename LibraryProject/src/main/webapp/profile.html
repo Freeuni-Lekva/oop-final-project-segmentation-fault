@@ -625,12 +625,15 @@
                     reviews.appendChild(noReviews);
                 } else {
                     user.reviews.forEach(r => {
+                        // Try different possible property names for author
+                        const author = r.author || r.bookAuthor || r.authorName || (r.book && r.book.author) || "Unknown Author";
+                        
                         const div = document.createElement("div");
                         div.className = "review";
                         div.innerHTML = `
       <div class="review-header">
         <span class="book-name">${r.bookTitle}</span>
-        <span class="author">by ${r.bookAuthor}</span>
+        <span class="author">by ${author}</span>
         <span class="rating-stars">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</span>
         <span class="rating-value">(${r.rating}.0)</span>
       </div>
