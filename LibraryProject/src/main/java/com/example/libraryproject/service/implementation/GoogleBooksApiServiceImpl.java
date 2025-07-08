@@ -36,6 +36,8 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
             return;
         }
 
+        deleteImages();
+
         Set<GoogleBooksResponse> googleBooks = fetchBooks();
         List<Book> books = googleBooks.stream()
                 .map(Mappers::mapGoogleBookToBook)
@@ -43,6 +45,29 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
 
         logger.info("Fetched {} books from Google Books API", books.size());
         bookRepository.saveAll(books);
+    }
+
+    private void deleteImages() {
+        try {
+            Path imagesDir = Paths.get(System.getenv("IMAGE_DIR"));
+
+            if (!Files.exists(imagesDir) || !Files.isDirectory(imagesDir)) {
+                return;
+            }
+
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(imagesDir, "*.{jpg,jpeg,png,gif}")) {
+                for (Path file : stream) {
+                    try {
+                        Files.delete(file);
+                    } catch (Exception e) {
+                        logger.warn("Could not delete file {}: {}", file.getFileName(), e.getMessage());
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            logger.error("Failed to delete images: {}", e.getMessage());
+        }
     }
 
     public boolean fetchBook(BookAdditionFromGoogleRequest request) {
@@ -87,7 +112,7 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
                 JsonObject item = items.getJsonObject(0);
                 JsonObject volumeInfo = item.getJsonObject("volumeInfo");
 
-                String bookTitle = volumeInfo.getString("title", "No Title");
+                String bookTitle = volumeInfo.getString("title", "Unknown Title");
                 String publishedDate = volumeInfo.getString("publishedDate", "Unknown Date");
                 String description = volumeInfo.getString("description", "No Description");
 
@@ -236,6 +261,7 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
 
         return books;
     }
+
 
     void downloadAndSaveImage(String imageUrl, String title) throws Exception {
         HttpRequest request = HttpRequest.newBuilder()

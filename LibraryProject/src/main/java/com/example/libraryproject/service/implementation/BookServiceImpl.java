@@ -1,19 +1,25 @@
 package com.example.libraryproject.service.implementation;
 
 import com.example.libraryproject.model.dto.BookDTO;
+import com.example.libraryproject.model.dto.ReviewDTO;
 import com.example.libraryproject.model.entity.Book;
+import com.example.libraryproject.model.entity.Review;
 import com.example.libraryproject.repository.BookRepository;
+import com.example.libraryproject.repository.ReviewRepository;
 import com.example.libraryproject.service.BookService;
+import com.example.libraryproject.utilities.Mappers;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RequiredArgsConstructor
 public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
+    private final ReviewRepository reviewRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(BookServiceImpl.class);
 
@@ -35,7 +41,7 @@ public class BookServiceImpl implements BookService {
                 book.getCurrentAmount(),
                 book.getVolume(),
                 book.getRating(),
-                book.getDate() != null ? book.getDate().toString() : ""
+                book.getDate().toString()
         );
     }
 
@@ -53,7 +59,7 @@ public class BookServiceImpl implements BookService {
                         book.getTotalAmount(),
                         book.getVolume(),
                         book.getRating(),
-                        book.getDate() != null ? book.getDate().toString() : ""
+                        book.getDate().toString()
                 )
         ).toList();
     }
@@ -72,7 +78,7 @@ public class BookServiceImpl implements BookService {
                         book.getTotalAmount(),
                         book.getVolume(),
                         book.getRating(),
-                        book.getDate() != null ? book.getDate().toString() : ""
+                        book.getDate().toString()
                 )
         ).toList();
     }
@@ -93,8 +99,16 @@ public class BookServiceImpl implements BookService {
                                 book.getTotalAmount(),
                                 book.getVolume(),
                                 book.getRating(),
-                                book.getDate() != null ? book.getDate().toString() : ""
+                                book.getDate().toString()
                         )
                 ).toList();
+    }
+
+    public List<ReviewDTO> getReviewsByBook(String bookPublicId) {
+        Set<Review> reviews = reviewRepository.findReviewsByBookPublicId(bookPublicId);
+
+        return reviews.stream()
+                .map(Mappers::mapReviewToDTO)
+                .toList();
     }
 }

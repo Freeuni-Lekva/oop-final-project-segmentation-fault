@@ -82,6 +82,19 @@ public class ReviewRepository {
         return reviews;
     }
 
+    public Set<Review> findReviewsByBookPublicId(String bookPublicId) {
+        Session session = sessionFactory.openSession();
+
+        Set<Review> reviews = new HashSet<>(session.createQuery(
+                        "SELECT r FROM Review r WHERE r.book.publicId = :bookPublicId", Review.class)
+                .setParameter("bookPublicId", bookPublicId)
+                .getResultList());
+
+        session.close();
+
+        return reviews;
+    }
+
     public Set<Review> findAll() {
         Session session = sessionFactory.openSession();
 

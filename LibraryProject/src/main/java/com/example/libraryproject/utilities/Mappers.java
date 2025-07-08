@@ -7,6 +7,7 @@ import com.example.libraryproject.model.dto.RegistrationRequest;
 import com.example.libraryproject.model.dto.UserDTO;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.BookKeeper;
+import com.example.libraryproject.model.entity.Review;
 import com.example.libraryproject.model.entity.User;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -88,12 +89,12 @@ public class Mappers {
     public static UserDTO convertUser(User user) {
         List<ReviewDTO> reviewDTOs = user.getReviews().stream()
                 .map(review -> new ReviewDTO(
+                        user.getUsername(),
                         review.getBook().getName(),
                         review.getBook().getAuthor(),
                         review.getRating(),
                         review.getComment()))
                 .collect(Collectors.toList());
-
 
         List<BookDTO> currentlyReadingDTOs = user.getBorrowedBooks().stream()
                 .map(book -> new BookDTO(
@@ -133,6 +134,27 @@ public class Mappers {
                 book.getVolume() != null ? book.getVolume() : 0L,
                 book.getRating() != null ? book.getRating() : 0L,
                 book.getDate() != null ? book.getDate().toString() : ""
+        );
+    }
+
+    public static ReviewDTO mapReviewToDTO(Review r) {
+        String bookTitle = r.getBook() != null && r.getBook().getName() != null
+                ? r.getBook().getName() : "Unknown Title";
+
+        String author = r.getBook() != null && r.getBook().getAuthor() != null
+                ? r.getBook().getAuthor() : "Unknown Author";
+
+        String comment = r.getComment() != null ? r.getComment() : "";
+        
+        String username = r.getUser() != null && r.getUser().getUsername() != null
+                ? r.getUser().getUsername() : "Anonymous";
+
+        return new ReviewDTO(
+                username,
+                bookTitle,
+                author,
+                r.getRating(),
+                comment
         );
     }
 }

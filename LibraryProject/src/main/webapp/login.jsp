@@ -1,10 +1,11 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: elenejobava
-  Date: 6/16/25
-  Time: 20:09
-  To change this template use File | Settings | File Templates.
---%>
+<%
+  // Check if user is already logged in and redirect to home page
+  String username = (String) session.getAttribute("username");
+  if (username != null && !username.trim().isEmpty()) {
+    response.sendRedirect(request.getContextPath() + "/main-page.jsp");
+    return;
+  }
+%>
 <%@ page contentType="text/html;charset=UTF-8" %>
 <!DOCTYPE html>
 <html lang="en">

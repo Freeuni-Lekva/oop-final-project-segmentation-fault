@@ -119,6 +119,7 @@ public class UserServlet extends HttpServlet {
                     response.put("success", false);
                     response.put("error", "Invalid endpoint.");
                 }
+
             }
 
             // Write JSON response
