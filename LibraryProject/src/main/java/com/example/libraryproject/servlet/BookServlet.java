@@ -1,5 +1,7 @@
 package com.example.libraryproject.servlet;
 
+import com.example.libraryproject.model.dto.BookDTO;
+import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.service.BookService;
 import com.example.libraryproject.service.implementation.BookServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,6 +36,11 @@ public class BookServlet extends HttpServlet {
                 objectMapper.writeValue(response.getWriter(), bookService.getAllBooks());
                 break;
             case "details":
+                if (pathParts.length < 2) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().write("{\"error\": \"Book ID is required\"}");
+                    return;
+                }
                 objectMapper.writeValue(response.getWriter(), bookService.getBookDetails(pathParts[1]));
                 break;
             case "available":

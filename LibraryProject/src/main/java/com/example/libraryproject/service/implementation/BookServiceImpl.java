@@ -35,7 +35,7 @@ public class BookServiceImpl implements BookService {
                 book.getCurrentAmount(),
                 book.getVolume(),
                 book.getRating(),
-                book.getDate() != null ? book.getDate().toString() : ""
+                book.getDate().toString()
         );
     }
 
@@ -53,7 +53,7 @@ public class BookServiceImpl implements BookService {
                         book.getTotalAmount(),
                         book.getVolume(),
                         book.getRating(),
-                        book.getDate() != null ? book.getDate().toString() : ""
+                        book.getDate().toString()
                 )
         ).toList();
     }
@@ -72,7 +72,7 @@ public class BookServiceImpl implements BookService {
                         book.getTotalAmount(),
                         book.getVolume(),
                         book.getRating(),
-                        book.getDate() != null ? book.getDate().toString() : ""
+                        book.getDate().toString()
                 )
         ).toList();
     }
@@ -93,7 +93,7 @@ public class BookServiceImpl implements BookService {
                                 book.getTotalAmount(),
                                 book.getVolume(),
                                 book.getRating(),
-                                book.getDate() != null ? book.getDate().toString() : ""
+                                book.getDate().toString()
                         )
                 ).toList();
     }

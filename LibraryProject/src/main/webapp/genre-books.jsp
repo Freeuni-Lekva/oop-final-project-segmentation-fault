@@ -161,8 +161,8 @@
             var hasHalfStar = rating % 1 >= 0.5;
             var stars = '★'.repeat(fullStars) + (hasHalfStar ? '☆' : '') + '☆'.repeat(5 - fullStars - (hasHalfStar ? 1 : 0));
 
-            var bookId = book.id || book.title;
-            var bookTitle = book.title || 'Unknown Title';
+            var bookId = book.publicId;
+            var bookTitle = book.name || 'Unknown Title';
             var bookAuthor = book.author || 'Unknown Author';
             var bookDescription = book.description || '';
             var currentAmount = book.currentAmount || 0;
