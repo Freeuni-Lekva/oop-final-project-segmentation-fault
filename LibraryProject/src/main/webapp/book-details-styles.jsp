@@ -297,7 +297,8 @@
 
     .review-rating {
         color: #ffd700;
-        font-size: 1rem;
+        font-size: 18px;
+        font-weight: bold;
     }
 
     .review-date {
