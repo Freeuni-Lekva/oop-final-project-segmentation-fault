@@ -95,16 +95,13 @@ public class UserServiceImplTest {
         assertDoesNotThrow(() -> userServiceImpl.reserveBook(user.getUsername(), book1.getPublicId()));
 
         // Test reservation when book is already reserved (book2 has 0 amount)
-        assertThrows(IllegalStateException.class,
-                () -> userServiceImpl.reserveBook(user.getUsername(), book2.getPublicId()));
+        assertFalse(userServiceImpl.reserveBook(user.getUsername(), book2.getPublicId()));
 
         // Test reservation with non-existent user
-        assertThrows(IllegalArgumentException.class,
-                () -> userServiceImpl.reserveBook("nonexistent", book1.getPublicId()));
+        assertFalse(userServiceImpl.reserveBook("nonexistent", book1.getPublicId()));
 
         // Test reservation with non-existent book
-        assertThrows(IllegalArgumentException.class,
-                () -> userServiceImpl.reserveBook(user.getUsername(), "nonexistent"));
+        assertFalse( userServiceImpl.reserveBook(user.getUsername(), "nonexistent"));
     }
 
     @Test
@@ -132,16 +129,13 @@ public class UserServiceImplTest {
         when(orderRepository.findOrdersByUserId(1L)).thenReturn(new HashSet<>());
 
         // Test cancellation when book is not reserved
-        assertThrows(IllegalStateException.class,
-                () -> userServiceImpl.cancelReservation(user.getUsername(), book3.getPublicId()));
+        assertFalse(userServiceImpl.cancelReservation(user.getUsername(), book3.getPublicId()));
 
         // Test cancellation with non-existent user
-        assertThrows(IllegalArgumentException.class,
-                () -> userServiceImpl.cancelReservation("nonexistent", book1.getPublicId()));
+        assertFalse(userServiceImpl.cancelReservation("nonexistent", book1.getPublicId()));
 
         // Test cancellation with non-existent book
-        assertThrows(IllegalArgumentException.class,
-                () -> userServiceImpl.cancelReservation(user.getUsername(), "nonexistent"));
+        assertFalse(userServiceImpl.cancelReservation(user.getUsername(), "nonexistent"));
     }
 
     @Test
@@ -167,18 +161,15 @@ public class UserServiceImplTest {
         user.setReadBooks(updatedReadBooks);
 
         // Test review for book not read by user
-        assertThrows(IllegalStateException.class,
-                () -> userServiceImpl.reviewBook(user.getUsername(), book2.getPublicId(), 4, "good"));
+        assertFalse(userServiceImpl.reviewBook(user.getUsername(), book2.getPublicId(), 4, "good"));
 
         // Test successful review for read book
-        assertDoesNotThrow(() -> userServiceImpl.reviewBook(user.getUsername(), book1.getPublicId(), 4, "good"));
+        assertTrue(userServiceImpl.reviewBook(user.getUsername(), book1.getPublicId(), 4, "good"));
 
         // Test review with non-existent user
-        assertThrows(IllegalArgumentException.class,
-                () -> userServiceImpl.reviewBook("nonexistent", book1.getPublicId(), 4, "good"));
+        assertFalse(userServiceImpl.reviewBook("nonexistent", book1.getPublicId(), 4, "good"));
 
         // Test review with non-existent book
-        assertThrows(IllegalArgumentException.class,
-                () -> userServiceImpl.reviewBook(user.getUsername(), "nonexistent", 4, "good"));
+        assertFalse(userServiceImpl.reviewBook(user.getUsername(), "nonexistent", 4, "good"));
     }
 }

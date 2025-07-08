@@ -56,10 +56,10 @@ public class UserServiceImpl implements UserService {
         user = optionalUser.get();
 
         // COMMENT THIS TO WRITE REVIEWS
-//       if (!user.getReadBooks().contains(book)) {
-//           logger.info("User {} hasn't read book {}", username, publicId);
-//           return false;
-//       }
+       if (!user.getReadBooks().contains(book)) {
+           logger.info("User {} hasn't read book {}", username, publicId);
+           return false;
+       }
 
         Set<Review> reviews = user.getReviews();
 
