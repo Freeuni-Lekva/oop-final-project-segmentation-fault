@@ -17,6 +17,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RequiredArgsConstructor
@@ -167,22 +168,34 @@ public class BookServiceImpl implements BookService {
                 .toList();
     }
 
-    public List<BookDTO> searchBooks(String searchTerm) {
-        logger.info("Searching books containing: {}", searchTerm);
-        return bookRepository.searchByTitle(searchTerm).stream()
-                .map(book -> new BookDTO(
-                        book.getPublicId(),
-                        book.getName(),
-                        book.getDescription(),
-                        book.getGenre(),
-                        book.getAuthor(),
-                        book.getImageUrl(),
-                        book.getTotalAmount(),
-                        book.getCurrentAmount(),
-                        book.getVolume(),
-                        book.getRating(),
-                        book.getDate().toString()
-                ))
-                .toList();
+    public List<BookDTO> searchBooks(String searchTerm, String sortBy, String availability) {
+        logger.info("Searching books containing: {}, sorting by: {}, availability: {}", searchTerm, sortBy, availability);
+
+        List<Book> books = bookRepository.searchByTitle(searchTerm);
+
+        Stream<Book> bookStream = books.stream();
+        if ("available".equalsIgnoreCase(availability)) {
+            bookStream = bookStream.filter(book -> book.getCurrentAmount() > 0);
+        }
+
+        BookSortCriteria sortCriteria = mapSortByToEnum(sortBy);
+        return sortBooks(bookStream, sortCriteria);
     }
+
+    /**
+     * Helper method to map string sort parameter to BookSortCriteria enum
+     */
+    private BookSortCriteria mapSortByToEnum(String sortBy) {
+        if (sortBy == null) {
+            return BookSortCriteria.RATING; // default
+        }
+
+        return switch (sortBy.toLowerCase()) {
+            case "title" -> BookSortCriteria.TITLE;
+            case "author" -> BookSortCriteria.AUTHOR;
+            case "available" -> BookSortCriteria.AVAILABLE;
+            default -> BookSortCriteria.RATING;
+        };
+    }
+
 }

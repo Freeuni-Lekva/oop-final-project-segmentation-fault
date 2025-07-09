@@ -24,5 +24,5 @@ public interface BookService {
 
     List<ReviewDTO> getReviewsByBook(String bookPublicId);
 
-    List<BookDTO> searchBooks(String searchTerm);
+    List<BookDTO> searchBooks(String searchTerm, String sortBy, String availability);
 }
