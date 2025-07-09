@@ -166,4 +166,23 @@ public class BookServiceImpl implements BookService {
                 ))
                 .toList();
     }
+
+    public List<BookDTO> searchBooks(String searchTerm) {
+        logger.info("Searching books containing: {}", searchTerm);
+        return bookRepository.searchByTitle(searchTerm).stream()
+                .map(book -> new BookDTO(
+                        book.getPublicId(),
+                        book.getName(),
+                        book.getDescription(),
+                        book.getGenre(),
+                        book.getAuthor(),
+                        book.getImageUrl(),
+                        book.getTotalAmount(),
+                        book.getCurrentAmount(),
+                        book.getVolume(),
+                        book.getRating(),
+                        book.getDate().toString()
+                ))
+                .toList();
+    }
 }

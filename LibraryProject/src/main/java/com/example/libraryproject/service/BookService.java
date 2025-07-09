@@ -23,4 +23,6 @@ public interface BookService {
     List<BookDTO> getAvailableBooks(BookSortCriteria sortCriteria);
 
     List<ReviewDTO> getReviewsByBook(String bookPublicId);
+
+    List<BookDTO> searchBooks(String searchTerm);
 }
