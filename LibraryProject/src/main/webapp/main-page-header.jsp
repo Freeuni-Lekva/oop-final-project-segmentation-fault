@@ -110,6 +110,7 @@ function handleLogout(event) {
     
     fetch(contextPath + '/api/authorization/logout', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
         }
