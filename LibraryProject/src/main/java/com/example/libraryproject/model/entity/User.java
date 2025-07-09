@@ -27,6 +27,10 @@ public class User {
     @NonNull
     private String password;
 
+    @Column(name = "mail", nullable = false)
+    @NonNull
+    private String mail;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     @NonNull

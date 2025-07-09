@@ -5,6 +5,7 @@ import com.example.libraryproject.model.enums.Role;
 public record RegistrationRequest(
         String username,
         String password,
+        String mail,
         Role role
 ) {
 }
