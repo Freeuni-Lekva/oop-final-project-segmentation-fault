@@ -205,7 +205,7 @@
                 document.getElementById('totalBooks').textContent = books.length;
 
                 var availableCount = books.filter(function(book) {
-                  console.log('Book availability check:', book.title, 'currentAmount:', book.currentAmount, 'type:', typeof book.currentAmount);
+                  console.log('Book availability check:', book.name, 'currentAmount:', book.currentAmount, 'type:', typeof book.currentAmount);
                   var current = book.currentAmount ? Number(book.currentAmount) : 0;
                   return current > 0;
                 }).length;
@@ -403,7 +403,7 @@
 
       if (book.imageUrl) {
         var imagePath = '/images/' + book.imageUrl;
-        imageHtml = '<img src="' + imagePath + '" alt="' + (book.title || 'Book cover') + '"' +
+        imageHtml = '<img src="' + imagePath + '" alt="' + (book.name || 'Book cover') + '"' +
                 ' onerror="this.src=\'' + getRandomDefaultCover() + '\'">';
       } else {
         imageHtml = '<img src="' + getRandomDefaultCover() + '" alt="No book cover">';

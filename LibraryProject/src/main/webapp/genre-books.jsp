@@ -88,7 +88,7 @@
 
             var contextPath = '<%= request.getContextPath() %>';
             var apiUrl = contextPath + '/api/books/get-books-by-genre/' + genre;
-            
+
             // Add sorting parameter if provided
             if (sortCriteria) {
                 apiUrl += '?sort=' + encodeURIComponent(sortCriteria);
@@ -155,7 +155,7 @@
 
             if (book.imageUrl) {
                 var imagePath = '/images/' + book.imageUrl;
-                imageHtml = '<img src="' + imagePath + '" alt="' + (book.title || 'Book cover') + '"' +
+                imageHtml = '<img src="' + imagePath + '" alt="' + (book.name || 'Book cover') + '"' +
                     ' onerror="this.src=\'' + getRandomDefaultCover() + '\'">';
             } else {
                 imageHtml = '<img src="' + getRandomDefaultCover() + '" alt="No book cover">';
@@ -211,6 +211,29 @@
         }
 
         function sortBooks(criteria) {
+            switch(criteria) {
+                case 'title':
+                    filteredBooks.sort(function(a, b) {
+                        return (a.name || '').localeCompare(b.name || '');
+                    });
+                    break;
+                case 'author':
+                    filteredBooks.sort(function(a, b) {
+                        return (a.author || '').localeCompare(b.author || '');
+                    });
+                    break;
+                case 'rating':
+                    filteredBooks.sort(function(a, b) {
+                        return (b.rating || 0) - (a.rating || 0);
+                    });
+                    break;
+                case 'available':
+                    filteredBooks.sort(function(a, b) {
+                        return (b.currentAmount || 0) - (a.currentAmount || 0);
+                    });
+                    break;
+            }
+            displayBooks(filteredBooks);
             fetchBooks(criteria);
         }
 

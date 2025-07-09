@@ -178,6 +178,47 @@ public class OrderRepository {
 
     }
 
+    public Set<Order> findOrdersByUsername(String username) {
+        Session session = sessionFactory.openSession();
+
+        Set<Order> orders = Set.copyOf(session.createQuery(
+                        "SELECT o FROM Order o WHERE LOWER(o.user.username) LIKE LOWER(:username)", Order.class)
+                .setParameter("username", "%" + username + "%")
+                .getResultList());
+
+        session.close();
+
+        return orders;
+    }
+
+    public Set<Order> findActiveOrders() {
+        Session session = sessionFactory.openSession();
+
+        Set<Order> orders = Set.copyOf(session.createQuery(
+                        "SELECT o FROM Order o WHERE o.status IN (:reserved, :borrowed)", Order.class)
+                .setParameter("reserved", OrderStatus.RESERVED)
+                .setParameter("borrowed", OrderStatus.BORROWED)
+                .getResultList());
+
+        session.close();
+
+        return orders;
+    }
+
+    public Set<Order> findOverdueOrders() {
+        Session session = sessionFactory.openSession();
+
+        LocalDateTime now = LocalDateTime.now();
+        Set<Order> orders = Set.copyOf(session.createQuery(
+                        "SELECT o FROM Order o WHERE o.dueDate < :now", Order.class)
+                .setParameter("now", now)
+                .getResultList());
+
+        session.close();
+
+        return orders;
+    }
+
     public Set<Order> findStaleOrders() {
 
         Session session = sessionFactory.openSession();

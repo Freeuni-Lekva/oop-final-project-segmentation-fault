@@ -2,6 +2,7 @@ package com.example.libraryproject.repository;
 
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.User;
+import com.example.libraryproject.model.enums.Role;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -109,6 +110,31 @@ public class UserRepository {
         session.close();
 
         return Optional.ofNullable(user);
+    }
+
+    public Optional<User> findByUsernameAndRole(String username, Role role) {
+        Session session = sessionFactory.openSession();
+        User user = session.createQuery(
+                        "FROM User u WHERE u.username = :username AND u.role = :role", User.class)
+                .setParameter("username", username)
+                .setParameter("role", role)
+                .uniqueResult();
+
+        session.close();
+
+        return Optional.ofNullable(user);
+    }
+
+    public Set<User> findByRole(Role role) {
+        Session session = sessionFactory.openSession();
+        HashSet<User> users = new HashSet<>(session.createQuery(
+                        "FROM User u WHERE u.role = :role", User.class)
+                .setParameter("role", role)
+                .getResultList());
+
+        session.close();
+
+        return users;
     }
 
     public Set<User> findAll() {

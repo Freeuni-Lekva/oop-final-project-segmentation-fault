@@ -55,7 +55,7 @@ public class AuthorizationServlet extends HttpServlet {
 
                     objectMapper.writeValue(response.getWriter(),
                             new JsonResponse(
-                                    "Bookkeeper registered successfully",
+                                    "User registered successfully",
                                     redirectPath)
                     );
 

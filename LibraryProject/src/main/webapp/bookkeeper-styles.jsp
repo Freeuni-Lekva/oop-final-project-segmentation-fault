@@ -1000,4 +1000,214 @@
             grid-column: 1 / -1;
         }
     }
+
+    .order-management-container {
+        background: #fefdf8;
+        border: 1px solid #e6cb58;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 20px;
+    }
+
+    .search-filters-row {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .search-input {
+        flex: 1;
+        min-width: 250px;
+        padding: 10px 12px;
+        border: 1px solid #e6cb58;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #5d4e37;
+        background-color: #fefdf8;
+        transition: border-color 0.3s ease;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #f5c45e;
+        box-shadow: 0 0 0 2px rgba(245, 196, 94, 0.2);
+    }
+
+    .filter-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+    }
+
+    .filter-checkbox input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        accent-color: #f5c45e;
+    }
+
+    .filter-checkbox label {
+        color: #5d4e37;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .orders-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fefdf8;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .orders-table thead {
+        background: #f5c45e;
+        color: white;
+    }
+
+    .orders-table th {
+        padding: 12px 16px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .orders-table td {
+        padding: 12px 16px;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 14px;
+        color: #5d4e37;
+    }
+
+    .orders-table tr:hover:not(.overdue-row) {
+        background-color: #faf9f6;
+    }
+
+    .overdue-row {
+        background-color: #fff5f5 !important;
+        border-left: 4px solid #dc2626;
+        color: #721c24 !important;
+    }
+
+    .overdue-row td {
+        color: #721c24 !important;
+        border-bottom-color: #f0e4e4;
+    }
+
+    .overdue-row:hover {
+        background-color: #fef2f2 !important;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-reserved {
+        background-color: #dbeafe;
+        color: #1e40af;
+    }
+
+    .status-borrowed {
+        background-color: #dcfce7;
+        color: #166534;
+    }
+
+    .status-returned {
+        background-color: #f3f4f6;
+        color: #374151;
+    }
+
+    .order-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .order-actions .btn {
+        padding: 6px 12px;
+        font-size: 12px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        text-decoration: none;
+    }
+
+    .order-actions .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .order-actions .btn-success {
+        background-color: #10b981;
+        color: white;
+    }
+
+    .order-actions .btn-success:hover:not(:disabled) {
+        background-color: #059669;
+        transform: translateY(-1px);
+    }
+
+    .order-actions .btn-danger {
+        background-color: #ef4444;
+        color: white;
+    }
+
+    .order-actions .btn-danger:hover:not(:disabled) {
+        background-color: #dc2626;
+        transform: translateY(-1px);
+    }
+
+    @media (max-width: 768px) {
+        .search-filters-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-input {
+            min-width: auto;
+        }
+
+        .orders-table {
+            font-size: 12px;
+        }
+
+        .orders-table th,
+        .orders-table td {
+            padding: 8px 12px;
+        }
+
+        .order-actions {
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .order-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .orders-table {
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+    }
 </style>

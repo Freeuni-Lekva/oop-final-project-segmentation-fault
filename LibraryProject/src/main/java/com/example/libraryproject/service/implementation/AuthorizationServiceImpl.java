@@ -3,10 +3,9 @@ package com.example.libraryproject.service.implementation;
 import com.example.libraryproject.model.dto.LoginRequest;
 import com.example.libraryproject.model.dto.LoginResult;
 import com.example.libraryproject.model.dto.RegistrationRequest;
-import com.example.libraryproject.model.entity.BookKeeper;
 import com.example.libraryproject.model.entity.User;
+import com.example.libraryproject.model.enums.Role;
 import com.example.libraryproject.model.enums.UserStatus;
-import com.example.libraryproject.repository.BookKeeperRepository;
 import com.example.libraryproject.repository.UserRepository;
 import com.example.libraryproject.service.AuthorizationService;
 import com.example.libraryproject.utilities.Mappers;
@@ -22,75 +21,60 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthorizationServiceImpl.class);
     private final UserRepository userRepository;
-    private final BookKeeperRepository bookKeeperRepository;
 
     public void register(RegistrationRequest request) {
-        switch (request.role()) {
-            case BOOKKEEPER -> registerBookKeeper(request);
-            case USER -> registerUser(request);
-        }
-    }
-
-    private void registerBookKeeper(RegistrationRequest request) {
-        Optional<BookKeeper> optionalBookKeeper = bookKeeperRepository.findByUsername(request.username());
-        Optional<User> optionalUser = userRepository.findByUsername(request.username());
-        if (optionalUser.isPresent() || optionalBookKeeper.isPresent()) {
-            throw new IllegalArgumentException("This username already exists");
-        }
-        BookKeeper bookKeeper = Mappers.mapRequestToBookKeeper(request);
-        bookKeeperRepository.save(bookKeeper);
-        logger.info("BookKeeper with username {} registered successfully", request.username());
-    }
-
-    private void registerUser(RegistrationRequest request) {
-        Optional<BookKeeper> optionalBookKeeper = bookKeeperRepository.findByUsername(request.username());
-        Optional<User> optionalUser = userRepository.findByUsername(request.username());
-        if (optionalUser.isPresent() || optionalBookKeeper.isPresent()) {
+        logger.info("Attempting to register user: {} with role: {}", request.username(), request.role());
+        Optional<User> existingUser = userRepository.findByUsername(request.username());
+        if (existingUser.isPresent()) {
             throw new IllegalArgumentException("This username already exists");
         }
         User user = Mappers.mapRequestToUser(request);
         userRepository.save(user);
-        logger.info("User with username {} registered successfully", request.username());
+        logger.info("User with username {} and role {} registered successfully", request.username(), request.role());
     }
 
     public LoginResult login(LoginRequest request) {
         String username = request.username();
         String password = request.password();
 
-        Optional<BookKeeper> optionalBookKeeper = bookKeeperRepository.findByUsername(username);
         Optional<User> optionalUser = userRepository.findByUsername(username);
 
         String errorMsg = "Username or password is incorrect. Please try again.";
-        if (optionalBookKeeper.isEmpty() && optionalUser.isEmpty()) {
+        if (optionalUser.isEmpty()) {
+            logger.warn("Login failed: user {} not found", username);
             throw new IllegalArgumentException(errorMsg);
         }
-        if (optionalBookKeeper.isPresent()) {
-            BookKeeper bookKeeper = optionalBookKeeper.get();
-            if (!BCrypt.checkpw(password, bookKeeper.getPassword())) {
-                throw new IllegalArgumentException(errorMsg);
-            }
-            return new LoginResult(username, com.example.libraryproject.model.enums.Role.BOOKKEEPER);
-        } else {
-            User user = optionalUser.get();
-            if (!BCrypt.checkpw(password, user.getPassword())) {
-                throw new IllegalArgumentException(errorMsg);
-            }
-            return new LoginResult(username, com.example.libraryproject.model.enums.Role.USER);
+        
+        User user = optionalUser.get();
+        if (!BCrypt.checkpw(password, user.getPassword())) {
+            logger.warn("Login failed: incorrect password for user {}", username);
+            throw new IllegalArgumentException(errorMsg);
         }
+        return new LoginResult(username, user.getRole());
     }
 
     public boolean checkBookkeeper(String username) {
-
-        Optional<BookKeeper> optionalBookKeeper = bookKeeperRepository.findByUsername(username);
-
-        return optionalBookKeeper.isPresent();
+        Optional<User> optionalUser = userRepository.findByUsernameAndRole(username, Role.BOOKKEEPER);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            logger.info("BOOKKEEPER user details - Role: {}, Status: {}", user.getRole(), user.getStatus());
+            return user.getStatus() == UserStatus.ACTIVE;
+        }
+        
+        logger.warn("BOOKKEEPER not found for username: {}", username);
+        return false;
     }
 
     public boolean checkUser(String username) {
-
-        Optional<User> optionalUser = userRepository.findByUsername(username);
-
-        return optionalUser.isPresent() && optionalUser.get().getStatus() == UserStatus.ACTIVE;
+        Optional<User> optionalUser = userRepository.findByUsernameAndRole(username, Role.USER);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            logger.info("USER user details - Role: {}, Status: {}", user.getRole(), user.getStatus());
+            return user.getStatus() == UserStatus.ACTIVE || user.getStatus() == UserStatus.BANNED;
+        }
+        
+        logger.warn("USER not found for username: {}", username);
+        return false;
     }
 
 }

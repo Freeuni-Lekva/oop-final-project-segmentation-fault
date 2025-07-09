@@ -465,10 +465,12 @@
             body: JSON.stringify({ bookId: currentBook.publicId })
         })
             .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to reserve book');
-                }
-                return response.json();
+                return response.json().then(data => {
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Failed to reserve book');
+                    }
+                    return data;
+                });
             })
             .then(data => {
                 alert('Book reserved successfully!');
@@ -477,7 +479,7 @@
             })
             .catch(error => {
                 console.error('Error reserving book:', error);
-                alert('Failed to reserve book. Please try again.');
+                alert(error.message || 'Failed to reserve book. Please try again.');
             });
     }
 
@@ -495,10 +497,12 @@
             body: JSON.stringify({ bookId: currentBook.publicId })
         })
             .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to cancel reservation');
-                }
-                return response.json();
+                return response.json().then(data => {
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Failed to cancel reservation');
+                    }
+                    return data;
+                });
             })
             .then(data => {
                 alert('Reservation cancelled successfully!');
@@ -506,7 +510,7 @@
             })
             .catch(error => {
                 console.error('Error cancelling reservation:', error);
-                alert('Failed to cancel reservation. Please try again.');
+                alert(error.message || 'Failed to cancel reservation. Please try again.');
             });
     }
 

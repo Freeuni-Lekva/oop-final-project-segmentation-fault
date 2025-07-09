@@ -3,15 +3,17 @@ package com.example.libraryproject.utilities;
 import com.example.libraryproject.model.dto.*;
 import com.example.libraryproject.model.dto.BookDTO;
 import com.example.libraryproject.model.dto.GoogleBooksResponse;
+import com.example.libraryproject.model.dto.OrderDTO;
 import com.example.libraryproject.model.dto.RegistrationRequest;
 import com.example.libraryproject.model.dto.UserDTO;
 import com.example.libraryproject.model.entity.Book;
-import com.example.libraryproject.model.entity.BookKeeper;
+import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.entity.Review;
 import com.example.libraryproject.model.entity.User;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 
@@ -24,18 +26,11 @@ public class Mappers {
         String hashedPassword = BCrypt.hashpw(userRequest.password(), BCrypt.gensalt());
         user.setUsername(userRequest.username());
         user.setPassword(hashedPassword);
+        user.setRole(userRequest.role());
         user.setBorrowedBooks(new HashSet<>());
         user.setReadBooks(new HashSet<>());
         user.setReviewCount(0L);
         return user;
-    }
-
-    public static BookKeeper mapRequestToBookKeeper(RegistrationRequest bookKeeperRequest) {
-        BookKeeper bookKeeper = new BookKeeper();
-        String hashedPassword = BCrypt.hashpw(bookKeeperRequest.password(), BCrypt.gensalt());
-        bookKeeper.setUsername(bookKeeperRequest.username());
-        bookKeeper.setPassword(hashedPassword);
-        return bookKeeper;
     }
 
     public static Book mapGoogleBookToBook(GoogleBooksResponse googleBooksResponse) {
@@ -97,16 +92,16 @@ public class Mappers {
 
         List<BookDTO> currentlyReadingDTOs = user.getBorrowedBooks().stream()
                 .map(book -> new BookDTO(
-                        book.getPublicId(),
-                        book.getName(),
-                        book.getDescription(),
-                        book.getGenre(),
-                        book.getAuthor(),
-                        book.getImageUrl(),
-                        book.getTotalAmount(),
-                        book.getCurrentAmount(),
-                        book.getVolume(),
-                        book.getRating(),
+                        book.getPublicId() != null ? book.getPublicId() : "",
+                        book.getName() != null ? book.getName() : "Unknown Book",
+                        book.getDescription() != null ? book.getDescription() : "",
+                        book.getGenre() != null ? book.getGenre() : "Unknown",
+                        book.getAuthor() != null ? book.getAuthor() : "Unknown Author",
+                        book.getImageUrl() != null ? book.getImageUrl() : "",
+                        book.getTotalAmount() != null ? book.getTotalAmount() : 0L,
+                        book.getCurrentAmount() != null ? book.getCurrentAmount() : 0L,
+                        book.getVolume() != null ? book.getVolume() : 0L,
+                        book.getRating() != null ? book.getRating() : 0.0,
                         book.getDate() != null ? book.getDate().toString() : ""))
                 .collect(Collectors.toList());
 
@@ -154,6 +149,41 @@ public class Mappers {
                 author,
                 r.getRating(),
                 comment
+        );
+    }
+
+    public static OrderDTO mapOrderToDTO(Order order) {
+        if (order == null) {
+            return null;
+        }
+
+        String orderPublicId = order.getPublicId() != null ? order.getPublicId().toString() : "";
+        String username = order.getUser() != null && order.getUser().getUsername() != null
+                ? order.getUser().getUsername() : "Unknown";
+        String bookTitle = order.getBook() != null && order.getBook().getName() != null
+                ? order.getBook().getName() : "Unknown Book";
+        String bookPublicId = order.getBook() != null && order.getBook().getPublicId() != null
+                ? order.getBook().getPublicId() : "";
+        String status = order.getStatus() != null ? order.getStatus().toString() : "UNKNOWN";
+
+        String reservedDate = order.getCreateDate() != null ? order.getCreateDate().toString() : "";
+        String dueDate = order.getDueDate() != null ? order.getDueDate().toString() : "";
+        String borrowedDate = order.getBorrowDate() != null ? order.getBorrowDate().toString() : "";
+        String returnDate = order.getReturnDate() != null ? order.getReturnDate().toString() : "";
+
+        boolean isOverdue = order.getDueDate() != null && LocalDateTime.now().isAfter(order.getDueDate());
+
+        return new OrderDTO(
+                orderPublicId,
+                username,
+                bookTitle,
+                bookPublicId,
+                status,
+                reservedDate,
+                dueDate,
+                borrowedDate,
+                returnDate,
+                isOverdue
         );
     }
 }

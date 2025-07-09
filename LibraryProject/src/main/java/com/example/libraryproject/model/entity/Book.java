@@ -89,4 +89,9 @@ public class Book {
         Book book = (Book) obj;
         return publicId.equalsIgnoreCase(book.publicId);
     }
+
+    @Override
+    public int hashCode() {
+        return publicId != null ? publicId.toLowerCase().hashCode() : 0;
+    }
 }

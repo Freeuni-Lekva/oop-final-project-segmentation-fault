@@ -21,7 +21,6 @@ import static org.mockito.Mockito.*;
 
 public class UserServiceImplTest {
     private UserRepository userRepository;
-    private BookKeeperRepository bookKeeperRepository;
     private ReviewRepository reviewRepository;
     private UserServiceImpl userServiceImpl;
     private BookRepository bookRepository;
@@ -33,7 +32,6 @@ public class UserServiceImplTest {
     @BeforeEach
     void setup() {
         userRepository = mock(UserRepository.class);
-        bookKeeperRepository = mock(BookKeeperRepository.class);
         reviewRepository = mock(ReviewRepository.class);
         bookRepository = mock(BookRepository.class);
         orderRepository = mock(OrderRepository.class);
