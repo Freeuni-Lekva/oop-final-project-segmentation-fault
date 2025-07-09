@@ -4,6 +4,7 @@ import com.example.libraryproject.model.dto.BookDTO;
 import com.example.libraryproject.model.dto.ReviewDTO;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Review;
+import com.example.libraryproject.model.enums.BookSortCriteria;
 import com.example.libraryproject.repository.BookRepository;
 import com.example.libraryproject.repository.ReviewRepository;
 import com.example.libraryproject.service.BookService;
@@ -12,9 +13,11 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 public class BookServiceImpl implements BookService {
@@ -63,6 +66,12 @@ public class BookServiceImpl implements BookService {
                 )
         ).toList();
     }
+    
+    public List<BookDTO> getBooksByGenre(String genre, BookSortCriteria sortCriteria) {
+        logger.info("Getting books by genre: {} with sorting: {}", genre, sortCriteria);
+        Stream<Book> bookStream = bookRepository.findByGenre(genre).stream();
+        return sortBooks(bookStream, sortCriteria);
+    }
 
     public List<BookDTO> getAllBooks() {
         logger.info("Getting all books");
@@ -81,6 +90,12 @@ public class BookServiceImpl implements BookService {
                         book.getDate().toString()
                 )
         ).toList();
+    }
+    
+    public List<BookDTO> getAllBooks(BookSortCriteria sortCriteria) {
+        logger.info("Getting all books with sorting: {}", sortCriteria);
+        Stream<Book> bookStream = bookRepository.findAll().stream();
+        return sortBooks(bookStream, sortCriteria);
     }
 
     public List<BookDTO> getAvailableBooks() {
@@ -103,12 +118,52 @@ public class BookServiceImpl implements BookService {
                         )
                 ).toList();
     }
+    
+    public List<BookDTO> getAvailableBooks(BookSortCriteria sortCriteria) {
+        logger.info("Getting all available books with sorting: {}", sortCriteria);
+        Stream<Book> bookStream = bookRepository.findAll().stream()
+                .filter(book -> book.getTotalAmount() > 0);
+        return sortBooks(bookStream, sortCriteria);
+    }
 
     public List<ReviewDTO> getReviewsByBook(String bookPublicId) {
         Set<Review> reviews = reviewRepository.findReviewsByBookPublicId(bookPublicId);
 
         return reviews.stream()
                 .map(Mappers::mapReviewToDTO)
+                .toList();
+    }
+    
+    /**
+     * Helper method to sort books based on the given criteria
+     */
+    private List<BookDTO> sortBooks(Stream<Book> bookStream, BookSortCriteria sortCriteria) {
+        Comparator<Book> comparator = switch (sortCriteria) {
+            case TITLE -> Comparator.comparing(book ->
+                    book.getName().toLowerCase()
+            );
+            case AUTHOR -> Comparator.comparing(book ->
+                    book.getAuthor().toLowerCase()
+            );
+            case AVAILABLE -> Comparator.<Book>comparingLong(Book::getCurrentAmount).reversed(); // Most available first
+            default -> Comparator.<Book>comparingDouble(Book::getRating).reversed(); // Highest rating first
+        };
+
+        return bookStream
+                .sorted(comparator)
+                .map(book -> new BookDTO(
+                        book.getPublicId(),
+                        book.getName(),
+                        book.getDescription(),
+                        book.getGenre(),
+                        book.getAuthor(),
+                        book.getImageUrl(),
+                        book.getTotalAmount(),
+                        book.getCurrentAmount(),
+                        book.getVolume(),
+                        book.getRating(),
+                        book.getDate().toString()
+                ))
                 .toList();
     }
 }

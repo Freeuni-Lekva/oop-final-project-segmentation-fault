@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     /**
-     * Calculates the average rating for a book based on all its reviews
+     * Calculates the  average rating for a book based on all its reviews
      * @param bookPublicId The public ID of the book
      * @return The average rating, or 0.0 if no reviews exist
      */

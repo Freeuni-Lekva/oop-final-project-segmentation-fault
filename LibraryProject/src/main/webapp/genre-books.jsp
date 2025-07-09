@@ -81,13 +81,18 @@
         var allBooks = [];
         var filteredBooks = [];
 
-        function fetchBooks() {
+        function fetchBooks(sortCriteria) {
             loadingIndicator.style.display = 'block';
             errorMessage.style.display = 'none';
             booksGrid.innerHTML = '';
 
             var contextPath = '<%= request.getContextPath() %>';
             var apiUrl = contextPath + '/api/books/get-books-by-genre/' + genre;
+            
+            // Add sorting parameter if provided
+            if (sortCriteria) {
+                apiUrl += '?sort=' + encodeURIComponent(sortCriteria);
+            }
 
             fetch(apiUrl)
                 .then(function(response) {
@@ -206,29 +211,7 @@
         }
 
         function sortBooks(criteria) {
-            switch(criteria) {
-                case 'title':
-                    filteredBooks.sort(function(a, b) {
-                        return (a.title || '').localeCompare(b.title || '');
-                    });
-                    break;
-                case 'author':
-                    filteredBooks.sort(function(a, b) {
-                        return (a.author || '').localeCompare(b.author || '');
-                    });
-                    break;
-                case 'rating':
-                    filteredBooks.sort(function(a, b) {
-                        return (b.rating || 0) - (a.rating || 0);
-                    });
-                    break;
-                case 'available':
-                    filteredBooks.sort(function(a, b) {
-                        return (b.currentAmount || 0) - (a.currentAmount || 0);
-                    });
-                    break;
-            }
-            displayBooks(filteredBooks);
+            fetchBooks(criteria);
         }
 
         function viewBookDetails(bookId) {
@@ -241,7 +224,7 @@
             sortBooks(this.value);
         });
 
-        fetchBooks();
+        fetchBooks('rating'); // Default sort by rating
     });
 </script>
 
