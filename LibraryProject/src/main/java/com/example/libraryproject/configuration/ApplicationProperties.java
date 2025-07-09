@@ -28,4 +28,9 @@ public class ApplicationProperties {
 
     public static final int SCHEDULER_UPDATE_INTERVAL_HRS = 1;
     public static final int STALE_ORDER_TIMEOUT_HRS = 48;
+
+    public static final String EMAIL_ADDRESS = "ooplibrarymanagement@gmail.com";
+    public static final String EMAIL_PASSWORD = "zpux dgjo uept afdn";
+    public static final String SMTP_HOST = "smtp.googlemail.com";
+    public static final int SMTP_PORT = 465;
 }
