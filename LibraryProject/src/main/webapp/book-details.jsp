@@ -237,7 +237,7 @@
             })
             .catch(error => {
                 console.error('Error loading book details:', error);
-                showError('Failed to load book details. Please try again. Error: ' + error.message);
+                showError('Failed to load book details. Please try again.');
             });
     }
 
