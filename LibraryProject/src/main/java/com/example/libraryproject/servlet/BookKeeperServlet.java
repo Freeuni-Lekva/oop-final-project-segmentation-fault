@@ -22,6 +22,8 @@ import jakarta.servlet.http.Part;
 
 import java.io.IOException;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -58,17 +60,22 @@ public class BookKeeperServlet extends HttpServlet {
                 break;
 
             case "/add-book":
-                handleAddBook(request, bookKeeperService);
+                handleAddBook(request, response, bookKeeperService);
                 break;
 
             case "/add-book-from-google":
 
-                handleAddBookFromGoogleAPI(request, googleBooksAPIService);
+                handleAddBookFromGoogleAPI(request, response, googleBooksAPIService);
                 break;
 
             case "/mark-borrowed":
 
                 handleMarkBorrowed(request, bookKeeperService);
+                break;
+
+            case "/return-book":
+
+                handleReturnBook(request, bookKeeperService);
                 break;
 
             case "/ban-user":
@@ -107,28 +114,70 @@ public class BookKeeperServlet extends HttpServlet {
     }
 
     private void handleAddBookFromGoogleAPI(HttpServletRequest req,
+                                            HttpServletResponse response,
                                             GoogleBooksApiService googleBooksAPIService) throws IOException {
 
         JsonNode params = objectMapper.readTree(req.getReader());
 
         String title = params.get("title").asText();
         String author = params.get("author").asText();
-        if (title == null) {
+        int copies = params.has("copies") ? params.get("copies").asInt(1) : 1;
+        
+        if (title == null || title.trim().isEmpty()) {
             throw new IllegalArgumentException("Title is required to add a new book.");
         }
+        
+        if (author == null || author.trim().isEmpty()) {
+            throw new IllegalArgumentException("Author is required for accurate Google Books search.");
+        }
+        
         BookAdditionFromGoogleRequest request = new BookAdditionFromGoogleRequest(title, author);
-        googleBooksAPIService.fetchBook(request);
+        boolean success = googleBooksAPIService.fetchBook(request, copies);
+        
+        if (success) {
+            response.setStatus(HttpServletResponse.SC_OK);
+            
+            Map<String, String> responseMap = new HashMap<>();
+            responseMap.put("status", "success");
+            responseMap.put("message", "Book successfully added from Google Books");
+            objectMapper.writeValue(response.getWriter(), responseMap);
+        } else {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            
+            Map<String, String> responseMap = new HashMap<>();
+            responseMap.put("status", "error");
+            responseMap.put("message", "Book not found in Google Books or already exists in library");
+            objectMapper.writeValue(response.getWriter(), responseMap);
+        }
     }
 
     @Override
     public void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+        
         BookKeeperService bookKeeperService = (BookKeeperServiceImpl) req.getServletContext()
                 .getAttribute(ApplicationProperties.BOOKKEEPER_SERVICE_ATTRIBUTE_NAME);
 
         String path = req.getPathInfo();
 
         if (path.equals("/delete-book")) {
-            handleDeleteBook(req, bookKeeperService);
+            try {
+                handleDeleteBook(req, bookKeeperService);
+                resp.setStatus(HttpServletResponse.SC_OK);
+                
+                Map<String, String> response = new HashMap<>();
+                response.put("status", "success");
+                response.put("message", "Book deleted successfully");
+                objectMapper.writeValue(resp.getWriter(), response);
+            } catch (Exception e) {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                
+                Map<String, String> response = new HashMap<>();
+                response.put("status", "error");
+                response.put("message", e.getMessage());
+                objectMapper.writeValue(resp.getWriter(), response);
+            }
         } else {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
@@ -142,15 +191,26 @@ public class BookKeeperServlet extends HttpServlet {
         return bookKeeperService.downloadImage(filePart);
     }
 
-    private void handleAddBook(HttpServletRequest req, BookKeeperService bookKeeperService) throws IOException {
+    private void handleAddBook(HttpServletRequest req, HttpServletResponse response, BookKeeperService bookKeeperService) throws IOException {
 
         BookAdditionRequest request = objectMapper.readValue(req.getInputStream(), BookAdditionRequest.class);
 
-        if (request.author() == null) {
-            throw new IllegalArgumentException("Title and author are required to add a new book.");
+        if (request.title() == null || request.title().trim().isEmpty()) {
+            throw new IllegalArgumentException("Title is required to add a new book.");
+        }
+        
+        if (request.author() == null || request.author().trim().isEmpty()) {
+            throw new IllegalArgumentException("Author is required to add a new book.");
         }
 
         bookKeeperService.addBook(request);
+        
+        response.setStatus(HttpServletResponse.SC_OK);
+        
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("status", "success");
+        responseMap.put("message", "Book successfully added to library");
+        objectMapper.writeValue(response.getWriter(), responseMap);
 
     }
 
@@ -165,6 +225,19 @@ public class BookKeeperServlet extends HttpServlet {
         }
 
         bookKeeperService.tookBook(orderPublicId);
+    }
+
+    private void handleReturnBook(HttpServletRequest req, BookKeeperService bookKeeperService) throws IOException {
+
+        JsonNode params = objectMapper.readTree(req.getReader());
+
+        String orderPublicId = params.get("orderPublicId").asText();
+
+        if (orderPublicId == null) {
+            throw new IllegalArgumentException("Order Public ID is required to return book.");
+        }
+
+        bookKeeperService.returnBook(orderPublicId);
     }
 
     private void handleDeleteBook(HttpServletRequest req, BookKeeperService bookKeeperService) throws IOException {

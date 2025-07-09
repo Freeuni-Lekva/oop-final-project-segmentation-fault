@@ -114,7 +114,7 @@ public class UserServiceImpl implements UserService {
         }
         Book book = optionalBook.get();
         User user = optionalUser.get();
-        if (book.getTotalAmount() <= 0) {
+        if (book.getCurrentAmount() <= 0) {
             logger.info("Book with publicId {} is not available for reservation", publicId);
             return false;
         }

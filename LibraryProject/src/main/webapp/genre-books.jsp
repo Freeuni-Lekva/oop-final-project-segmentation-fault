@@ -166,7 +166,7 @@
             var bookAuthor = book.author || 'Unknown Author';
             var bookDescription = book.description || '';
             var currentAmount = book.currentAmount || 0;
-            var originalAmount = book.originalAmount || 0;
+            var totalAmount = book.totalAmount || 0;
 
             var ratingHtml = '';
             if (rating > 0) {
@@ -183,7 +183,7 @@
 
             var availabilityClass = currentAmount > 0 ? 'available' : 'unavailable';
 
-            var totalCopiesText = originalAmount > 0 ? originalAmount + ' total copies' : 'No copies';
+                            var totalCopiesText = totalAmount > 0 ? totalAmount + ' total copies' : 'No copies';
             var currentCopiesText = currentAmount > 0 ? currentAmount + ' available' : 'None available';
 
             return '<div class="book-card" onclick="viewBookDetails(\'' + bookId + '\')">' +
