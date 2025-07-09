@@ -1,5 +1,6 @@
 package com.example.libraryproject.servlet;
 
+import com.example.libraryproject.model.enums.BookSortCriteria;
 import com.example.libraryproject.service.BookService;
 import com.example.libraryproject.service.UserService;
 import com.example.libraryproject.service.implementation.BookServiceImpl;
@@ -34,9 +35,16 @@ public class BookServlet extends HttpServlet {
         String[] pathParts = request.getPathInfo().substring(1).split("/");
         String path = pathParts[0];
 
+        String sortParam = request.getParameter("sort");
+        BookSortCriteria sortCriteria = BookSortCriteria.fromValue(sortParam);
+
         switch (path) {
             case "all":
-                objectMapper.writeValue(response.getWriter(), bookService.getAllBooks());
+                if (sortParam != null && !sortParam.trim().isEmpty()) {
+                    objectMapper.writeValue(response.getWriter(), bookService.getAllBooks(sortCriteria));
+                } else {
+                    objectMapper.writeValue(response.getWriter(), bookService.getAllBooks());
+                }
                 break;
             case "details":
                 if (pathParts.length < 2) {
@@ -47,10 +55,23 @@ public class BookServlet extends HttpServlet {
                 objectMapper.writeValue(response.getWriter(), bookService.getBookDetails(pathParts[1]));
                 break;
             case "available":
-                objectMapper.writeValue(response.getWriter(), bookService.getAvailableBooks());
+                if (sortParam != null && !sortParam.trim().isEmpty()) {
+                    objectMapper.writeValue(response.getWriter(), bookService.getAvailableBooks(sortCriteria));
+                } else {
+                    objectMapper.writeValue(response.getWriter(), bookService.getAvailableBooks());
+                }
                 break;
             case "get-books-by-genre":
-                objectMapper.writeValue(response.getWriter(), bookService.getBooksByGenre(pathParts[1]));
+                if (pathParts.length < 2) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().write("{\"error\": \"Genre is required\"}");
+                    return;
+                }
+                if (sortParam != null && !sortParam.trim().isEmpty()) {
+                    objectMapper.writeValue(response.getWriter(), bookService.getBooksByGenre(pathParts[1], sortCriteria));
+                } else {
+                    objectMapper.writeValue(response.getWriter(), bookService.getBooksByGenre(pathParts[1]));
+                }
                 break;
             case "book":
                 if (pathParts.length < 2) {

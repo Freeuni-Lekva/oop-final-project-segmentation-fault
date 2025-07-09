@@ -342,7 +342,7 @@
     function fetchPopularBooks() {
       var popularScroll = document.getElementById('popularScroll');
 
-      fetch(contextPath + '/api/books/all')
+      fetch(contextPath + '/api/books/all?sort=rating')
               .then(function(response) {
                 if (!response.ok) {
                   throw new Error('HTTP error! status: ' + response.status);
@@ -350,10 +350,8 @@
                 return response.json();
               })
               .then(function(books) {
-
-                var popularBooks = books
-                        .sort(function(a, b) { return (b.rating || 0) - (a.rating || 0); })
-                        .slice(0, 25);
+                // Backend now handles sorting by rating, just take first 25
+                var popularBooks = books.slice(0, 25);
                 displayBooks(popularBooks, popularScroll);
               })
               .catch(function(error) {
