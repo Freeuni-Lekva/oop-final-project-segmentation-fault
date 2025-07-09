@@ -7,7 +7,7 @@ public record BookDTO(
         String genre,
         String author,
         String imageUrl,
-        Long totalAmount,
+        Long originalAmount,
         Long currentAmount,
         Long volume,
         Long rating,

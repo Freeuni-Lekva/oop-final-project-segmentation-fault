@@ -163,52 +163,6 @@
         transform: translateY(-1px);
     }
 
-    /* Admin button styles */
-    .delete-button {
-        background-color: #e53e3e;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 6px;
-        font-size: 1rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .delete-button:hover {
-        background-color: #c53030;
-        transform: translateY(-1px);
-    }
-
-    .delete-button:disabled {
-        background-color: #e2e8f0;
-        cursor: not-allowed;
-    }
-
-    .back-to-admin-button {
-        background-color: #4a5568;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 6px;
-        font-size: 1rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .back-to-admin-button:hover {
-        background-color: #2d3748;
-        transform: translateY(-1px);
-    }
-
     .review-form {
         display: none;
         margin-top: 20px;

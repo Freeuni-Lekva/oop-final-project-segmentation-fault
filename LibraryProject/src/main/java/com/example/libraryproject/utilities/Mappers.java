@@ -63,12 +63,10 @@ public class Mappers {
 
         book.setGenre(googleBooksResponse.genre());
         book.setVolume(googleBooksResponse.volume());
-        
-        // Set default values to prevent null constraint violations
-        // These can be overridden by the service layer if needed
-        book.setTotalAmount(1L);
-        book.setCurrentAmount(1L);
-        book.setRating(0L);
+        long initialCopies = ThreadLocalRandom.current().nextLong(2, 16);
+        book.setTotalAmount(initialCopies);
+        book.setCurrentAmount(initialCopies);
+        book.setRating((long) DEFAULT_RATING);
 
         return book;
     }

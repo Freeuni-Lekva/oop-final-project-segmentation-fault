@@ -77,48 +77,6 @@
             margin-right: 6px;
         }
 
-        /* Authentication buttons */
-        .auth-buttons {
-            position: absolute;
-            top: -220px;
-            right: 1rem;
-            display: flex;
-            gap: 10px;
-            z-index: 10;
-        }
-
-        .auth-btn {
-            background-color: rgba(139,115,85,0.9);
-            color: white;
-            border: 2px solid rgba(139,115,85,0.3);
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            user-select: none;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 8px rgba(139,115,85,0.2);
-        }
-
-        .auth-btn:hover {
-            background-color: rgba(139,115,85,1);
-            border-color: rgba(107,90,66,0.8);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(139,115,85,0.3);
-        }
-
-        .auth-btn svg {
-            fill: white;
-            width: 16px;
-            height: 16px;
-            margin-right: 6px;
-        }
-
         h1 {
             text-align: left;
             color: #5d4e37;
@@ -509,18 +467,13 @@
     Home
 </a>
 
-<!-- Authentication buttons -->
-<div class="auth-buttons" id="authButtons">
-    <!-- Buttons will be populated by JavaScript based on auth status -->
-</div>
-
 <div class="profile-main">
     <div class="left-side">
         <div class="profile-header">
             <img src="/LibraryProject_war_exploded/images/cropped_circle_image.jpg" alt="User profile picture" class="profile-pic" />
             <div class="profile-info">
-                <div class="user-name">Loading...</div>
-                <div class="user-bio">Loading...</div>
+                <div class="user-name">Elenejobava</div>
+                <div class="user-bio">Passionate reader and book lover. Always looking for new stories to dive into!</div>
                 <div class="stats">
                     <p class="books-read">Books Read: 0</p>
                     <p class="reviews-given">Reviews Given: 0</p>
@@ -530,14 +483,47 @@
 
         <div class="scrollable-frame" id="currentlyReading">
             <h2>Currently Reading</h2>
-            <div class="no-content-message">Loading...</div>
+            <div class="book-item">The Hobbit <span class="author">by J.R.R. Tolkien</span></div>
+            <div class="book-item">Sapiens: A Brief History of Humankind <span class="author">by Yuval Noah Harari</span></div>
+            <div class="book-item">Atomic Habits <span class="author">by James Clear</span></div>
+            <div class="book-item">Educated <span class="author">by Tara Westover</span></div>
+            <div class="book-item">The Catcher in the Rye <span class="author">by J.D. Salinger</span></div>
+            <div class="book-item">1984 <span class="author">by George Orwell</span></div>
         </div>
     </div>
 
     <div class="right-side">
         <h2>User Reviews</h2>
         <div class="scrollable-frame" id="reviewsSection" style="flex-grow: 1;">
-            <div class="no-content-message">Loading...</div>
+            <div class="review">
+                <div class="review-header">
+                    <span class="book-name">The Great Gatsby</span>
+                    <span class="review-author">by F. Scott Fitzgerald</span>
+                    <span class="rating-stars">★★★★☆</span>
+                    <span class="rating-value">(4.0)</span>
+                </div>
+                <p class="review-text">Loved the story and characters. A classic!</p>
+            </div>
+
+            <div class="review">
+                <div class="review-header">
+                    <span class="book-name">1984</span>
+                    <span class="review-author">by George Orwell</span>
+                    <span class="rating-stars">★★★☆☆</span>
+                    <span class="rating-value">(3.0)</span>
+                </div>
+                <p class="review-text">Interesting but a bit depressing.</p>
+            </div>
+
+            <div class="review">
+                <div class="review-header">
+                    <span class="book-name">Pride and Prejudice</span>
+                    <span class="review-author">by Jane Austen</span>
+                    <span class="rating-stars">★★★★★</span>
+                    <span class="rating-value">(5.0)</span>
+                </div>
+                <p class="review-text">Absolutely loved the romance and wit!</p>
+            </div>
         </div>
     </div>
 </div>
@@ -585,9 +571,6 @@
     const userIndex = segments.indexOf("user");
     const username = segments[userIndex + 1];
     const contextPath = segments[1];
-
-    // Initialize authentication buttons
-    initializeAuthButtons();
 
     if (!username) {
         console.error("Username not found in URL");
@@ -690,7 +673,7 @@
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                username: username,
+                username: "Elenejobava",
                 oldPassword: oldPassword,
                 newPassword: newPassword
             }),
@@ -743,76 +726,5 @@
                 console.error(err);
             });
     });
-
-    // Authentication functions
-    function initializeAuthButtons() {
-        const authButtons = document.getElementById('authButtons');
-        
-        // Check if user is logged in by checking if we can get user data successfully
-        fetch(`/${contextPath}/api/user/${username}`, {
-            method: 'GET',
-            credentials: 'include'
-        })
-        .then(res => {
-            if (res.ok) {
-                // User is logged in, show logout button
-                authButtons.innerHTML = `
-                    <a href="#" class="auth-btn" onclick="handleLogout(event)" aria-label="Logout">
-                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"></path>
-                        </svg>
-                        Logout
-                    </a>
-                `;
-            } else {
-                // User is not logged in, show login button
-                authButtons.innerHTML = `
-                    <a href="/${contextPath}/login.jsp" class="auth-btn" aria-label="Login">
-                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v12z"></path>
-                        </svg>
-                        Login
-                    </a>
-                `;
-            }
-        })
-        .catch(err => {
-            // If there's an error, assume user is not logged in
-            console.error('Error checking auth status:', err);
-            authButtons.innerHTML = `
-                <a href="/${contextPath}/login.jsp" class="auth-btn" aria-label="Login">
-                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                        <path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v12z"></path>
-                    </svg>
-                    Login
-                </a>
-            `;
-        });
-    }
-
-    function handleLogout(event) {
-        event.preventDefault();
-        
-        fetch(`/${contextPath}/api/authorization/logout`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'include'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.redirect) {
-                window.location.href = data.redirect;
-            } else {
-                window.location.href = `/${contextPath}/main-page.jsp`;
-            }
-        })
-        .catch(error => {
-            console.error('Logout error:', error);
-            // Fallback: redirect to main page
-            window.location.href = `/${contextPath}/main-page.jsp`;
-        });
-    }
 </script>
 </html>

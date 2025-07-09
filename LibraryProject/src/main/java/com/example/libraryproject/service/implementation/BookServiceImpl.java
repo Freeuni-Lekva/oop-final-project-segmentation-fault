@@ -55,8 +55,8 @@ public class BookServiceImpl implements BookService {
                         book.getGenre(),
                         book.getAuthor(),
                         book.getImageUrl(),
-                        book.getTotalAmount(),
                         book.getCurrentAmount(),
+                        book.getTotalAmount(),
                         book.getVolume(),
                         book.getRating(),
                         book.getDate().toString()
@@ -74,8 +74,8 @@ public class BookServiceImpl implements BookService {
                         book.getGenre(),
                         book.getAuthor(),
                         book.getImageUrl(),
-                        book.getTotalAmount(),
                         book.getCurrentAmount(),
+                        book.getTotalAmount(),
                         book.getVolume(),
                         book.getRating(),
                         book.getDate().toString()
@@ -95,8 +95,8 @@ public class BookServiceImpl implements BookService {
                                 book.getGenre(),
                                 book.getAuthor(),
                                 book.getImageUrl(),
-                                book.getTotalAmount(),
                                 book.getCurrentAmount(),
+                                book.getTotalAmount(),
                                 book.getVolume(),
                                 book.getRating(),
                                 book.getDate().toString()

@@ -65,62 +65,43 @@
             <!-- Actions Section -->
             <div class="actions-section">
                 <h3 class="section-title">Actions</h3>
-                <% if ("BOOKKEEPER".equals(session.getAttribute("role"))) { %>
-                    <!-- Admin Actions -->
-                    <div class="action-buttons">
-                        <button class="delete-button" id="deleteButton" onclick="deleteBook()">
-                            <svg viewBox="0 0 24 24" class="nav-icon">
-                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path>
-                            </svg>
-                            Delete Book
-                        </button>
-                        <button class="back-to-admin-button" onclick="goBackToAdmin()">
-                            <svg viewBox="0 0 24 24" class="nav-icon">
-                                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path>
-                            </svg>
-                            Back to Admin Panel
-                        </button>
-                    </div>
-                <% } else { %>
-                    <!-- User Actions -->
-                    <div class="action-buttons">
-                        <button class="reserve-button" id="reserveButton" disabled onclick="reserveBook()">
-                            <svg viewBox="0 0 24 24" class="nav-icon">
-                                <path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"></path>
-                            </svg>
-                            <span id="reserveButtonText">Reserve Book</span>
-                        </button>
-                        <button class="review-button" onclick="toggleReviewForm()">
-                            <svg viewBox="0 0 24 24" class="nav-icon">
-                                <path d="M21 5h-2.64l1.14-3.14L17.15 1l-1.46 4H3v14h18V5zm-5 12.86L12 15.44 8 17.86l1.29-5.52L5 8.62h5.48L12 3.43l1.52 5.19H19l-4.29 3.72 1.29 5.51z"></path>
-                            </svg>
-                            Write a Review
-                        </button>
-                    </div>
+                <div class="action-buttons">
+                    <button class="reserve-button" id="reserveButton" disabled onclick="reserveBook()">
+                        <svg viewBox="0 0 24 24" class="nav-icon">
+                            <path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"></path>
+                        </svg>
+                        <span id="reserveButtonText">Reserve Book</span>
+                    </button>
+                    <button class="review-button" onclick="toggleReviewForm()">
+                        <svg viewBox="0 0 24 24" class="nav-icon">
+                            <path d="M21 5h-2.64l1.14-3.14L17.15 1l-1.46 4H3v14h18V5zm-5 12.86L12 15.44 8 17.86l1.29-5.52L5 8.62h5.48L12 3.43l1.52 5.19H19l-4.29 3.72 1.29 5.51z"></path>
+                        </svg>
+                        Write a Review
+                    </button>
+                </div>
 
-                    <div class="review-form" id="reviewForm">
-                        <form id="reviewFormSubmit" action="<%= request.getContextPath() %>/api/reviews/submit" method="POST">
-                            <input type="hidden" name="bookId" id="reviewBookId" value="">
-                            <input type="hidden" name="rating" id="selectedRating" value="">
-                            
-                            <textarea name="reviewText" placeholder="Write your review here..." required></textarea>
-                            
-                            <div class="star-rating-container">
-                                <label class="rating-label">Rating:</label>
-                                <div class="star-rating" id="starRating">
-                                    <span class="star" data-rating="1">☆</span>
-                                    <span class="star" data-rating="2">☆</span>
-                                    <span class="star" data-rating="3">☆</span>
-                                    <span class="star" data-rating="4">☆</span>
-                                    <span class="star" data-rating="5">☆</span>
-                                </div>
-                                <span class="rating-text" id="ratingText">Click to rate</span>
+                <div class="review-form" id="reviewForm">
+                    <form id="reviewFormSubmit" action="<%= request.getContextPath() %>/api/reviews/submit" method="POST">
+                        <input type="hidden" name="bookId" id="reviewBookId" value="">
+                        <input type="hidden" name="rating" id="selectedRating" value="">
+                        
+                        <textarea name="reviewText" placeholder="Write your review here..." required></textarea>
+                        
+                        <div class="star-rating-container">
+                            <label class="rating-label">Rating:</label>
+                            <div class="star-rating" id="starRating">
+                                <span class="star" data-rating="1">☆</span>
+                                <span class="star" data-rating="2">☆</span>
+                                <span class="star" data-rating="3">☆</span>
+                                <span class="star" data-rating="4">☆</span>
+                                <span class="star" data-rating="5">☆</span>
                             </div>
-                            
-                            <button type="submit" class="submit-review">Submit Review</button>
-                        </form>
-                    </div>
-                <% } %>
+                            <span class="rating-text" id="ratingText">Click to rate</span>
+                        </div>
+                        
+                        <button type="submit" class="submit-review">Submit Review</button>
+                    </form>
+                </div>
             </div>
 
             <!-- Description Section -->
@@ -139,11 +120,7 @@
         <div id="reviewsLoading" class="reviews-loading">Loading reviews...</div>
         <div id="reviewsContainer" class="reviews-container"></div>
         <div id="noReviews" class="no-reviews" style="display: none;">
-            <% if ("BOOKKEEPER".equals(session.getAttribute("role"))) { %>
-                <p>No reviews available for this book.</p>
-            <% } else { %>
-                <p>No reviews yet. Be the first to write a review!</p>
-            <% } %>
+            <p>No reviews yet. Be the first to write a review!</p>
         </div>
     </div>
 </div>
@@ -186,8 +163,7 @@
 
     function getBookIdFromUrl() {
         const urlParams = new URLSearchParams(window.location.search);
-        // Check for both 'id' and 'bookId' parameters (admin panel uses 'bookId')
-        const bookId = urlParams.get('id') || urlParams.get('bookId');
+        const bookId = urlParams.get('id');
         if (!bookId) {
             const pathParts = window.location.pathname.split('/');
             return pathParts[pathParts.length - 1];
@@ -213,27 +189,17 @@
 
         fetch('<%= request.getContextPath() %>/api/books/details/' + encodeURIComponent(bookId))
             .then(response => {
-                console.log('Book details response status:', response.status);
-                console.log('Book details response ok:', response.ok);
                 if (!response.ok) {
-                    return response.text().then(text => {
-                        console.error('Server error response:', text);
-                        throw new Error('Failed to fetch book details: ' + response.status + ' - ' + text);
-                    });
+                    throw new Error('Failed to fetch book details');
                 }
                 return response.json();
             })
             .then(book => {
-                console.log('Successfully loaded book details:', book);
                 currentBook = book;
                 displayBookDetails(book);
                 loadBookReviews(book.publicId);
-                // Check reservation status only if reserve button exists (for regular users)
-                const reserveButton = document.getElementById('reserveButton');
-                if (reserveButton) {
-                    return checkReservationStatus(book.publicId);
-                }
-                return Promise.resolve();
+                // Check reservation status AFTER displaying details to ensure proper button state
+                return checkReservationStatus(book.publicId);
             })
             .catch(error => {
                 console.error('Error loading book details:', error);
@@ -258,11 +224,6 @@
     function updateReserveButtonState(isReserved) {
         const reserveButton = document.getElementById('reserveButton');
         const reserveButtonText = document.getElementById('reserveButtonText');
-
-        // Safety check: if elements don't exist (admin users), return early
-        if (!reserveButton || !reserveButtonText) {
-            return;
-        }
 
         // Clear all existing classes and states first
         reserveButton.classList.remove('cancel-button', 'reserved');
@@ -406,12 +367,10 @@
         document.getElementById('bookDescription').textContent =
             book.description || 'No description available.';
         
-        // Set the review book ID if the field exists (only for non-admin users)
+        // Set the review book ID and add debugging
         const reviewBookIdField = document.getElementById('reviewBookId');
-        if (reviewBookIdField) {
-            const bookPublicId = book.publicId || '';
-            reviewBookIdField.value = bookPublicId;
-        }
+        const bookPublicId = book.publicId || '';
+        reviewBookIdField.value = bookPublicId;
         
         // Don't set button state here - let checkReservationStatus handle it
     }
@@ -555,129 +514,78 @@
         }
     }
 
-    // Admin functions
-    function deleteBook() {
-        if (!currentBook || !currentBook.publicId) {
-            alert('Unable to delete book. Please refresh the page and try again.');
-            return;
-        }
-
-        if (!confirm('Are you sure you want to delete this book? This action cannot be undone.')) {
-            return;
-        }
-
-        const deleteButton = document.getElementById('deleteButton');
-        deleteButton.disabled = true;
-        deleteButton.textContent = 'Deleting...';
-
-        fetch('<%= request.getContextPath() %>/api/bookkeeper/delete-book', {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ bookPublicId: currentBook.publicId }),
-            credentials: "include"
-        })
-        .then(response => {
-            return response.json().then(data => {
-                if (response.ok && data.status === 'success') {
-                    alert(data.message || 'Book deleted successfully');
-                    // Redirect back to admin panel
-                    window.location.href = '<%= request.getContextPath() %>/bookkeeper-admin.jsp';
-                } else {
-                    throw new Error(data.message || 'Failed to delete book');
-                }
-            });
-        })
-        .catch(error => {
-            console.error('Error deleting book:', error);
-            alert('Failed to delete book: ' + error.message);
-            deleteButton.disabled = false;
-            deleteButton.textContent = 'Delete Book';
-        });
-    }
-
-    function goBackToAdmin() {
-        window.location.href = '<%= request.getContextPath() %>/bookkeeper-admin.jsp';
-    }
-
     document.addEventListener('DOMContentLoaded', function() {
         loadBookDetails();
-        
-        // Check if review form exists (only for non-admin users)
-        const reviewForm = document.getElementById('reviewFormSubmit');
-        if (reviewForm) {
-            initializeStarRating();
+        initializeStarRating();
+
+        document.getElementById('reviewFormSubmit').addEventListener('submit', function(event) {
+            event.preventDefault();
             
-            reviewForm.addEventListener('submit', function(event) {
-                event.preventDefault();
-                
-                const formData = new FormData(this);
-                
-                // Check if bookId is present
-                const bookId = formData.get('bookId');
-                if (!bookId || bookId.trim() === '') {
-                    alert('Error: Book ID is missing. Please refresh the page and try again.');
-                    return;
-                }
-                
-                // Check if reviewText is present
-                const reviewText = formData.get('reviewText');
-                if (!reviewText || reviewText.trim() === '') {
-                    alert('Error: Please write a review.');
-                    return;
-                }
-                
-                // Check if rating is present
-                const rating = formData.get('rating');
-                if (!rating || rating === '') {
-                    alert('Error: Please select a star rating.');
-                    return;
-                }
-                
-                // Convert FormData to URLSearchParams for proper encoding
-                const urlParams = new URLSearchParams();
-                for (let [key, value] of formData.entries()) {
-                    urlParams.append(key, value);
-                }
-                
-                fetch(this.action, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: urlParams
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            return response.text().then(text => {
-                                throw new Error('Failed to submit review: ' + text);
-                            });
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        alert('Review submitted successfully!');
-                        document.getElementById('reviewForm').classList.remove('show');
-                        this.reset();
-                        // Reset star rating
-                        document.querySelectorAll('.star').forEach(star => {
-                            star.classList.remove('filled');
+            const formData = new FormData(this);
+            
+            // Check if bookId is present
+            const bookId = formData.get('bookId');
+            if (!bookId || bookId.trim() === '') {
+                alert('Error: Book ID is missing. Please refresh the page and try again.');
+                return;
+            }
+            
+            // Check if reviewText is present
+            const reviewText = formData.get('reviewText');
+            if (!reviewText || reviewText.trim() === '') {
+                alert('Error: Please write a review.');
+                return;
+            }
+            
+            // Check if rating is present
+            const rating = formData.get('rating');
+            if (!rating || rating === '') {
+                alert('Error: Please select a star rating.');
+                return;
+            }
+            
+            // Convert FormData to URLSearchParams for proper encoding
+            const urlParams = new URLSearchParams();
+            for (let [key, value] of formData.entries()) {
+                urlParams.append(key, value);
+            }
+            
+            fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: urlParams
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            throw new Error('Failed to submit review: ' + text);
                         });
-                        document.getElementById('selectedRating').value = '';
-                        document.getElementById('ratingText').textContent = 'Click to rate';
-                        document.getElementById('ratingText').classList.remove('selected');
-                        
-                        if (currentBook && currentBook.publicId) {
-                            loadBookReviews(currentBook.publicId);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error submitting review:', error);
-                        alert('Failed to submit review. Please try again. Error: ' + error.message);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert('Review submitted successfully!');
+                    document.getElementById('reviewForm').classList.remove('show');
+                    this.reset();
+                    // Reset star rating
+                    document.querySelectorAll('.star').forEach(star => {
+                        star.classList.remove('filled');
                     });
-            });
-        }
+                    document.getElementById('selectedRating').value = '';
+                    document.getElementById('ratingText').textContent = 'Click to rate';
+                    document.getElementById('ratingText').classList.remove('selected');
+                    
+                    if (currentBook && currentBook.publicId) {
+                        loadBookReviews(currentBook.publicId);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error submitting review:', error);
+                    alert('Failed to submit review. Please try again. Error: ' + error.message);
+                });
+        });
     });
 
     // Navigation functionality

@@ -38,14 +38,11 @@ public class BookKeeperServiceImpl implements BookKeeperService {
 
 
     public void addBook(BookAdditionRequest bookRequest) {
-        Long copies = bookRequest.copies() != null ? bookRequest.copies() : 1L;
         Optional<Book> existingBook = bookRepository.findByTitle(bookRequest.title());
 
         if (existingBook.isPresent()) {
             Book bookInLibrary = existingBook.get();
-            // Add copies to both total and current amount
-            bookInLibrary.setTotalAmount(bookInLibrary.getTotalAmount() + copies);
-            bookInLibrary.setCurrentAmount(bookInLibrary.getCurrentAmount() + copies);
+            bookInLibrary.setTotalAmount(bookInLibrary.getTotalAmount() + 1);
             bookRepository.update(bookInLibrary);
         } else {
             Book book = new Book();
@@ -56,20 +53,10 @@ public class BookKeeperServiceImpl implements BookKeeperService {
             book.setPublicId(bookRequest.title().replaceAll("[^a-zA-Z0-9.\\-]", "_"));
             book.setImageUrl(bookRequest.title().replaceAll("[^a-zA-Z0-9.\\-]", "_") + ".jpg");
             book.setVolume(bookRequest.volume());
-            // Parse and set the publication date
-            if (bookRequest.publicationDate() != null && !bookRequest.publicationDate().isEmpty()) {
-                book.setDate(java.time.LocalDate.parse(bookRequest.publicationDate()));
-            } else {
-                book.setDate(java.time.LocalDate.now()); // Fallback to current date
-            }
-            // Set both total and current amount to the number of copies
-            book.setTotalAmount(copies);
-            book.setCurrentAmount(copies);
-            // New books start with 0 rating
-            book.setRating(0L);
+            book.setTotalAmount(1L);
             bookRepository.save(book);
         }
-        logger.info("Book with title '{}' added successfully with {} copies", bookRequest.title(), copies);
+        logger.info("Book with title '{}' added successfully", bookRequest.title());
     }
 
     public void deleteBook(String bookPublicId) {
@@ -77,22 +64,22 @@ public class BookKeeperServiceImpl implements BookKeeperService {
         if (bookOptional.isEmpty()) {
             throw new IllegalArgumentException("Book not found");
         }
-        
         Book book = bookOptional.get();
-        
-        // Check if there are any active orders for this book
-        Set<Order> activeOrders = orderRepository.findOrdersByBookId(book.getId());
-        long activeOrderCount = activeOrders.stream()
-                .filter(order -> order.getStatus() == OrderStatus.RESERVED || order.getStatus() == OrderStatus.BORROWED)
-                .count();
-        
-        if (activeOrderCount > 0) {
-            throw new IllegalStateException("Cannot delete book with active reservations or borrowed copies");
+        Optional<Book> existingBook = bookRepository.findByTitle(book.getName());
+        if (existingBook.isPresent()) {
+            Book bookInLibrary = existingBook.get();
+            long amount = bookInLibrary.getTotalAmount();
+            if (amount > 1) {
+                bookInLibrary.setTotalAmount(amount - 1);
+                bookRepository.update(bookInLibrary);
+            } else {
+                bookRepository.delete(bookInLibrary);
+            }
+            logger.info("Book with title '{}' deleted successfully", book.getName());
+        } else {
+            logger.info("Attempted to delete a book that does not exist in the library: {}", book.getName());
+            throw new IllegalArgumentException("Book not found. Try again.");
         }
-        
-        // Completely delete the book from the database
-        bookRepository.delete(book);
-        logger.info("Book with title '{}' and publicId '{}' deleted successfully", book.getName(), bookPublicId);
     }
 
     public void tookBook(String orderPublicId) {
@@ -109,30 +96,6 @@ public class BookKeeperServiceImpl implements BookKeeperService {
         order.setStatus(OrderStatus.BORROWED);
         orderRepository.update(order);
         logger.info("Order with public ID '{}' marked as BORROWED", orderPublicId);
-    }
-
-    public void returnBook(String orderPublicId) {
-        Optional<Order> orderOptional = orderRepository.findByPublicId(orderPublicId);
-        if (orderOptional.isEmpty()) {
-            throw new IllegalArgumentException("Order not found");
-        }
-        Order order = orderOptional.get();
-        if (order.getStatus() != OrderStatus.BORROWED) {
-            logger.info("Attempted to mark order {} as RETURNED but it has status {}", orderPublicId, order.getStatus());
-            throw new IllegalStateException("Invalid status: " + order.getStatus());
-        }
-
-        // Update order status and set return date
-        order.setStatus(OrderStatus.RETURNED);
-        order.setReturnDate(java.time.LocalDateTime.now());
-        orderRepository.update(order);
-
-        // Increment book availability
-        Book book = order.getBook();
-        book.setCurrentAmount(book.getCurrentAmount() + 1);
-        bookRepository.update(book);
-
-        logger.info("Order with public ID '{}' marked as RETURNED, book '{}' is now available", orderPublicId, book.getName());
     }
 
     public void banUser(String username) {

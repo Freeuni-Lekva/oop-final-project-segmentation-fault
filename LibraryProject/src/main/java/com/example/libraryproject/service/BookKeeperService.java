@@ -16,8 +16,6 @@ public interface BookKeeperService {
 
     void tookBook(String orderPublicId);
 
-    void returnBook(String orderPublicId);
-
     void banUser(String username);
 
     void unbanUser(String username);

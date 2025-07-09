@@ -420,7 +420,7 @@
       var bookTitle = book.name || 'Unknown Title';
       var bookAuthor = book.author || 'Unknown Author';
       var currentAmount = book.currentAmount || 0;
-                      var totalAmount = book.totalAmount || 0;
+      var originalAmount = book.originalAmount || 0;
 
       var ratingHtml = '';
       if (rating > 0) {

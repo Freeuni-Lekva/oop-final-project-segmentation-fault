@@ -1,3 +1,10 @@
+<%--
+  Created by IntelliJ IDEA.
+  User: elenejobava
+  Date: 6/19/25
+  Time: 20:54
+  To change this template use File | Settings | File Templates.
+--%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
@@ -124,18 +131,6 @@
         fill: currentColor;
     }
 
-    /* Authentication button styles */
-    .auth-btn {
-        border: 2px solid #8b7355 !important;
-        font-weight: 600 !important;
-    }
-
-    .auth-btn:hover {
-        background-color: #8b7355 !important;
-        color: #ffffff !important;
-        border-color: #6b5a42 !important;
-    }
-
     .main-content {
         padding: 20px;
         min-height: 600px;
@@ -235,7 +230,7 @@
 
     .form-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 20px;
         margin-bottom: 25px;
     }
@@ -891,113 +886,6 @@
         .book-actions {
             width: 100%;
             text-align: right;
-        }
-    }
-
-    /* Google Books Quick Add Styling */
-    .google-books-section {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border: 2px solid #4285f4;
-        border-radius: 12px;
-        padding: 25px;
-        margin-bottom: 30px;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .google-books-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 4px;
-        background: linear-gradient(90deg, #4285f4 25%, #34a853 50%, #fbbc05 75%, #ea4335 100%);
-    }
-
-    .manual-add-section {
-        background: #fefdf8;
-        border: 1px solid #e6cb58;
-        border-radius: 12px;
-        padding: 25px;
-        margin-top: 20px;
-    }
-
-    .subsection-title {
-        color: #5d4e37;
-        font-family: 'Poppins', sans-serif;
-        font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .google-books-section .subsection-title {
-        color: #1a73e8;
-    }
-
-    .form-grid-simple {
-        display: grid;
-        grid-template-columns: 2fr 2fr 1fr;
-        gap: 20px;
-        margin-bottom: 20px;
-    }
-
-    .btn-google {
-        background: linear-gradient(135deg, #4285f4 0%, #1a73e8 100%);
-        color: white;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 14px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        text-decoration: none;
-        box-shadow: 0 2px 8px rgba(66, 133, 244, 0.2);
-    }
-
-    .btn-google:hover {
-        background: linear-gradient(135deg, #1a73e8 0%, #1557b0 100%);
-        box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
-        transform: translateY(-2px);
-    }
-
-    .btn-google:active {
-        transform: translateY(0);
-        box-shadow: 0 2px 8px rgba(66, 133, 244, 0.2);
-    }
-
-    .btn-google:disabled {
-        background: #94a3b8;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-    }
-
-    @media (max-width: 768px) {
-        .form-grid-simple {
-            grid-template-columns: 1fr;
-        }
-        
-        .google-books-section,
-        .manual-add-section {
-            padding: 20px;
-        }
-    }
-    
-    @media (max-width: 1024px) {
-        .form-grid-simple {
-            grid-template-columns: 1fr 1fr;
-        }
-        
-        .form-grid-simple .form-group:nth-child(3) {
-            grid-column: 1 / -1;
         }
     }
 </style>
