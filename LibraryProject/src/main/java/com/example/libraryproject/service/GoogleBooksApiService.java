@@ -6,5 +6,5 @@ public interface GoogleBooksApiService {
 
     void fetchAndSaveBooks();
 
-    boolean fetchBook(BookAdditionFromGoogleRequest request);
+    boolean fetchBook(BookAdditionFromGoogleRequest request, int copies);
 }

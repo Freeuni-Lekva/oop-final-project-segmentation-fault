@@ -94,7 +94,41 @@
     <div id="add-book" class="tab-content active">
       <div class="form-container">
         <h2 class="form-section-title">Add New Book to Collection</h2>
-        <form id="addBookForm" enctype="multipart/form-data">
+        
+        <!-- Google Books Quick Add Section -->
+        <div class="google-books-section">
+          <h3 class="subsection-title">Quick Add from Google Books</h3>
+          <form id="googleBooksForm">
+            <div class="form-grid-simple">
+              <div class="form-group">
+                <label for="googleTitle">Book Title *</label>
+                <input type="text" id="googleTitle" name="googleTitle" placeholder="Enter book title" required>
+              </div>
+              <div class="form-group">
+                <label for="googleAuthor">Author *</label>
+                <input type="text" id="googleAuthor" name="googleAuthor" placeholder="Enter author name" required>
+              </div>
+              <div class="form-group">
+                <label for="googleCopies">Number of Copies *</label>
+                <input type="number" id="googleCopies" name="googleCopies" placeholder="Enter number of copies" min="1" value="1" required>
+              </div>
+            </div>
+            <div class="action-buttons">
+              <button type="submit" class="btn btn-google" id="addFromGoogleBtn">
+                <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                Add from Google Books
+              </button>
+            </div>
+            <div id="googleBooksMessage" class="message-area" style="display: none;"></div>
+          </form>
+        </div>
+
+        <!-- Manual Add Section -->
+        <div class="manual-add-section">
+          <h3 class="subsection-title">Manual Add (Custom Book)</h3>
+          <form id="addBookForm" enctype="multipart/form-data">
           <div class="form-grid">
             <div class="form-group">
               <label for="title">Book Title *</label>
@@ -121,6 +155,14 @@
             <div class="form-group">
               <label for="volume">Volume</label>
               <input type="text" id="volume" name="volume" placeholder="e.g., 1st Edition, Volume 2">
+            </div>
+            <div class="form-group">
+              <label for="copies">Number of Copies *</label>
+              <input type="number" id="copies" name="copies" placeholder="Enter number of copies" min="1" value="1" required>
+            </div>
+            <div class="form-group">
+              <label for="publicationDate">Publication Date *</label>
+              <input type="date" id="publicationDate" name="publicationDate" required>
             </div>
           </div>
           <div class="form-group">
@@ -151,6 +193,7 @@
           </div>
           <div id="addBookMessage" class="message-area" style="display: none;"></div>
         </form>
+        </div> <!-- End manual-add-section -->
       </div>
     </div>
 
@@ -278,8 +321,8 @@
       const genre = document.getElementById('genre').value.trim();
       const volume = document.getElementById('volume').value.trim();
       const description = document.getElementById('description').value.trim();
-      const currentAmount = document.getElementById('amount').value.trim();
-      const originalAmount = document.getElementById('originalAmount').value.trim();
+      const copies = parseInt(document.getElementById('copies').value) || 1;
+      const publicationDate = document.getElementById('publicationDate').value;
       const fileInput = document.getElementById('bookImage');
       const imageFile = fileInput.files[0];
 
@@ -305,8 +348,8 @@
         genre,
         volume,
         description,
-        currentAmount,
-        originalAmount,
+        copies,
+        publicationDate
       };
 
       const bookCreateResponse = await fetch('${pageContext.request.contextPath}/api/bookkeeper/add-book', {
@@ -319,22 +362,104 @@
       });
 
       if (bookCreateResponse.ok) {
-        msgBox.textContent = 'Book added successfully';
+        const responseData = await bookCreateResponse.json().catch(() => null);
+        const successMessage = responseData ? responseData.message : 'Book added successfully';
+        msgBox.textContent = successMessage;
         msgBox.className = 'message-area success';
         msgBox.style.display = 'block';
         form.reset();
         if (preview && preview.classList.contains('show')) {
           preview.classList.remove('show');
         }
+        
+        // Always refresh book collection list
+        loadBooksList();
+        
         setTimeout(() => (msgBox.style.display = 'none'), 5000);
       } else {
-        msgBox.textContent = 'Failed to add book';
+        const responseData = await bookCreateResponse.json().catch(() => null);
+        const errorMessage = responseData ? responseData.message : 'Failed to add book';
+        msgBox.textContent = errorMessage;
         msgBox.className = 'message-area error';
         msgBox.style.display = 'block';
       }
     } catch (error) {
       console.error(error);
       msgBox.textContent = 'Error: Check your connection or input';
+      msgBox.className = 'message-area error';
+      msgBox.style.display = 'block';
+    } finally {
+      button.textContent = buttonText;
+      button.disabled = false;
+    }
+  });
+
+  // Google Books Form Handler
+  document.getElementById('googleBooksForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const form = this;
+    const button = document.getElementById('addFromGoogleBtn');
+    const buttonText = button.textContent;
+    const msgBox = document.getElementById('googleBooksMessage');
+
+    button.disabled = true;
+    button.textContent = 'Fetching from Google Books...';
+    msgBox.style.display = 'none';
+
+    try {
+      const title = document.getElementById('googleTitle').value.trim();
+      const author = document.getElementById('googleAuthor').value.trim();
+      const copies = parseInt(document.getElementById('googleCopies').value) || 1;
+
+      if (!title) {
+        throw new Error('Book title is required');
+      }
+
+      if (!author) {
+        throw new Error('Author is required for accurate Google Books search');
+      }
+
+      if (copies < 1) {
+        throw new Error('Number of copies must be at least 1');
+      }
+
+      const payload = {
+        title: title,
+        author: author,
+        copies: copies
+      };
+
+      const response = await fetch('${pageContext.request.contextPath}/api/bookkeeper/add-book-from-google', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload),
+        credentials: "include"
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        msgBox.textContent = responseData.message || 'Book successfully added from Google Books!';
+        msgBox.className = 'message-area success';
+        msgBox.style.display = 'block';
+        form.reset();
+        
+        // Always refresh book collection list
+        loadBooksList();
+        
+        setTimeout(() => (msgBox.style.display = 'none'), 5000);
+      } else {
+        const responseData = await response.json().catch(() => null);
+        const errorMessage = responseData ? responseData.message : 'Failed to fetch book from Google Books';
+        msgBox.textContent = errorMessage;
+        msgBox.className = 'message-area error';
+        msgBox.style.display = 'block';
+      }
+    } catch (error) {
+      console.error(error);
+      msgBox.textContent = 'Error: ' + error.message;
       msgBox.className = 'message-area error';
       msgBox.style.display = 'block';
     } finally {
@@ -595,6 +720,25 @@
     loadBooksList();
   });
 
+  // Auto-refresh book list when returning to admin panel (e.g., after deleting a book in another tab)
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+      // Page became visible again - refresh the book list in case books were deleted
+      if (document.getElementById('book-collection').classList.contains('active')) {
+        console.log('Admin panel became visible - refreshing book list');
+        loadBooksList();
+      }
+    }
+  });
+
+  // Also refresh when window gains focus
+  window.addEventListener('focus', function() {
+    if (document.getElementById('book-collection').classList.contains('active')) {
+      console.log('Admin panel gained focus - refreshing book list');
+      loadBooksList();
+    }
+  });
+
   function refreshUsersList() {
     setTimeout(function() {
       loadUsersList();
@@ -830,7 +974,7 @@
 
                 const bookAmount = document.createElement('span');
                 bookAmount.className = 'book-amount';
-                bookAmount.textContent = (book.currentAmount || 0) + '/' + (book.originalAmount || 0) + ' available';
+                bookAmount.textContent = (book.currentAmount || 0) + '/' + (book.totalAmount || 0) + ' available';
 
                 bookData.appendChild(bookGenre);
                 bookData.appendChild(document.createTextNode(' | '));
@@ -858,6 +1002,13 @@
 
                 bookInfo.appendChild(bookImage);
                 bookInfo.appendChild(bookDetails);
+                
+                // Make the book info clickable to go to book details
+                bookInfo.style.cursor = 'pointer';
+                bookInfo.onclick = function() {
+                  window.open('${pageContext.request.contextPath}/book-details.jsp?bookId=' + encodeURIComponent(book.publicId) + '&admin=true', '_blank');
+                };
+                
                 bookElement.appendChild(bookInfo);
                 bookElement.appendChild(bookActions);
 
@@ -890,19 +1041,21 @@
       credentials: "include"
     })
             .then(function(response) {
-              if (response.ok) {
-                msgBox.textContent = 'Book deleted successfully';
-                msgBox.className = 'message-area success';
-                msgBox.style.display = 'block';
-                bookElement.remove();
-                setTimeout(function() {
-                  msgBox.style.display = 'none';
-                }, 5000);
-              } else {
-                msgBox.textContent = 'Failed to delete book';
-                msgBox.className = 'message-area error';
-                msgBox.style.display = 'block';
-              }
+              return response.json().then(function(data) {
+                if (response.ok && data.status === 'success') {
+                  msgBox.textContent = data.message || 'Book deleted successfully';
+                  msgBox.className = 'message-area success';
+                  msgBox.style.display = 'block';
+                  bookElement.remove();
+                  setTimeout(function() {
+                    msgBox.style.display = 'none';
+                  }, 5000);
+                } else {
+                  msgBox.textContent = data.message || 'Failed to delete book';
+                  msgBox.className = 'message-area error';
+                  msgBox.style.display = 'block';
+                }
+              });
             })
             .catch(function(error) {
               console.error(error);
