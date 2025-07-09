@@ -6,7 +6,7 @@ import java.time.LocalDate;
 
 public class MockDataForTests {
 
-    public static  Book createTestBook(String name, String author, String genre, Long rating, Long originalAmount, Long currentAmount, String imageUrl) {
+    public static  Book createTestBook(String name, String author, String genre, double rating, Long originalAmount, Long currentAmount, String imageUrl) {
         return new Book(
                 name.replaceAll("[^a-zA-Z0-9.\\-]", "_"),
                 name,

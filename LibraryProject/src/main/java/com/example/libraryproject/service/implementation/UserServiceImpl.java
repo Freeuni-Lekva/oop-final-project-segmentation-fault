@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -32,6 +33,27 @@ public class UserServiceImpl implements UserService {
     private final OrderRepository orderRepository;
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
+    /**
+     * Calculates the average rating for a book based on all its reviews
+     * @param bookPublicId The public ID of the book
+     * @return The average rating, or 0.0 if no reviews exist
+     */
+    private double calculateAverageRating(String bookPublicId) {
+        Set<Review> reviews = reviewRepository.findReviewsByBookPublicId(bookPublicId);
+        
+        if (reviews.isEmpty()) {
+            return 0.0;
+        }
+        
+        double sum = reviews.stream()
+                .mapToInt(Review::getRating)
+                .sum();
+        
+        double average = sum / reviews.size();
+        
+        // Round to 1 decimal place for cleaner display
+        return Math.round(average * 10.0) / 10.0;
+    }
 
     public boolean reviewBook(String username, String publicId, int rating, String comment) {
         // Check if user is logged in
@@ -83,7 +105,14 @@ public class UserServiceImpl implements UserService {
         user.setReviews(updatedReviews);
 
         userRepository.update(user);
-        logger.info("User {} reviewed book {} with rating {} and comment '{}'", username, publicId, rating, comment);
+        
+        // Recalculate and update book rating
+        double newAverageRating = calculateAverageRating(publicId);
+        book.setRating(newAverageRating);
+        bookRepository.update(book);
+        
+        logger.info("User {} reviewed book {} with rating {} and comment '{}'. Book rating updated to {}", 
+                   username, publicId, rating, comment, newAverageRating);
         return true;
     }
 
@@ -229,6 +258,23 @@ public class UserServiceImpl implements UserService {
             order.getBook().getPublicId().equals(bookId) && 
             order.getStatus() == OrderStatus.RESERVED
         );
+    }
+
+    /**
+     * Recalculates and updates ratings for all books based on their reviews.
+     * This method can be used to fix data inconsistencies or initialize ratings for existing books.
+     */
+    public void recalculateAllBookRatings() {
+        List<Book> allBooks = bookRepository.findAll();
+        
+        for (Book book : allBooks) {
+            double newRating = calculateAverageRating(book.getPublicId());
+            book.setRating(newRating);
+            bookRepository.update(book);
+            logger.info("Updated rating for book '{}' to {}", book.getName(), newRating);
+        }
+        
+        logger.info("Completed recalculating ratings for {} books", allBooks.size());
     }
 
 

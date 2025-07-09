@@ -46,7 +46,7 @@ public class UserServiceImplTest {
                 "Author A",
                 LocalDate.of(2020, 5, 10),
                 "A gripping tale of magic and destiny.",
-                300L, 1L, 1L, 4L, ""
+                300L, 1L, 1L, 4.0, ""
         );
 
         book2 = new Book(
@@ -56,7 +56,7 @@ public class UserServiceImplTest {
                 "Author A",
                 LocalDate.of(2021, 6, 15),
                 "The saga continues with greater peril.",
-                300L, 0L, 2L, 5L, ""
+                300L, 0L, 2L, 5.0, ""
         );
 
         book3 = new Book(
@@ -66,7 +66,7 @@ public class UserServiceImplTest {
                 "Author A",
                 LocalDate.of(2019, 4, 20),
                 "Ancient secrets resurface to test the realm.",
-                300L, 3L, 3L, 3L, ""
+                300L, 3L, 3L, 3.0, ""
         );
 
         user = new User("rezi", "1234");
@@ -172,5 +172,8 @@ public class UserServiceImplTest {
 
         // Test review with non-existent book
         assertFalse(userServiceImpl.reviewBook(user.getUsername(), "nonexistent", 4, "good"));
+        
+        // Verify that bookRepository.update was called to update the book's rating
+        verify(bookRepository, atLeastOnce()).update(any(Book.class));
     }
 }

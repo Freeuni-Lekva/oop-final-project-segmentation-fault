@@ -68,7 +68,7 @@ public class Mappers {
         // These can be overridden by the service layer if needed
         book.setTotalAmount(1L);
         book.setCurrentAmount(1L);
-        book.setRating(0L);
+        book.setRating(0.0);
 
         return book;
     }

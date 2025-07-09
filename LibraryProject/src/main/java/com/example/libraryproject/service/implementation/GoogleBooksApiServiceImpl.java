@@ -46,7 +46,7 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
                     long randomCopies = ThreadLocalRandom.current().nextInt(1, 16);
                     book.setTotalAmount(randomCopies);
                     book.setCurrentAmount(randomCopies);
-                    book.setRating(0L);
+                    book.setRating(0.0);
                     return book;
                 })
                 .toList();
@@ -101,7 +101,7 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
         } else {
             book.setTotalAmount((long) copies);
             book.setCurrentAmount((long) copies);
-            book.setRating(0L);
+            book.setRating(0.0);
             
             bookRepository.save(book);
             logger.info("Successfully saved new book: {} with {} copies", book.getName(), copies);

@@ -154,14 +154,14 @@ public class TestBookRepository {
         bookRepository.save(book);
         book.setName("Updated Title");
         book.setAuthor("Updated Author");
-        book.setRating(5L);
+        book.setRating(5.0);
         assertDoesNotThrow(() -> bookRepository.update(book));
 
         Optional<Book> updatedBook = bookRepository.findById(book.getId());
         assertTrue(updatedBook.isPresent());
         assertEquals("Updated Title", updatedBook.get().getName());
         assertEquals("Updated Author", updatedBook.get().getAuthor());
-        assertEquals(5L, updatedBook.get().getRating());
+        assertEquals(5.0, updatedBook.get().getRating());
     }
 
     @Test
