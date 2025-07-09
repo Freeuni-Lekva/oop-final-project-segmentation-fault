@@ -40,11 +40,7 @@ public class BookServlet extends HttpServlet {
 
         switch (path) {
             case "all":
-                if (sortParam != null && !sortParam.trim().isEmpty()) {
-                    objectMapper.writeValue(response.getWriter(), bookService.getAllBooks(sortCriteria));
-                } else {
-                    objectMapper.writeValue(response.getWriter(), bookService.getAllBooks());
-                }
+                objectMapper.writeValue(response.getWriter(), bookService.getAllBooks(sortCriteria));
                 break;
             case "details":
                 if (pathParts.length < 2) {
