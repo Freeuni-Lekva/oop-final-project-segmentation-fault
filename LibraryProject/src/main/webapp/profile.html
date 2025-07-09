@@ -34,7 +34,7 @@
             left: 0;
             width: 100vw;
             height: 300px;
-            background-image: url('images/image0.jpg');
+            background-image: url('/LibraryProject_war_exploded/images/image0.jpg');
             background-size: cover;
             background-position: center 60%;
             background-repeat: no-repeat;
@@ -502,7 +502,7 @@
 
 <div class="top-line1"></div>
 
-<a href="main-page.jsp" id="homeButtonPlease" class="home-button" aria-label="Go to Home">
+<a href="/LibraryProject_war_exploded/main-page.jsp" id="homeButtonPlease" class="home-button" aria-label="Go to Home">
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
         <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
     </svg>
@@ -517,7 +517,7 @@
 <div class="profile-main">
     <div class="left-side">
         <div class="profile-header">
-            <img src="images/cropped_circle_image.jpg" alt="User profile picture" class="profile-pic" />
+            <img src="/LibraryProject_war_exploded/images/cropped_circle_image.jpg" alt="User profile picture" class="profile-pic" />
             <div class="profile-info">
                 <div class="user-name">Loading...</div>
                 <div class="user-bio">Loading...</div>
@@ -767,7 +767,7 @@
             } else {
                 // User is not logged in, show login button
                 authButtons.innerHTML = `
-                    <a href="login.jsp" class="auth-btn" aria-label="Login">
+                    <a href="/${contextPath}/login.jsp" class="auth-btn" aria-label="Login">
                         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                             <path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v12z"></path>
                         </svg>
@@ -780,7 +780,7 @@
             // If there's an error, assume user is not logged in
             console.error('Error checking auth status:', err);
             authButtons.innerHTML = `
-                <a href="login.jsp" class="auth-btn" aria-label="Login">
+                <a href="/${contextPath}/login.jsp" class="auth-btn" aria-label="Login">
                     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                         <path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v12z"></path>
                     </svg>
@@ -805,13 +805,13 @@
             if (data.redirect) {
                 window.location.href = data.redirect;
             } else {
-                window.location.href = `main-page.jsp`;
+                window.location.href = `/${contextPath}/main-page.jsp`;
             }
         })
         .catch(error => {
             console.error('Logout error:', error);
             // Fallback: redirect to main page
-            window.location.href = `main-page.jsp`;
+            window.location.href = `/${contextPath}/main-page.jsp`;
         });
     }
 </script>
