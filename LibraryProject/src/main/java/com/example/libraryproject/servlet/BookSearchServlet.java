@@ -28,8 +28,6 @@ public class BookSearchServlet extends HttpServlet {
     public void init() throws ServletException {
         super.init();
 
-        System.out.println("Initializing BookSearchServlet...");
-
         try {
             SessionFactory sessionFactory = getSessionFactory();
             System.out.println("SessionFactory created successfully");
@@ -59,12 +57,14 @@ public class BookSearchServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws IOException {
 
         String searchTerm = request.getParameter("term");
+        String sortBy = request.getParameter("sort");
+        String availability = request.getParameter("availability");
+
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
         PrintWriter out = response.getWriter();
 
         if (searchTerm == null || searchTerm.trim().isEmpty()) {
@@ -80,8 +80,7 @@ public class BookSearchServlet extends HttpServlet {
         }
 
         try {
-            List<BookDTO> books = bookService.searchBooks(searchTerm.trim());
-            System.out.println("Found " + books.size() + " books"); // Debug log
+            List<BookDTO> books = bookService.searchBooks(searchTerm.trim(), sortBy, availability);
 
             JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
 
@@ -110,6 +109,7 @@ public class BookSearchServlet extends HttpServlet {
             e.printStackTrace();
         }
     }
+
 
     @Override
     public void destroy() {
