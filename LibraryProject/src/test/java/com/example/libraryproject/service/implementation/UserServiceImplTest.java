@@ -94,10 +94,11 @@ public class UserServiceImplTest {
         // Test successful reservation
         assertDoesNotThrow(() -> userServiceImpl.reserveBook(user.getUsername(), book1.getPublicId()));
 
-        // Test reservation when book is already reserved (book2 has 0 amount)
+        book2.setCurrentAmount(0L);
         assertFalse(userServiceImpl.reserveBook(user.getUsername(), book2.getPublicId()));
 
         // Test reservation with non-existent user
+        book2.setCurrentAmount(1L);
         assertFalse(userServiceImpl.reserveBook("nonexistent", book1.getPublicId()));
 
         // Test reservation with non-existent book
