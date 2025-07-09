@@ -96,6 +96,26 @@ public class AuthorizationServlet extends HttpServlet {
                     );
                 }
             }
+            case "/logout" -> {
+                try {
+                    HttpSession session = request.getSession(false);
+                    if (session != null) {
+                        session.invalidate();
+                    }
+
+                    String redirectPath = request.getContextPath() + "/main-page.jsp";
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    objectMapper.writeValue(response.getWriter(),
+                            new JsonResponse("Logout successful", redirectPath)
+                    );
+
+                } catch (Exception e) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    objectMapper.writeValue(response.getWriter(),
+                            new JsonResponse("Logout failed: " + e.getMessage(), null)
+                    );
+                }
+            }
             default -> {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 objectMapper.writeValue(response.getWriter(),

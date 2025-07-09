@@ -40,7 +40,15 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
 
         Set<GoogleBooksResponse> googleBooks = fetchBooks();
         List<Book> books = googleBooks.stream()
-                .map(Mappers::mapGoogleBookToBook)
+                .map(googleBook -> {
+                    Book book = Mappers.mapGoogleBookToBook(googleBook);
+                    // Set random amounts for bulk imported books (1-15 copies)
+                    long randomCopies = ThreadLocalRandom.current().nextInt(1, 16);
+                    book.setTotalAmount(randomCopies);
+                    book.setCurrentAmount(randomCopies);
+                    book.setRating(0L);
+                    return book;
+                })
                 .toList();
 
         logger.info("Fetched {} books from Google Books API", books.size());
@@ -71,12 +79,34 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
     }
 
     public boolean fetchBook(BookAdditionFromGoogleRequest request) {
+        return fetchBook(request, 1); // Default to 1 copy
+    }
+    
+    public boolean fetchBook(BookAdditionFromGoogleRequest request, int copies) {
         Book book = getBookFromGoogle(request.title(), request.author());
         if (book == null) {
             return false;
         }
-        bookRepository.save(book);
-        logger.info("Successfully saved book: {}", book.getName());
+        
+        // Check if book already exists in our library
+        Optional<Book> existingBook = bookRepository.findByTitle(book.getName());
+        
+        if (existingBook.isPresent()) {
+            // Add copies to existing book
+            Book bookInLibrary = existingBook.get();
+            bookInLibrary.setTotalAmount(bookInLibrary.getTotalAmount() + copies);
+            bookInLibrary.setCurrentAmount(bookInLibrary.getCurrentAmount() + copies);
+            bookRepository.update(bookInLibrary);
+            logger.info("Added {} copies to existing book: {}", copies, book.getName());
+        } else {
+            book.setTotalAmount((long) copies);
+            book.setCurrentAmount((long) copies);
+            book.setRating(0L);
+            
+            bookRepository.save(book);
+            logger.info("Successfully saved new book: {} with {} copies", book.getName(), copies);
+        }
+        
         return true;
     }
 
@@ -126,7 +156,28 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
                         ? volumeInfo.getJsonNumber("pageCount").longValue()
                         : 0L;
 
+                // Extract genre from categories array
                 String genre = "Unknown";
+                JsonArray categories = volumeInfo.getJsonArray("categories");
+                if (categories != null && !categories.isEmpty()) {
+                    String fullCategory = categories.getString(0);
+                    logger.debug("Google Books category for '{}': {}", bookTitle, fullCategory);
+                    
+                    // Google Books categories can be like "Fiction / Fantasy" or "Computers / Programming"
+                    // Take the first part before any slash for simplicity
+                    if (fullCategory.contains("/")) {
+                        genre = fullCategory.split("/")[0].trim();
+                    } else {
+                        genre = fullCategory.trim();
+                    }
+                    
+                    // Map common Google Books categories to our standard genres
+                    String originalGenre = genre;
+                    genre = mapGoogleGenreToStandard(genre);
+                    logger.debug("Mapped genre for '{}': '{}' -> '{}'", bookTitle, originalGenre, genre);
+                } else {
+                    logger.debug("No categories found for book: {}", bookTitle);
+                }
 
                 String safeTitle = bookTitle.replaceAll("[^a-zA-Z0-9.\\-]", "_");
                 String thumbnail = null;
@@ -260,6 +311,107 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
         }
 
         return books;
+    }
+
+    /**
+     * Maps Google Books API categories to our standard application genres
+     */
+    private String mapGoogleGenreToStandard(String googleGenre) {
+        if (googleGenre == null || googleGenre.trim().isEmpty()) {
+            return "Unknown";
+        }
+        
+        String genre = googleGenre.toLowerCase().trim();
+        
+        // Map common Google Books categories to our standard genres
+        switch (genre) {
+            case "fiction":
+            case "literary fiction":
+            case "general fiction":
+                return "Fiction";
+                
+            case "science fiction":
+            case "science fiction & fantasy":
+            case "science fiction/fantasy":
+                return "Sci-Fi";
+                
+            case "fantasy":
+            case "fantasy fiction":
+                return "Fantasy";
+                
+            case "mystery":
+            case "mystery & detective":
+            case "mystery/thriller":
+            case "detective":
+            case "thriller":
+            case "crime":
+                return "Mystery";
+                
+            case "romance":
+            case "romantic fiction":
+            case "love stories":
+                return "Romance";
+                
+            case "biography":
+            case "biography & autobiography":
+            case "autobiography":
+            case "memoirs":
+                return "Biography";
+                
+            case "history":
+            case "historical":
+            case "world history":
+            case "american history":
+            case "european history":
+                return "History";
+                
+            case "non-fiction":
+            case "nonfiction":
+            case "science":
+            case "technology":
+            case "computers":
+            case "business":
+            case "self-help":
+            case "health":
+            case "cooking":
+            case "travel":
+            case "reference":
+            case "education":
+            case "philosophy":
+            case "religion":
+            case "psychology":
+            case "politics":
+                return "Non-Fiction";
+                
+            default:
+                // If we can't map it to a standard genre, return the cleaned-up version
+                // Capitalize first letter of each word
+                return capitalizeWords(googleGenre);
+        }
+    }
+    
+    /**
+     * Capitalizes the first letter of each word in a string
+     */
+    private String capitalizeWords(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return "Unknown";
+        }
+        
+        String[] words = text.toLowerCase().split("\\s+");
+        StringBuilder result = new StringBuilder();
+        
+        for (int i = 0; i < words.length; i++) {
+            if (i > 0) {
+                result.append(" ");
+            }
+            if (!words[i].isEmpty()) {
+                result.append(words[i].substring(0, 1).toUpperCase())
+                      .append(words[i].substring(1));
+            }
+        }
+        
+        return result.toString();
     }
 
 
