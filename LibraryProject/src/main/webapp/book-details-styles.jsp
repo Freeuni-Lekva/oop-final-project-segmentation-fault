@@ -16,22 +16,40 @@
     }
 
     .book-cover-large {
-        flex: 0 0 250px;
-        max-width: 250px;
-        height: 350px;
-        background: #f8f9fa;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        width: 150px;
+        position: relative;
+        margin-right: 30px;
+    }
+
+    .book-cover-large::before {
+        content: "";
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        right: -5px;
+        bottom: -5px;
+        background: rgba(255, 235, 150, 0.3);
+        border-radius: 4px;
+        z-index: -1;
+        filter: blur(8px);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .book-cover-large:hover img {
+        transform: scale(1.02);
+    }
+
+    .book-cover-large:hover::before {
+        opacity: 1;
     }
 
     .book-cover-large img {
         max-width: 100%;
         max-height: 100%;
         object-fit: cover;
+        border-radius: 2px;
+        transition: transform 0.3s ease;
     }
 
     .book-info-details {
@@ -42,13 +60,14 @@
     .book-title-large {
         font-family: 'Poppins', sans-serif;
         font-size: 2rem;
-        font-weight: 600;
-        color: #2d3748;
+        font-weight: 500;
+        color: #5d4e37;
         margin: 0 0 10px 0;
+        letter-spacing: 0.5px;
     }
 
     .book-author-large {
-        color: #718096;
+        color: #8b7355;
         font-size: 1.2rem;
         font-weight: 400;
         margin: 0 0 15px 0;
@@ -59,7 +78,7 @@
         flex-wrap: wrap;
         gap: 15px;
         margin-bottom: 15px;
-        color: #718096;
+        color: #8b7355;
         font-size: 0.9rem;
     }
 
@@ -73,11 +92,11 @@
     .book-meta-item svg {
         width: 16px;
         height: 16px;
-        fill: #718096;
+        fill: #8b7355;
     }
 
     .book-description {
-        color: #4a5568;
+        color: #7a6a3e;
         line-height: 1.6;
         margin-bottom: 20px;
         font-size: 1rem;
@@ -91,13 +110,13 @@
     }
 
     .stars-large {
-        color: #ffd700;
+        color: #e6cb58;
         font-size: 1.2rem;
         font-weight: bold;
     }
 
     .rating-text-large {
-        color: #718096;
+        color: #8b7355;
         font-size: 1rem;
     }
 
@@ -108,11 +127,11 @@
     }
 
     .availability-status.available {
-        color: #38a169;
+        color: #2f855a;
     }
 
     .availability-status.unavailable {
-        color: #e53e3e;
+        color: #d73a49;
     }
 
     .action-buttons {
@@ -135,37 +154,42 @@
     }
 
     .reserve-button {
-        background-color: #a7cdcd;
+        background: linear-gradient(135deg, #F5C45E 0%, #E8B850 100%);
         color: white;
         border: none;
+        box-shadow: 0 4px 12px rgba(245, 196, 94, 0.3);
     }
 
     .reserve-button:hover {
-        background-color: #8bb8b8;
+        background: linear-gradient(135deg, #E8B850 0%, #DBAC48 100%);
         transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(219, 172, 72, 0.4);
     }
 
     .reserve-button:disabled {
-        background-color: #e2e8f0;
+        background: #e6cb58;
         cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+        opacity: 0.5;
     }
 
     .review-button {
-        background-color: #f7f5f2;
+        background-color: #f9f7f4;
         color: #8b7355;
-        border: 1px solid #e0d6c7;
+        border: 1px solid #e6cb58;
     }
 
     .review-button:hover {
-        background-color: #f2ede6;
-        color: #6b5a42;
-        border-color: #d4c4b0;
+        background-color: #f5f0e6;
+        color: #5d4e37;
+        border-color: #f5c45e;
         transform: translateY(-1px);
     }
 
     /* Admin button styles */
     .delete-button {
-        background-color: #e53e3e;
+        background-color: #d73a49;
         color: white;
         border: none;
         padding: 10px 20px;
@@ -190,7 +214,7 @@
     }
 
     .back-to-admin-button {
-        background-color: #4a5568;
+        background-color: #8b7355;
         color: white;
         border: none;
         padding: 10px 20px;
@@ -205,7 +229,7 @@
     }
 
     .back-to-admin-button:hover {
-        background-color: #2d3748;
+        background-color: #5d4e37;
         transform: translateY(-1px);
     }
 
@@ -213,8 +237,9 @@
         display: none;
         margin-top: 20px;
         padding: 20px;
-        background: #f8fafa;
+        background: #f9f7f4;
         border-radius: 8px;
+        border: 1px solid #e6cb58;
     }
 
     .review-form.show {
@@ -225,45 +250,47 @@
         width: 100%;
         min-height: 100px;
         padding: 10px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #e6cb58;
         border-radius: 6px;
         font-size: 1rem;
         margin-bottom: 10px;
         resize: vertical;
+        background: #fefdf8;
+        color: #5d4e37;
     }
-
-
 
     .submit-review {
         padding: 10px 20px;
-        background-color: #a7cdcd;
+        background: linear-gradient(135deg, #F5C45E 0%, #E8B850 100%);
         color: white;
         border: none;
         border-radius: 6px;
         cursor: pointer;
         transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(245, 196, 94, 0.3);
     }
 
     .submit-review:hover {
-        background-color: #8bb8b8;
+        background: linear-gradient(135deg, #E8B850 0%, #DBAC48 100%);
         transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(219, 172, 72, 0.4);
     }
 
     /* Enhanced sections styles */
     .book-header-section {
         margin-bottom: 20px;
         padding-bottom: 15px;
-        border-bottom: 1px solid #e2e8f0;
+        border-bottom: 1px solid #e6cb58;
     }
 
     .section-title {
         font-family: 'Poppins', sans-serif;
         font-size: 1.1rem;
         font-weight: 600;
-        color: #2d3748;
+        color: #5d4e37;
         margin: 0 0 12px 0;
         padding-bottom: 6px;
-        border-bottom: 2px solid #a7cdcd;
+        border-bottom: 2px solid #f5c45e;
     }
 
     .book-metadata-grid {
@@ -275,23 +302,23 @@
 
     .metadata-section, .availability-section {
         padding: 15px;
-        background: #f8fafa;
+        background: #f9f7f4;
         border-radius: 8px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #e6cb58;
     }
 
     .availability-details p {
         margin: 6px 0;
-        color: #4a5568;
+        color: #7a6a3e;
         font-size: 0.9rem;
     }
 
     .actions-section {
         margin-bottom: 20px;
         padding: 15px;
-        background: #f8fafa;
+        background: #f9f7f4;
         border-radius: 8px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #e6cb58;
     }
 
     .description-section {
@@ -303,13 +330,13 @@
         max-width: 1200px;
         margin: 40px auto 0;
         padding: 20px;
-        background: #ffffff;
-        border-top: 1px solid #e2e8f0;
+        background: #faf8f0;
+        border-top: 1px solid #e6cb58;
     }
 
     .reviews-loading {
         text-align: center;
-        color: #6c757d;
+        color: #8b7355;
         padding: 20px;
     }
 
@@ -321,9 +348,9 @@
 
     .review-item {
         padding: 20px;
-        background: #f8fafa;
+        background: #f9f7f4;
         border-radius: 8px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #e6cb58;
     }
 
     .review-header {
@@ -337,30 +364,30 @@
 
     .review-author {
         font-weight: 600;
-        color: #2d3748;
+        color: #5d4e37;
         font-size: 1rem;
     }
 
     .review-rating {
-        color: #ffd700;
+        color: #e6cb58;
         font-size: 18px;
         font-weight: bold;
     }
 
     .review-date {
-        color: #718096;
+        color: #8b7355;
         font-size: 0.9rem;
     }
 
     .review-text {
-        color: #4a5568;
+        color: #7a6a3e;
         line-height: 1.6;
         font-size: 0.95rem;
     }
 
     .no-reviews {
         text-align: center;
-        color: #718096;
+        color: #8b7355;
         padding: 40px 20px;
         font-style: italic;
     }
@@ -372,11 +399,11 @@
     }
 
     .error {
-        color: #dc3545;
+        color: #d73a49;
     }
 
     .loading {
-        color: #6c757d;
+        color: #8b7355;
     }
 
     /* Mobile responsiveness */
@@ -451,23 +478,24 @@
     }
 
     .reserve-button.reserved {
-        background-color: #6c757d !important;
+        background: #8b7355 !important;
         color: white !important;
         cursor: not-allowed !important;
     }
 
     .reserve-button.reserved:hover {
-        background-color: #6c757d !important;
+        background: #8b7355 !important;
         transform: none !important;
     }
 
     .cancel-button {
-        background-color: #dc3545 !important;
+        background: linear-gradient(135deg, #d73a49 0%, #cb2431 100%) !important;
         color: white !important;
+        box-shadow: 0 4px 12px rgba(203, 36, 49, 0.3) !important;
     }
 
     .cancel-button:hover {
-        background-color: #c82333 !important;
+        background: linear-gradient(135deg, #cb2431 0%, #b52d3a 100%) !important;
         transform: translateY(-1px) !important;
     }
 
@@ -479,7 +507,7 @@
     .rating-label {
         display: block;
         font-weight: 500;
-        color: #2d3748;
+        color: #5d4e37;
         margin-bottom: 8px;
         font-size: 0.9rem;
     }
@@ -492,7 +520,7 @@
 
     .star {
         font-size: 1.8rem;
-        color: #e2e8f0;
+        color: #f5f0e6;
         cursor: pointer;
         transition: all 0.2s ease;
         user-select: none;
@@ -500,26 +528,25 @@
 
     .star:hover {
         transform: scale(1.1);
-        color: #ffd700;
+        color: #e6cb58;
     }
 
     .star.filled {
-        color: #ffd700;
+        color: #e6cb58;
     }
 
     .star.hovered {
-        color: #ffd700;
+        color: #e6cb58;
     }
 
     .rating-text {
         font-size: 0.85rem;
-        color: #718096;
+        color: #8b7355;
         font-style: italic;
     }
 
     .rating-text.selected {
-        color: #2d3748;
+        color: #5d4e37;
         font-weight: 500;
     }
-
 </style>
