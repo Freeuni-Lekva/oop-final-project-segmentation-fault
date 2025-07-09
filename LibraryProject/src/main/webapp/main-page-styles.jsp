@@ -526,6 +526,46 @@
         font-weight: 500;
     }
 
+    .search-container {
+        position: relative;
+        width: 300px;
+        margin: 0 30px 0 15px;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 8px 15px;
+        border: 1px solid #e0d6c7;
+        border-radius: 20px;
+        background-color: #f7f5f2;
+        font-size: 14px;
+        color: #8b7355;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        border-color: #d4c4b0;
+        box-shadow: 0 0 0 2px rgba(139, 115, 85, 0.2);
+    }
+
+    .search-button {
+        position: absolute;
+        right: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+    }
+
+    .search-icon {
+        width: 20px;
+        height: 20px;
+        fill: #8b7355;
+    }
+
     @media (max-width: 768px) {
         .section-title {
             font-size: 1.5rem;
