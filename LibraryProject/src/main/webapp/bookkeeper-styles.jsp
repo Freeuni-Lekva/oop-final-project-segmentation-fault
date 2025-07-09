@@ -131,6 +131,18 @@
         fill: currentColor;
     }
 
+    /* Authentication button styles */
+    .auth-btn {
+        border: 2px solid #8b7355 !important;
+        font-weight: 600 !important;
+    }
+
+    .auth-btn:hover {
+        background-color: #8b7355 !important;
+        color: #ffffff !important;
+        border-color: #6b5a42 !important;
+    }
+
     .main-content {
         padding: 20px;
         min-height: 600px;
