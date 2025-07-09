@@ -260,22 +260,5 @@ public class UserServiceImpl implements UserService {
         );
     }
 
-    /**
-     * Recalculates and updates ratings for all books based on their reviews.
-     * This method can be used to fix data inconsistencies or initialize ratings for existing books.
-     */
-    public void recalculateAllBookRatings() {
-        List<Book> allBooks = bookRepository.findAll();
-        
-        for (Book book : allBooks) {
-            double newRating = calculateAverageRating(book.getPublicId());
-            book.setRating(newRating);
-            bookRepository.update(book);
-            logger.info("Updated rating for book '{}' to {}", book.getName(), newRating);
-        }
-        
-        logger.info("Completed recalculating ratings for {} books", allBooks.size());
-    }
-
 
 }
