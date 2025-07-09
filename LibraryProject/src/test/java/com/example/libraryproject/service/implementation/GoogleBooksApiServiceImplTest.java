@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import static com.example.libraryproject.utils.MockDataForTests.createTestBook;
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,7 +27,9 @@ class GoogleBooksApiServiceImplTest {
 
         service = Mockito.spy(new GoogleBooksApiServiceImpl(bookRepository));
 
-        doReturn(createFakeBooks()).when(service).fetchBooksFromGenre(anyString(), anyInt());
+        doReturn(createFakeBooks()).when(service)
+                .fetchBooksFromGenre(anyString(), anyInt(), any(ExecutorService.class));
+
         doNothing().when(service).downloadAndSaveImage(anyString(), anyString());
     }
 

@@ -21,48 +21,69 @@ public class OrderRepository {
     private final SessionFactory sessionFactory;
 
     public void save(Order order) {
-        Session session = sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
 
-        session.persist(order);
+        Transaction tx = null;
 
-        tx.commit();
-        session.close();
+        try (Session session = sessionFactory.openSession()) {
+            tx = session.beginTransaction();
+            session.persist(order);
+            tx.commit();
+
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw e;
+        }
     }
 
     public void update(Order order) {
-        Session session = sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
 
-        session.merge(order);
+        Transaction tx = null;
 
-        tx.commit();
-        session.close();
+        try (Session session = sessionFactory.openSession()) {
+            tx = session.beginTransaction();
+            session.merge(order);
+            tx.commit();
+
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw e;
+        }
     }
 
     public void delete(Order order) {
-        Session session = sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
 
-        session.remove(order);
+        Transaction tx = null;
 
-        tx.commit();
-        session.close();
+        try (Session session = sessionFactory.openSession()) {
+            tx = session.beginTransaction();
+            session.remove(order);
+            tx.commit();
+
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw e;
+        }
     }
 
     public void deleteAll(Set<Order> staleOrders) {
-        Session session = sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
 
-        for (Order order : staleOrders) {
-            session.remove(order);
+        Transaction tx = null;
+
+        try (Session session = sessionFactory.openSession()) {
+            tx = session.beginTransaction();
+            for (Order order : staleOrders) {
+                session.remove(order);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw e;
         }
 
-        tx.commit();
-        session.close();
     }
 
     public Optional<Order> findById(Long id) {
+
         Session session = sessionFactory.openSession();
 
         Optional<Order> order = Optional.ofNullable(session.get(Order.class, id));
@@ -73,6 +94,7 @@ public class OrderRepository {
     }
 
     public Set<Order> findOrdersByUserId(Long userId) {
+
         Session session = sessionFactory.openSession();
 
         Set<Order> orders = Set.copyOf(session.createQuery(
@@ -87,6 +109,7 @@ public class OrderRepository {
     }
 
     public Set<Order> findOrdersByBookId(Long bookId) {
+
         Session session = sessionFactory.openSession();
 
         Set<Order> orders = Set.copyOf(session.createQuery(
@@ -100,7 +123,9 @@ public class OrderRepository {
     }
 
     public Set<Order> findDueOrders() {
+
         Session session = sessionFactory.openSession();
+
         Set<Order> orders = Set.copyOf(session.createQuery(
                         "SELECT o FROM Order o WHERE o.borrowDate > o.dueDate AND o.status = :status", Order.class)
                 .setParameter("status", OrderStatus.BORROWED).
@@ -113,6 +138,7 @@ public class OrderRepository {
 
 
     public Set<Order> findAll() {
+
         Session session = sessionFactory.openSession();
 
         Set<Order> orders = Set.copyOf(session.createQuery("FROM Order", Order.class)
@@ -124,6 +150,7 @@ public class OrderRepository {
     }
 
     public Optional<Order> findByPublicId(String publicId) {
+
         Session session = sessionFactory.openSession();
 
         Optional<Order> order = Optional.ofNullable(session.createQuery(
@@ -137,6 +164,7 @@ public class OrderRepository {
     }
 
     public Set<Order> findOrdersByStatus(OrderStatus status) {
+
         Session session = sessionFactory.openSession();
 
         Set<Order> orders = Set.copyOf(session.createQuery(
@@ -151,19 +179,38 @@ public class OrderRepository {
     }
 
     public Set<Order> findStaleOrders() {
+
         Session session = sessionFactory.openSession();
 
         LocalDateTime staleDate = LocalDateTime.now().minusHours(STALE_ORDER_TIMEOUT_HRS);
+
         Set<Order> orders = Set.copyOf(session.createQuery(
                         "SELECT o FROM Order o " +
                                 "WHERE o.status = :status AND o.createDate <= :staleDate", Order.class)
-                        .setParameter("status", OrderStatus.RESERVED)
-                        .setParameter("staleDate", staleDate)
-                        .getResultList());
+                .setParameter("status", OrderStatus.RESERVED)
+                .setParameter("staleDate", staleDate)
+                .getResultList());
 
         session.close();
 
         return orders;
 
+    }
+
+    public boolean hasReservation(Long userId, Long bookId) {
+
+        Session session = sessionFactory.openSession();
+
+        Optional<Order> orderOptional = Optional.ofNullable(session.createQuery(
+                        "SELECT o FROM Order o " +
+                                "WHERE o.user.id = :userId AND o.book.id = :bookId " +
+                                "AND o.status = :status", Order.class)
+                .setParameter("userId", userId)
+                .setParameter("bookId", bookId)
+                .setParameter("status", OrderStatus.RESERVED)
+                .uniqueResult());
+
+        session.close();
+        return orderOptional.isPresent();
     }
 }

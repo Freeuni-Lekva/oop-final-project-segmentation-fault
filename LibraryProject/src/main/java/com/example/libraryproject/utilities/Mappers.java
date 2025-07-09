@@ -16,9 +16,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import java.util.stream.Collectors;
-import java.util.concurrent.ThreadLocalRandom;
-
-import static com.example.libraryproject.configuration.ApplicationProperties.DEFAULT_RATING;
 
 public class Mappers {
 
@@ -88,7 +85,7 @@ public class Mappers {
         return parsedDate;
     }
 
-    public static UserDTO convertUser(User user) {
+    public static UserDTO convertUserToDTO(User user) {
         List<ReviewDTO> reviewDTOs = user.getReviews().stream()
                 .map(review -> new ReviewDTO(
                         user.getUsername(),

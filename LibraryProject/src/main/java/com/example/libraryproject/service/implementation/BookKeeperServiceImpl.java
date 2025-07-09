@@ -160,7 +160,7 @@ public class BookKeeperServiceImpl implements BookKeeperService {
         Set<User> users = userRepository.findAll();
         Set<UserDTO> usersWithStatus = new HashSet<>();
         for (User user : users) {
-            usersWithStatus.add(Mappers.convertUser(user));
+            usersWithStatus.add(Mappers.convertUserToDTO(user));
         }
         return usersWithStatus;
     }

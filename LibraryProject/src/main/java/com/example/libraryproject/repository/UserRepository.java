@@ -17,35 +17,61 @@ public class UserRepository {
     private final SessionFactory sessionFactory;
 
     public void save(User user) {
-        Session session = sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
-
-        session.persist(user);
-
-        tx.commit();
-        session.close();
+        Transaction tx = null;
+        try (Session session = sessionFactory.openSession()) {
+            tx = session.beginTransaction();
+            session.persist(user);
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            throw new RuntimeException("Failed to save user", e);
+        }
     }
 
     public void update(User user) {
-        Session session = sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
+        Transaction tx = null;
+        try (Session session = sessionFactory.openSession()) {
+            tx = session.beginTransaction();
+            session.merge(user);
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            throw new RuntimeException("Failed to update user", e);
+        }
+    }
 
-        session.merge(user);
-
-        tx.commit();
-        session.close();
-
+    public void updateAll(Set<User> dueUsers) {
+        Transaction tx = null;
+        try (Session session = sessionFactory.openSession()) {
+            tx = session.beginTransaction();
+            for (User user : dueUsers) {
+                session.merge(user);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            throw new RuntimeException("Failed to update all users", e);
+        }
     }
 
     public void delete(User user) {
-        Session session = sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
-
-        session.remove(user);
-
-        tx.commit();
-        session.close();
-
+        Transaction tx = null;
+        try (Session session = sessionFactory.openSession()) {
+            tx = session.beginTransaction();
+            session.remove(user);
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            throw new RuntimeException("Failed to delete user", e);
+        }
     }
 
     public Optional<User> findById(Long id) {
@@ -95,14 +121,4 @@ public class UserRepository {
         return users;
     }
 
-    public void updateAll(Set<User> dueUsers) {
-        Session session = sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
-
-        for (User user : dueUsers) {
-            session.merge(user);
-        }
-        tx.commit();
-        session.close();
-    }
 }

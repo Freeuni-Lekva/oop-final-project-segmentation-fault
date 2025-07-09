@@ -31,18 +31,61 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
     private static final Logger logger = LoggerFactory.getLogger(GoogleBooksApiServiceImpl.class);
     private static final HttpClient httpClient = HttpClient.newHttpClient();
 
-    public void fetchAndSaveBooks() {
-        if (!bookRepository.findAll().isEmpty()) {
-            return;
+    public boolean fetchBook(BookAdditionFromGoogleRequest request) {
+        return fetchBook(request, 1); // Default to 1 copy
+    }
+
+    public boolean fetchBook(BookAdditionFromGoogleRequest request, int copies) {
+        Book book = getBookFromGoogle(request.title(), request.author());
+        if (book == null) {
+            return false;
         }
+
+        // Check if book already exists in our library
+        Optional<Book> existingBook = bookRepository.findByTitle(book.getName());
+
+        if (existingBook.isPresent()) {
+            // Add copies to existing book
+            Book bookInLibrary = existingBook.get();
+            bookInLibrary.setTotalAmount(bookInLibrary.getTotalAmount() + copies);
+            bookInLibrary.setCurrentAmount(bookInLibrary.getCurrentAmount() + copies);
+            bookRepository.update(bookInLibrary);
+            logger.info("Added {} copies to existing book: {}", copies, book.getName());
+        } else {
+            book.setTotalAmount((long) copies);
+            book.setCurrentAmount((long) copies);
+            book.setRating(0.0);
+
+            bookRepository.save(book);
+            logger.info("Successfully saved new book: {} with {} copies", book.getName(), copies);
+        }
+
+        return true;
+    }
+
+    public void fetchAndSaveBooks() {
+        if (!bookRepository.findAll().isEmpty()) return;
 
         deleteImages();
 
-        Set<GoogleBooksResponse> googleBooks = fetchBooks();
+        ExecutorService imageDownloadExecutor = Executors.newFixedThreadPool(8);
+
+        Set<GoogleBooksResponse> googleBooks = fetchBooks(imageDownloadExecutor);
+        imageDownloadExecutor.shutdown();
+        try {
+            if (!imageDownloadExecutor.awaitTermination(2, TimeUnit.MINUTES)) {
+                logger.warn("Image download tasks didn't finish in time");
+                imageDownloadExecutor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            imageDownloadExecutor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+
+        // Continue with saving
         List<Book> books = googleBooks.stream()
                 .map(googleBook -> {
                     Book book = Mappers.mapGoogleBookToBook(googleBook);
-                    // Set random amounts for bulk imported books (1-15 copies)
                     long randomCopies = ThreadLocalRandom.current().nextInt(1, 16);
                     book.setTotalAmount(randomCopies);
                     book.setCurrentAmount(randomCopies);
@@ -55,59 +98,131 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
         bookRepository.saveAll(books);
     }
 
-    private void deleteImages() {
+    Set<GoogleBooksResponse> fetchBooks(ExecutorService imageDownloadExecutor) {
+        Set<GoogleBooksResponse> allBooks = ConcurrentHashMap.newKeySet();
+
+        ExecutorService executor = Executors.newFixedThreadPool(Math.min(10, GOOGLE_BOOKS_GENRES.length));
+        List<Callable<Void>> tasks = new ArrayList<>();
+
+        for (String genre : GOOGLE_BOOKS_GENRES) {
+            tasks.add(() -> {
+                Set<GoogleBooksResponse> genreBooks = fetchBooksFromGenre(genre, BOOKS_PER_REQUEST, imageDownloadExecutor);
+                allBooks.addAll(genreBooks);
+                return null;
+            });
+        }
+
         try {
-            Path imagesDir = Paths.get(System.getenv("IMAGE_DIR"));
+            executor.invokeAll(tasks);
+        } catch (InterruptedException e) {
+            logger.error("Parallel genre fetching interrupted: {}", e.getMessage());
+            Thread.currentThread().interrupt();
+        } finally {
+            executor.shutdown(); // ❗ Only shuts down genre-fetching, not image download
+        }
 
-            if (!Files.exists(imagesDir) || !Files.isDirectory(imagesDir)) {
-                return;
-            }
+        return allBooks;
+    }
 
-            try (DirectoryStream<Path> stream = Files.newDirectoryStream(imagesDir, "*.{jpg,jpeg,png,gif}")) {
-                for (Path file : stream) {
-                    try {
-                        Files.delete(file);
-                    } catch (Exception e) {
-                        logger.warn("Could not delete file {}: {}", file.getFileName(), e.getMessage());
+    Set<GoogleBooksResponse> fetchBooksFromGenre(String genre, int booksPerRequest, ExecutorService imageDownloadExecutor) {
+        Set<GoogleBooksResponse> books = new HashSet<>();
+
+        try {
+            int random = ThreadLocalRandom.current().nextInt(0, GOOGLE_BOOKS_API_MAX_PAGE);
+            String fullUrl = GOOGLE_API_URL + "?q=subject:" + genre + "&startIndex=" + random + "&maxResults=" + booksPerRequest;
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(fullUrl))
+                    .header("User-Agent", "LibraryProject/1.0")
+                    .GET()
+                    .build();
+
+            HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+
+            try (InputStream is = response.body(); JsonReader reader = Json.createReader(is)) {
+                JsonObject root = reader.readObject();
+                JsonArray items = root.getJsonArray("items");
+
+                if (items == null) return books;
+
+                for (JsonValue itemVal : items) {
+                    JsonObject item = itemVal.asJsonObject();
+                    JsonObject volumeInfo = item.getJsonObject("volumeInfo");
+
+                    Long pageCount = volumeInfo.containsKey("pageCount") ?
+                            volumeInfo.getJsonNumber("pageCount").longValue() : 0;
+
+                    String title = volumeInfo.getString("title", "No Title");
+                    String publishedDate = volumeInfo.getString("publishedDate", "Unknown Date");
+                    String description = volumeInfo.getString("description", "No Description");
+
+                    String author = "Unknown Author";
+                    JsonArray authors = volumeInfo.getJsonArray("authors");
+                    if (authors != null && !authors.isEmpty()) {
+                        author = authors.getString(0);
                     }
+
+                    String safeTitle = title.replaceAll("[^a-zA-Z0-9.\\-]", "_");
+                    String thumbnail;
+                    JsonObject imageLinks = volumeInfo.getJsonObject("imageLinks");
+                    if (imageLinks != null) {
+                        thumbnail = imageLinks.getString("thumbnail", null);
+                        if (thumbnail != null && !thumbnail.isEmpty()) {
+                            imageDownloadExecutor.submit(() -> {
+                                try {
+                                    downloadAndSaveImage(thumbnail, safeTitle);
+                                } catch (Exception ex) {
+                                    logger.warn("Failed to download image for '{}': {}", title, ex.getMessage());
+                                }
+                            });
+                        }
+                    } else {
+                        thumbnail = null;
+                    }
+
+                    books.add(new GoogleBooksResponse(
+                            title,
+                            publishedDate,
+                            author,
+                            description,
+                            (thumbnail != null ? safeTitle + ".jpg" : "NOT_FOUND"),
+                            genre,
+                            pageCount
+                    ));
+
+                    logger.info("Added '{}' to books set", title);
                 }
             }
 
         } catch (Exception e) {
-            logger.error("Failed to delete images: {}", e.getMessage());
+            logger.error("Error fetching books for genre '{}': {}", genre, e.getMessage());
         }
+
+        return books;
     }
 
-    public boolean fetchBook(BookAdditionFromGoogleRequest request) {
-        return fetchBook(request, 1); // Default to 1 copy
-    }
-    
-    public boolean fetchBook(BookAdditionFromGoogleRequest request, int copies) {
-        Book book = getBookFromGoogle(request.title(), request.author());
-        if (book == null) {
-            return false;
+
+    void downloadAndSaveImage(String imageUrl, String title) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(imageUrl))
+                .GET()
+                .build();
+
+        HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("Image download failed with status: " + response.statusCode());
         }
-        
-        // Check if book already exists in our library
-        Optional<Book> existingBook = bookRepository.findByTitle(book.getName());
-        
-        if (existingBook.isPresent()) {
-            // Add copies to existing book
-            Book bookInLibrary = existingBook.get();
-            bookInLibrary.setTotalAmount(bookInLibrary.getTotalAmount() + copies);
-            bookInLibrary.setCurrentAmount(bookInLibrary.getCurrentAmount() + copies);
-            bookRepository.update(bookInLibrary);
-            logger.info("Added {} copies to existing book: {}", copies, book.getName());
-        } else {
-            book.setTotalAmount((long) copies);
-            book.setCurrentAmount((long) copies);
-            book.setRating(0.0);
-            
-            bookRepository.save(book);
-            logger.info("Successfully saved new book: {} with {} copies", book.getName(), copies);
+
+        String safeTitle = title.replaceAll("[^a-zA-Z0-9.\\-]", "_");
+        Path imagesDir = Paths.get(System.getenv("IMAGE_DIR"));
+        Files.createDirectories(imagesDir);
+        Path filePath = imagesDir.resolve(safeTitle + ".jpg");
+
+        try (InputStream is = response.body()) {
+            Files.copy(is, filePath, StandardCopyOption.REPLACE_EXISTING);
+            logger.info("Image saved to: {}", filePath);
         }
-        
-        return true;
     }
 
     Book getBookFromGoogle(String title, String author) {
@@ -162,7 +277,7 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
                 if (categories != null && !categories.isEmpty()) {
                     String fullCategory = categories.getString(0);
                     logger.debug("Google Books category for '{}': {}", bookTitle, fullCategory);
-                    
+
                     // Google Books categories can be like "Fiction / Fantasy" or "Computers / Programming"
                     // Take the first part before any slash for simplicity
                     if (fullCategory.contains("/")) {
@@ -170,7 +285,7 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
                     } else {
                         genre = fullCategory.trim();
                     }
-                    
+
                     // Map common Google Books categories to our standard genres
                     String originalGenre = genre;
                     genre = mapGoogleGenreToStandard(genre);
@@ -214,105 +329,6 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
         return null;
     }
 
-    Set<GoogleBooksResponse> fetchBooks() {
-        Set<GoogleBooksResponse> allBooks = ConcurrentHashMap.newKeySet();
-
-        ExecutorService executor = Executors.newFixedThreadPool(Math.min(10, GOOGLE_BOOKS_GENRES.length));
-        List<Callable<Void>> tasks = new ArrayList<>();
-
-        for (String genre : GOOGLE_BOOKS_GENRES) {
-            tasks.add(() -> {
-                Set<GoogleBooksResponse> genreBooks = fetchBooksFromGenre(genre, BOOKS_PER_REQUEST);
-                allBooks.addAll(genreBooks);
-                return null;
-            });
-        }
-
-        try {
-            executor.invokeAll(tasks);
-        } catch (InterruptedException e) {
-            logger.error("Parallel genre fetching interrupted: {}", e.getMessage());
-            Thread.currentThread().interrupt();
-        } finally {
-            executor.shutdown();
-        }
-
-        return allBooks;
-    }
-
-    Set<GoogleBooksResponse> fetchBooksFromGenre(String genre, int booksPerRequest) {
-        Set<GoogleBooksResponse> books = new HashSet<>();
-
-        try {
-            int random = ThreadLocalRandom.current().nextInt(0, GOOGLE_BOOKS_API_MAX_PAGE);
-            String fullUrl = GOOGLE_API_URL + "?q=subject:" + genre + "&startIndex=" + random + "&maxResults=" + booksPerRequest;
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(fullUrl))
-                    .header("User-Agent", "LibraryProject/1.0")
-                    .GET()
-                    .build();
-
-            HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-
-            try (InputStream is = response.body(); JsonReader reader = Json.createReader(is)) {
-                JsonObject root = reader.readObject();
-                JsonArray items = root.getJsonArray("items");
-
-                if (items == null) return books;
-
-                for (JsonValue itemVal : items) {
-                    JsonObject item = itemVal.asJsonObject();
-                    JsonObject volumeInfo = item.getJsonObject("volumeInfo");
-
-                    Long pageCount = volumeInfo.containsKey("pageCount") ?
-                            volumeInfo.getJsonNumber("pageCount").longValue() : 0;
-
-                    String title = volumeInfo.getString("title", "No Title");
-                    String publishedDate = volumeInfo.getString("publishedDate", "Unknown Date");
-                    String description = volumeInfo.getString("description", "No Description");
-
-                    String author = "Unknown Author";
-                    JsonArray authors = volumeInfo.getJsonArray("authors");
-                    if (authors != null && !authors.isEmpty()) {
-                        author = authors.getString(0);
-                    }
-
-                    String safeTitle = title.replaceAll("[^a-zA-Z0-9.\\-]", "_");
-                    String thumbnail = null;
-                    JsonObject imageLinks = volumeInfo.getJsonObject("imageLinks");
-                    if (imageLinks != null) {
-                        thumbnail = imageLinks.getString("thumbnail", null);
-                        if (thumbnail != null && !thumbnail.isEmpty()) {
-                            try {
-                                downloadAndSaveImage(thumbnail, safeTitle);
-                            } catch (Exception ex) {
-                                logger.warn("Failed to download image for '{}': {}", title, ex.getMessage());
-                            }
-                        }
-                    }
-
-                    books.add(new GoogleBooksResponse(
-                            title,
-                            publishedDate,
-                            author,
-                            description,
-                            (thumbnail != null ? safeTitle + ".jpg" : "NOT_FOUND"),
-                            genre,
-                            pageCount
-                    ));
-
-                    logger.info("Added '{}' to books set", title);
-                }
-            }
-
-        } catch (Exception e) {
-            logger.error("Error fetching books for genre '{}': {}", genre, e.getMessage());
-        }
-
-        return books;
-    }
-
     /**
      * Maps Google Books API categories to our standard application genres
      */
@@ -320,76 +336,28 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
         if (googleGenre == null || googleGenre.trim().isEmpty()) {
             return "Unknown";
         }
-        
+
         String genre = googleGenre.toLowerCase().trim();
-        
+
         // Map common Google Books categories to our standard genres
-        switch (genre) {
-            case "fiction":
-            case "literary fiction":
-            case "general fiction":
-                return "Fiction";
-                
-            case "science fiction":
-            case "science fiction & fantasy":
-            case "science fiction/fantasy":
-                return "Sci-Fi";
-                
-            case "fantasy":
-            case "fantasy fiction":
-                return "Fantasy";
-                
-            case "mystery":
-            case "mystery & detective":
-            case "mystery/thriller":
-            case "detective":
-            case "thriller":
-            case "crime":
-                return "Mystery";
-                
-            case "romance":
-            case "romantic fiction":
-            case "love stories":
-                return "Romance";
-                
-            case "biography":
-            case "biography & autobiography":
-            case "autobiography":
-            case "memoirs":
-                return "Biography";
-                
-            case "history":
-            case "historical":
-            case "world history":
-            case "american history":
-            case "european history":
-                return "History";
-                
-            case "non-fiction":
-            case "nonfiction":
-            case "science":
-            case "technology":
-            case "computers":
-            case "business":
-            case "self-help":
-            case "health":
-            case "cooking":
-            case "travel":
-            case "reference":
-            case "education":
-            case "philosophy":
-            case "religion":
-            case "psychology":
-            case "politics":
-                return "Non-Fiction";
-                
-            default:
+        return switch (genre) {
+            case "fiction", "literary fiction", "general fiction" -> "Fiction";
+            case "science fiction", "science fiction & fantasy", "science fiction/fantasy" -> "Sci-Fi";
+            case "fantasy", "fantasy fiction" -> "Fantasy";
+            case "mystery", "mystery & detective", "mystery/thriller", "detective", "thriller", "crime" -> "Mystery";
+            case "romance", "romantic fiction", "love stories" -> "Romance";
+            case "biography", "biography & autobiography", "autobiography", "memoirs" -> "Biography";
+            case "history", "historical", "world history", "american history", "european history" -> "History";
+            case "non-fiction", "nonfiction", "science", "technology", "computers", "business", "self-help", "health",
+                 "cooking", "travel", "reference", "education", "philosophy", "religion", "psychology", "politics" ->
+                    "Non-Fiction";
+            default ->
                 // If we can't map it to a standard genre, return the cleaned-up version
                 // Capitalize first letter of each word
-                return capitalizeWords(googleGenre);
-        }
+                    capitalizeWords(googleGenre);
+        };
     }
-    
+
     /**
      * Capitalizes the first letter of each word in a string
      */
@@ -397,44 +365,44 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
         if (text == null || text.trim().isEmpty()) {
             return "Unknown";
         }
-        
+
         String[] words = text.toLowerCase().split("\\s+");
         StringBuilder result = new StringBuilder();
-        
+
         for (int i = 0; i < words.length; i++) {
             if (i > 0) {
                 result.append(" ");
             }
             if (!words[i].isEmpty()) {
                 result.append(words[i].substring(0, 1).toUpperCase())
-                      .append(words[i].substring(1));
+                        .append(words[i].substring(1));
             }
         }
-        
+
         return result.toString();
     }
 
+    private void deleteImages() {
+        try {
+            Path imagesDir = Paths.get(System.getenv("IMAGE_DIR"));
 
-    void downloadAndSaveImage(String imageUrl, String title) throws Exception {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(imageUrl))
-                .GET()
-                .build();
+            if (!Files.exists(imagesDir) || !Files.isDirectory(imagesDir)) {
+                return;
+            }
 
-        HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(imagesDir, "*.{jpg,jpeg,png,gif}")) {
+                for (Path file : stream) {
+                    try {
+                        Files.delete(file);
+                    } catch (Exception e) {
+                        logger.warn("Could not delete file {}: {}", file.getFileName(), e.getMessage());
+                    }
+                }
+            }
 
-        if (response.statusCode() != 200) {
-            throw new RuntimeException("Image download failed with status: " + response.statusCode());
-        }
-
-        String safeTitle = title.replaceAll("[^a-zA-Z0-9.\\-]", "_");
-        Path imagesDir = Paths.get(System.getenv("IMAGE_DIR"));
-        Files.createDirectories(imagesDir);
-        Path filePath = imagesDir.resolve(safeTitle + ".jpg");
-
-        try (InputStream is = response.body()) {
-            Files.copy(is, filePath, StandardCopyOption.REPLACE_EXISTING);
-            logger.info("Image saved to: {}", filePath);
+        } catch (Exception e) {
+            logger.error("Failed to delete images: {}", e.getMessage());
         }
     }
+
 }

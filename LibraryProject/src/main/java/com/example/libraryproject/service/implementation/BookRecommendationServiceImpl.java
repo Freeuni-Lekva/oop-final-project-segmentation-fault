@@ -20,45 +20,41 @@ import static com.example.libraryproject.configuration.ApplicationProperties.*;
 @RequiredArgsConstructor
 public class BookRecommendationServiceImpl implements BookRecommendationService {
 
-    private static final Map<Integer, Integer> OFFSET_MAP;
+    private static final int[] coefficients = {0, -3,-1,0,1,3};
 
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
     private static final Logger logger = LoggerFactory.getLogger(BookRecommendationServiceImpl.class);
 
+    public Set<BookDTO> recommendBooks(String username){
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-    static {
-        Map<Integer, Integer> map = new HashMap<>();
-        map.put(1, -3);
-        map.put(2, -1);
-        map.put(3, 0);
-        map.put(4, 1);
-        map.put(5, 3);
-        OFFSET_MAP = Collections.unmodifiableMap(map);
-    }
+        Set<Book> readBooks = user.getReadBooks();
+        Set<Review> userReviews = user.getReviews();
+        logger.info("Recommending books for user: {}", user.getUsername());
 
-    private int getRating(Book book, Set<Review> reviews){
-        int rating = DEFAULT_RATING;
+        Set<Book> recommendedBooks = getPreferredBooks(readBooks, userReviews);
 
-        for (Review review : reviews){
-            if (review.getBook().equals(book)){
-                rating = review.getRating();
-                break;
-            }
-        }
-
-        return rating;
+        return recommendedBooks
+                .stream()
+                .map(Mappers::mapBookToDTO)
+                .collect(Collectors.toSet());
     }
 
     private Set<Book> getPreferredBooks(Set<Book> readBooks, Set<Review> reviews) {
+
         Map<String, Double> authorScores = new HashMap<>();
         Map<String, Double> genreScores = new HashMap<>();
 
+        Map<Book, Integer> bookRatings = reviews.stream()
+                .collect(Collectors.toMap(Review::getBook, Review::getRating));
+
         for (Book book : readBooks) {
-            int rating = getRating(book, reviews);
+            int rating = bookRatings.get(book);
             String author = book.getAuthor();
             String category = book.getGenre();
-            double mappedRating = OFFSET_MAP.get(rating);
+            double mappedRating = coefficients[rating];
 
             authorScores.merge(author, mappedRating, Double::sum);
             genreScores.merge(category, mappedRating, Double::sum);
@@ -78,12 +74,13 @@ public class BookRecommendationServiceImpl implements BookRecommendationService 
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
 
-        List<Book> filtered = bookRepository.findByAuthorsAndGenres(topAuthorNames,topGenreNames,readBooks);
-        List<Book> doubleFiltered = applyCoefficients(topAuthorNames,topGenreNames,authorScores,genreScores,filtered);
+        List<Book> filteredBooks = bookRepository.findByAuthorsAndGenres(topAuthorNames,topGenreNames,readBooks);
 
-        Collections.shuffle(doubleFiltered);
+        List<Book> chosenBooks = applyCoefficients(topAuthorNames,topGenreNames,authorScores,genreScores,filteredBooks);
 
-        return doubleFiltered.stream()
+        Collections.shuffle(chosenBooks);
+
+        return chosenBooks.stream()
                 .limit(RECOMMENDED_COUNT)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
@@ -93,6 +90,7 @@ public class BookRecommendationServiceImpl implements BookRecommendationService 
                                   Map<String, Double> authorScores,
                                   Map<String, Double> genreScores,
                                   List<Book> candidateBooks){
+
         int totalCount = RECOMMENDED_COUNT;
 
         Map<String, Double> combinedScores = new HashMap<>();
@@ -107,6 +105,7 @@ public class BookRecommendationServiceImpl implements BookRecommendationService 
         double totalScore = combinedScores.values().stream().mapToDouble(Double::doubleValue).sum();
 
         Map<String, Integer> allocations = new HashMap<>();
+
         for (var entry : combinedScores.entrySet()) {
             double fraction = entry.getValue() / totalScore;
             int count = (int) Math.round(fraction * totalCount);
@@ -149,17 +148,4 @@ public class BookRecommendationServiceImpl implements BookRecommendationService 
         return new ArrayList<>(result);
     }
 
-    public Set<BookDTO> recommendBooks(String username){
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        Set<Book> readBooks = user.getReadBooks();
-        Set<Review> userReviews = user.getReviews();
-
-        logger.info("Recommending books for user: {}", user.getUsername());
-
-        Set<Book> recommendedBooks = getPreferredBooks(readBooks, userReviews);
-
-        return recommendedBooks.stream().map(Mappers::mapBookToDTO).collect(Collectors.toSet());
-    }
 }
