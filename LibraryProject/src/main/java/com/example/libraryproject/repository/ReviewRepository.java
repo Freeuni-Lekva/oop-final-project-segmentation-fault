@@ -17,33 +17,48 @@ public class ReviewRepository {
     private final SessionFactory sessionFactory;
 
     public void save(Review review) {
-        Session session = sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
-
-        session.persist(review);
-
-        tx.commit();
-        session.close();
+        Transaction tx = null;
+        try (Session session = sessionFactory.openSession()) {
+            tx = session.beginTransaction();
+            session.persist(review);
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            throw new RuntimeException("Failed to save review", e);
+        }
     }
 
     public void update(Review review) {
-        Session session = sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
-
-        session.merge(review);
-
-        tx.commit();
-        session.close();
+        Transaction tx = null;
+        try (Session session = sessionFactory.openSession()) {
+            tx = session.beginTransaction();
+            session.merge(review);
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            throw new RuntimeException("Failed to update review", e);
+        }
     }
 
-    public void delete(Review review) {
-        Session session = sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
-
-        session.remove(review);
-
-        tx.commit();
-        session.close();
+    public void delete(Long id) {
+        Transaction tx = null;
+        try (Session session = sessionFactory.openSession()) {
+            tx = session.beginTransaction();
+            Review review = session.get(Review.class, id);
+            if (review != null) {
+                session.remove(review);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            throw new RuntimeException("Failed to delete review", e);
+        }
     }
 
     public Optional<Review> findById(Long id) {

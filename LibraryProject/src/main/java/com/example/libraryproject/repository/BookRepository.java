@@ -23,10 +23,11 @@ public class BookRepository {
             transaction = session.beginTransaction();
             session.persist(book);
             transaction.commit();
-            session.close();
         }catch(Exception e) {
-            if(transaction != null) transaction.rollback();
+            if (transaction != null) transaction.rollback();
             throw e;
+        }finally {
+            session.close();
         }
     }
 
@@ -38,11 +39,13 @@ public class BookRepository {
             transaction = session.beginTransaction();
             session.merge(book);
             transaction.commit();
-            session.close();
 
         }catch(Exception e) {
             if(transaction != null) transaction.rollback();
             throw e;
+        }
+        finally {
+            session.close();
         }
     }
 
@@ -53,11 +56,13 @@ public class BookRepository {
             transaction = session.beginTransaction();
             session.remove(book);
             transaction.commit();
-            session.close();
 
         }catch(Exception e) {
             if(transaction != null) transaction.rollback();
             throw e;
+        }
+        finally {
+            session.close();
         }
     }
 
@@ -163,10 +168,12 @@ public class BookRepository {
                 session.persist(book);
             }
             transaction.commit();
-            session.close();
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
             throw e;
+        }
+        finally {
+            session.close();
         }
     }
 
