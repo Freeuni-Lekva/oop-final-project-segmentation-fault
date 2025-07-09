@@ -16,10 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -44,19 +42,17 @@ public class UserServiceImpl implements UserService {
         if (reviews.isEmpty()) {
             return 0.0;
         }
-        
-        double sum = reviews.stream()
+
+        double average = reviews.stream()
                 .mapToInt(Review::getRating)
-                .sum();
-        
-        double average = sum / reviews.size();
-        
+                .average()
+                .orElse(0.0);
+
         // Round to 1 decimal place for cleaner display
         return Math.round(average * 10.0) / 10.0;
     }
 
     public boolean reviewBook(String username, String publicId, int rating, String comment) {
-        // Check if user is logged in
         if (username == null) {
             logger.info("Review attempt failed: no user logged in");
             return false;
@@ -106,7 +102,6 @@ public class UserServiceImpl implements UserService {
 
         userRepository.update(user);
         
-        // Recalculate and update book rating
         double newAverageRating = calculateAverageRating(publicId);
         book.setRating(newAverageRating);
         bookRepository.update(book);
@@ -159,6 +154,7 @@ public class UserServiceImpl implements UserService {
         }
 
         LocalDateTime now = LocalDateTime.now();
+
         Order order = new Order(
                 UUID.randomUUID(),
                 now.plusDays(1),
@@ -234,7 +230,7 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("user doesn't exist");
         }
 
-        return Mappers.convertUser(user.get());
+        return Mappers.convertUserToDTO(user.get());
     }
 
     @Override
@@ -250,15 +246,8 @@ public class UserServiceImpl implements UserService {
             logger.info("Book with publicId {} not found", bookId);
             return false;
         }
-        
-        User user = optionalUser.get();
-        Set<Order> userOrders = orderRepository.findOrdersByUserId(user.getId());
-        
-        return userOrders.stream().anyMatch(order -> 
-            order.getBook().getPublicId().equals(bookId) && 
-            order.getStatus() == OrderStatus.RESERVED
-        );
+
+        return orderRepository.hasReservation(optionalUser.get().getId(), optionalBook.get().getId());
+
     }
-
-
 }

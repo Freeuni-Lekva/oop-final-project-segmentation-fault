@@ -18,51 +18,40 @@ public class BookRepository {
 
     public void save(Book book) {
         Transaction transaction = null;
-        Session session = sessionFactory.openSession();
-        try{
+        try (Session session = sessionFactory.openSession()) {
             transaction = session.beginTransaction();
             session.persist(book);
             transaction.commit();
-        }catch(Exception e) {
+        } catch (Exception e) {
             if (transaction != null) transaction.rollback();
             throw e;
-        }finally {
-            session.close();
         }
     }
 
     public void update(Book book) {
         Transaction transaction = null;
-        Session session = sessionFactory.openSession();
 
-        try{
+        try (Session session = sessionFactory.openSession()) {
             transaction = session.beginTransaction();
             session.merge(book);
             transaction.commit();
 
-        }catch(Exception e) {
-            if(transaction != null) transaction.rollback();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
             throw e;
-        }
-        finally {
-            session.close();
         }
     }
 
     public void delete(Book book) {
         Transaction transaction = null;
-        Session session = sessionFactory.openSession();
-        try{
+        try (Session session = sessionFactory.openSession()) {
             transaction = session.beginTransaction();
             session.remove(book);
             transaction.commit();
 
-        }catch(Exception e) {
-            if(transaction != null) transaction.rollback();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
             throw e;
-        }
-        finally {
-            session.close();
         }
     }
 
@@ -159,10 +148,9 @@ public class BookRepository {
     }
 
     public void saveAll(List<Book> books) {
-        Session session = sessionFactory.openSession();
 
         Transaction transaction = null;
-        try {
+        try (Session session = sessionFactory.openSession()) {
             transaction = session.beginTransaction();
             for (Book book : books) {
                 session.persist(book);
@@ -171,9 +159,6 @@ public class BookRepository {
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
             throw e;
-        }
-        finally {
-            session.close();
         }
     }
 

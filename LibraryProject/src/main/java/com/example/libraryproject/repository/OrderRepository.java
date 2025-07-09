@@ -187,13 +187,30 @@ public class OrderRepository {
         Set<Order> orders = Set.copyOf(session.createQuery(
                         "SELECT o FROM Order o " +
                                 "WHERE o.status = :status AND o.createDate <= :staleDate", Order.class)
-                        .setParameter("status", OrderStatus.RESERVED)
-                        .setParameter("staleDate", staleDate)
-                        .getResultList());
+                .setParameter("status", OrderStatus.RESERVED)
+                .setParameter("staleDate", staleDate)
+                .getResultList());
 
         session.close();
 
         return orders;
 
+    }
+
+    public boolean hasReservation(Long userId, Long bookId) {
+
+        Session session = sessionFactory.openSession();
+
+        Optional<Order> orderOptional = Optional.ofNullable(session.createQuery(
+                        "SELECT o FROM Order o " +
+                                "WHERE o.user.id = :userId AND o.book.id = :bookId " +
+                                "AND o.status = :status", Order.class)
+                .setParameter("userId", userId)
+                .setParameter("bookId", bookId)
+                .setParameter("status", OrderStatus.RESERVED)
+                .uniqueResult());
+
+        session.close();
+        return orderOptional.isPresent();
     }
 }

@@ -89,7 +89,7 @@ public class TestReviewRepository {
         reviewRepository.save(review);
         reviewRepository.delete(review);
         Optional<Review> found = reviewRepository.findById(review.getId());
-        assertFalse(found.isPresent());
+        assertTrue(found.isEmpty());
     }
 
     @Test

@@ -44,11 +44,10 @@ public class ReviewRepository {
         }
     }
 
-    public void delete(Long id) {
+    public void delete(Review review) {
         Transaction tx = null;
         try (Session session = sessionFactory.openSession()) {
             tx = session.beginTransaction();
-            Review review = session.get(Review.class, id);
             if (review != null) {
                 session.remove(review);
             }
