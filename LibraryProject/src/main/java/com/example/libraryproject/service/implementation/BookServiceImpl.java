@@ -13,10 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -171,9 +168,14 @@ public class BookServiceImpl implements BookService {
     public List<BookDTO> searchBooks(String searchTerm, String sortBy, String availability) {
         logger.info("Searching books containing: {}, sorting by: {}, availability: {}", searchTerm, sortBy, availability);
 
-        List<Book> books = bookRepository.searchByTitle(searchTerm);
+        List<Book> titleResults = bookRepository.searchByTitle(searchTerm);
+        List<Book> authorResults = bookRepository.searchByAuthor(searchTerm);
 
-        Stream<Book> bookStream = books.stream();
+        Set<Book> combinedResults = new HashSet<>();
+        combinedResults.addAll(titleResults);
+        combinedResults.addAll(authorResults);
+
+        Stream<Book> bookStream = combinedResults.stream();
         if ("available".equalsIgnoreCase(availability)) {
             bookStream = bookStream.filter(book -> book.getCurrentAmount() > 0);
         }

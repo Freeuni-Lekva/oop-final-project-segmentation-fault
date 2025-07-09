@@ -181,4 +181,16 @@ public class BookRepository {
         session.close();
         return results;
     }
+
+    public List<Book> searchByAuthor(String searchTerm) {
+        Session session = sessionFactory.openSession();
+
+        Query<Book> query = session.createQuery(
+                "FROM Book WHERE LOWER(author) LIKE LOWER(:searchTerm)", Book.class);
+        query.setParameter("searchTerm", "%" + searchTerm + "%");
+
+        List<Book> results = query.getResultList();
+        session.close();
+        return results;
+    }
 }
