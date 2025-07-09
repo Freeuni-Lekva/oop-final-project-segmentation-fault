@@ -1,0 +1,118 @@
+package com.example.libraryproject.servlet;
+
+import com.example.libraryproject.model.dto.BookDTO;
+import com.example.libraryproject.repository.BookRepository;
+import com.example.libraryproject.repository.ReviewRepository;
+import com.example.libraryproject.service.implementation.BookServiceImpl;
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
+
+@WebServlet("/api/books/search")
+public class BookSearchServlet extends HttpServlet {
+
+    private BookServiceImpl bookService;
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+
+        System.out.println("Initializing BookSearchServlet...");
+
+        try {
+            SessionFactory sessionFactory = getSessionFactory();
+            System.out.println("SessionFactory created successfully");
+
+            BookRepository bookRepository = new BookRepository(sessionFactory);
+            ReviewRepository reviewRepository = new ReviewRepository(sessionFactory);
+            System.out.println("Repositories created successfully");
+
+            this.bookService = new BookServiceImpl(bookRepository, reviewRepository);
+            System.out.println("BookService created successfully");
+
+        } catch (Exception e) {
+            System.err.println("Failed to initialize BookSearchServlet: " + e.getMessage());
+            e.printStackTrace();
+            throw new ServletException("Failed to initialize BookSearchServlet", e);
+        }
+    }
+
+    private SessionFactory getSessionFactory() {
+        try {
+            return new Configuration().configure().buildSessionFactory();
+        } catch (Throwable ex) {
+            System.err.println("Initial SessionFactory creation failed." + ex);
+            throw new ExceptionInInitializerError(ex);
+        }
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String searchTerm = request.getParameter("term");
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Cache-Control", "no-cache");
+        PrintWriter out = response.getWriter();
+
+        if (searchTerm == null || searchTerm.trim().isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            out.write("{\"error\": \"Search term is required\"}");
+            return;
+        }
+
+        if (bookService == null) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            out.write("{\"error\": \"Service not initialized\"}");
+            return;
+        }
+
+        try {
+            List<BookDTO> books = bookService.searchBooks(searchTerm.trim());
+            System.out.println("Found " + books.size() + " books"); // Debug log
+
+            JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
+
+            for (BookDTO book : books) {
+                JsonObjectBuilder bookJson = Json.createObjectBuilder()
+                        .add("publicId", book.publicId())
+                        .add("name", book.name() != null ? book.name() : "")
+                        .add("description", book.description() != null ? book.description() : "")
+                        .add("genre", book.genre() != null ? book.genre() : "")
+                        .add("author", book.author() != null ? book.author() : "")
+                        .add("imageUrl", book.imageUrl() != null ? book.imageUrl() : "")
+                        .add("totalAmount", book.totalAmount())
+                        .add("currentAmount", book.currentAmount())
+                        .add("volume", book.volume())
+                        .add("rating", book.rating())
+                        .add("date", book.date() != null ? book.date() : "");
+
+                jsonArrayBuilder.add(bookJson);
+            }
+
+            out.write(jsonArrayBuilder.build().toString());
+
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            out.write("{\"error\": \"Internal server error: " + e.getMessage() + "\"}");
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+    }
+}
