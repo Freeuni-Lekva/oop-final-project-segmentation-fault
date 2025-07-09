@@ -65,8 +65,7 @@ public class BookKeeperServiceImpl implements BookKeeperService {
             // Set both total and current amount to the number of copies
             book.setTotalAmount(copies);
             book.setCurrentAmount(copies);
-            // New books start with 0 rating
-            book.setRating(0L);
+            book.setRating(0.0);
             bookRepository.save(book);
         }
         logger.info("Book with title '{}' added successfully with {} copies", bookRequest.title(), copies);

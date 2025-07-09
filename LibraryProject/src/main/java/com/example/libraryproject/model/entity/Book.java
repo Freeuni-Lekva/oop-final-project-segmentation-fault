@@ -61,7 +61,7 @@ public class Book {
 
     @NonNull
     @Column(name = "rating")
-    private Long rating;
+    private Double rating;
 
     @NonNull
     @Column(name = "image_url")

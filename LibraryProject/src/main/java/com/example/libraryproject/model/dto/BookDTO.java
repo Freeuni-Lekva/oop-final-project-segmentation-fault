@@ -10,6 +10,6 @@ public record BookDTO(
         Long totalAmount,
         Long currentAmount,
         Long volume,
-        Long rating,
+        Double rating,
         String date
 ) {}

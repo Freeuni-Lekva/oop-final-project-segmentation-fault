@@ -286,6 +286,34 @@
         }
     }
 
+    function refreshBookRatingAndReviews() {
+        if (!currentBook || !currentBook.publicId) return;
+        
+        // Silently fetch updated book data to get new rating
+        fetch('<%= request.getContextPath() %>/api/books/details/' + encodeURIComponent(currentBook.publicId))
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch updated book data');
+                }
+                return response.json();
+            })
+            .then(book => {
+                // Update the book rating display without showing loading states
+                currentBook = book;
+                const rating = book.rating || 0;
+                document.getElementById('bookStars').textContent = renderStars(rating);
+                document.getElementById('bookRating').textContent = rating > 0 ?
+                    '(' + rating.toFixed(1) + ')' : '(No rating)';
+                
+                // Also refresh the reviews to show the new review
+                loadBookReviews(book.publicId);
+            })
+            .catch(error => {
+                console.error('Error refreshing book rating:', error);
+                loadBookDetails();
+            });
+    }
+
     function loadBookReviews(bookId) {
         if (!bookId) return;
 
@@ -668,9 +696,8 @@
                         document.getElementById('ratingText').textContent = 'Click to rate';
                         document.getElementById('ratingText').classList.remove('selected');
                         
-                        if (currentBook && currentBook.publicId) {
-                            loadBookReviews(currentBook.publicId);
-                        }
+                        // Instantly refresh rating and reviews without loading states
+                        refreshBookRatingAndReviews();
                     })
                     .catch(error => {
                         console.error('Error submitting review:', error);
