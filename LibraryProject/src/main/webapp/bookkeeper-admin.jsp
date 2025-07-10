@@ -1150,7 +1150,7 @@
       userCell.textContent = order.username;
 
       const bookCell = document.createElement('td');
-      bookCell.textContent = order.bookTitle;
+      bookCell.textContent = order.book ? order.book.name : 'Unknown Book';
 
       const statusCell = document.createElement('td');
       const statusBadge = document.createElement('span');

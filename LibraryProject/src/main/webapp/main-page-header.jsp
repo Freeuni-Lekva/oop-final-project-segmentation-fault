@@ -14,11 +14,11 @@
     <div class="library-title">
         <span class="pale-text">Freeuni</span>
         <span class="highlight-text">Library</span>
-        <img src="images/cropped_circle_image.jpg" alt="owl" class="owl-icon">
+        <img src="${pageContext.request.contextPath}/images/cropped_circle_image.jpg" alt="owl" class="owl-icon">
     </div>
 
     <div class="nav-container">
-        <a href="main-page.jsp" class="nav-box <%= request.getRequestURI().endsWith("main-page.jsp") ? "active" : "" %>">
+        <a href="${pageContext.request.contextPath}/main-page.jsp" class="nav-box <%= request.getRequestURI().endsWith("main-page.jsp") ? "active" : "" %>">
             <svg class="nav-icon" viewBox="0 0 24 24">
                 <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path>
             </svg>
@@ -36,25 +36,25 @@
                 </svg>
             </a>
             <div class="dropdown-content" id="browseDropdown">
-                <a href="genre-books.jsp?genre=classics" class="dropdown-item">Classics</a>
-                <a href="genre-books.jsp?genre=fiction" class="dropdown-item">Fiction</a>
-                <a href="genre-books.jsp?genre=crime" class="dropdown-item">Crime</a>
-                <a href="genre-books.jsp?genre=mystery" class="dropdown-item">Mystery</a>
-                <a href="genre-books.jsp?genre=romance" class="dropdown-item">Romance</a>
-                <a href="genre-books.jsp?genre=memoir" class="dropdown-item">Memoir</a>
-                <a href="genre-books.jsp?genre=fantasy" class="dropdown-item">Fantasy</a>
-                <a href="genre-books.jsp?genre=horror" class="dropdown-item">Horror</a>
-                <a href="genre-books.jsp?genre=history" class="dropdown-item">History</a>
-                <a href="genre-books.jsp?genre=poetry" class="dropdown-item">Poetry</a>
-                <a href="genre-books.jsp?genre=adventure" class="dropdown-item">Adventure</a>
-                <a href="genre-books.jsp?genre=comedy" class="dropdown-item">Comedy</a>
-                <a href="genre-books.jsp?genre=philosophy" class="dropdown-item">Philosophy</a>
-                <a href="genre-books.jsp?genre=psychology" class="dropdown-item">Psychology</a>
+                <a href="${pageContext.request.contextPath}/genre-books.jsp?genre=classics" class="dropdown-item">Classics</a>
+                <a href="${pageContext.request.contextPath}/genre-books.jsp?genre=fiction" class="dropdown-item">Fiction</a>
+                <a href="${pageContext.request.contextPath}/genre-books.jsp?genre=crime" class="dropdown-item">Crime</a>
+                <a href="${pageContext.request.contextPath}/genre-books.jsp?genre=mystery" class="dropdown-item">Mystery</a>
+                <a href="${pageContext.request.contextPath}/genre-books.jsp?genre=romance" class="dropdown-item">Romance</a>
+                <a href="${pageContext.request.contextPath}/genre-books.jsp?genre=memoir" class="dropdown-item">Memoir</a>
+                <a href="${pageContext.request.contextPath}/genre-books.jsp?genre=fantasy" class="dropdown-item">Fantasy</a>
+                <a href="${pageContext.request.contextPath}/genre-books.jsp?genre=horror" class="dropdown-item">Horror</a>
+                <a href="${pageContext.request.contextPath}/genre-books.jsp?genre=history" class="dropdown-item">History</a>
+                <a href="${pageContext.request.contextPath}/genre-books.jsp?genre=poetry" class="dropdown-item">Poetry</a>
+                <a href="${pageContext.request.contextPath}/genre-books.jsp?genre=adventure" class="dropdown-item">Adventure</a>
+                <a href="${pageContext.request.contextPath}/genre-books.jsp?genre=comedy" class="dropdown-item">Comedy</a>
+                <a href="${pageContext.request.contextPath}/genre-books.jsp?genre=philosophy" class="dropdown-item">Philosophy</a>
+                <a href="${pageContext.request.contextPath}/genre-books.jsp?genre=psychology" class="dropdown-item">Psychology</a>
             </div>
         </div>
 
         <% if (!"BOOKKEEPER".equals(session.getAttribute("role"))) { %>
-            <a href="#my-books" class="nav-box">
+            <a href="${pageContext.request.contextPath}/user/${sessionScope.username}/my-books?view=grid" class="nav-box <%= request.getRequestURI().endsWith("my-books.jsp") ? "active" : "" %>">
                 <svg class="nav-icon" viewBox="0 0 24 24">
                     <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"></path>
                 </svg>
@@ -82,12 +82,12 @@
                 Admin Panel
             </a>
         <% } else { %>
-            <a href="${pageContext.request.contextPath}/user/${sessionScope.username}" class="nav-box">
-                <svg class="nav-icon" viewBox="0 0 24 24">
-                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
-                </svg>
-                Profile
-            </a>
+        <a href="${pageContext.request.contextPath}/user/${sessionScope.username}" class="nav-box">
+            <svg class="nav-icon" viewBox="0 0 24 24">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
+            </svg>
+            Profile
+        </a>
         <% } %>
 
         <!-- Authentication buttons -->
