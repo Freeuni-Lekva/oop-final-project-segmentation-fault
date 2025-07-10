@@ -178,18 +178,20 @@ public class OrderRepository {
 
     }
 
+
     public Set<Order> findOrdersByUsername(String username) {
         Session session = sessionFactory.openSession();
 
         Set<Order> orders = Set.copyOf(session.createQuery(
                         "SELECT o FROM Order o WHERE LOWER(o.user.username) LIKE LOWER(:username)", Order.class)
-                .setParameter("username", "%" + username + "%")
+                .setParameter("username", username.toLowerCase() + "%")
                 .getResultList());
 
         session.close();
 
         return orders;
     }
+
 
     public Set<Order> findActiveOrders() {
         Session session = sessionFactory.openSession();

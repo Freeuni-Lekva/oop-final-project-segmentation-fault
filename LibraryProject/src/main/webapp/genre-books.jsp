@@ -233,8 +233,9 @@
                     });
                     break;
             }
-            displayBooks(filteredBooks);
+
             fetchBooks(criteria);
+            displayBooks(filteredBooks);
         }
 
         function viewBookDetails(bookId) {

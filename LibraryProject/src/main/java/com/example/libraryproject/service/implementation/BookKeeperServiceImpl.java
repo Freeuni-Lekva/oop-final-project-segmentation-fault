@@ -144,7 +144,6 @@ public class BookKeeperServiceImpl implements BookKeeperService {
         logger.debug("Book removed from borrowed collection: {}", removed);
 
         userRepository.update(user);
-        logger.debug("book removed from borrowed books");
 
         try {
             user.getReadBooks().add(book);
