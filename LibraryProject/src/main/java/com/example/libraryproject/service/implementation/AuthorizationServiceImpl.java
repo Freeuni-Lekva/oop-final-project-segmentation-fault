@@ -8,12 +8,14 @@ import com.example.libraryproject.model.enums.Role;
 import com.example.libraryproject.model.enums.UserStatus;
 import com.example.libraryproject.repository.UserRepository;
 import com.example.libraryproject.service.AuthorizationService;
+import com.example.libraryproject.service.MailService;
 import com.example.libraryproject.utilities.Mappers;
 import lombok.RequiredArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -21,6 +23,8 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthorizationServiceImpl.class);
     private final UserRepository userRepository;
+    private final BookKeeperRepository bookKeeperRepository;
+    private final MailService mailService;
 
     public void register(RegistrationRequest request) {
         logger.info("Attempting to register user: {} with role: {}", request.username(), request.role());
@@ -29,6 +33,15 @@ public class AuthorizationServiceImpl implements AuthorizationService {
             throw new IllegalArgumentException("This username already exists");
         }
         User user = Mappers.mapRequestToUser(request);
+        try {
+            mailService.sendEmail(
+                    List.of(user.getMail()),
+                    "Library Registration",
+                    "Welcome to the Library, " + user.getUsername() + "! Your registration was successful."
+            );
+        } catch (Exception e) {
+            logger.error("Failed to send registration email to {}: {}", user.getMail(), e.getMessage());
+        }
         userRepository.save(user);
         logger.info("User with username {} and role {} registered successfully", request.username(), request.role());
     }
@@ -44,7 +57,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
             logger.warn("Login failed: user {} not found", username);
             throw new IllegalArgumentException(errorMsg);
         }
-        
+
         User user = optionalUser.get();
         if (!BCrypt.checkpw(password, user.getPassword())) {
             logger.warn("Login failed: incorrect password for user {}", username);
@@ -60,7 +73,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
             logger.info("BOOKKEEPER user details - Role: {}, Status: {}", user.getRole(), user.getStatus());
             return user.getStatus() == UserStatus.ACTIVE;
         }
-        
+
         logger.warn("BOOKKEEPER not found for username: {}", username);
         return false;
     }
@@ -72,7 +85,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
             logger.info("USER user details - Role: {}, Status: {}", user.getRole(), user.getStatus());
             return user.getStatus() == UserStatus.ACTIVE || user.getStatus() == UserStatus.BANNED;
         }
-        
+
         logger.warn("USER not found for username: {}", username);
         return false;
     }

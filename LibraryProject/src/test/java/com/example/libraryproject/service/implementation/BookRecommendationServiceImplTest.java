@@ -114,7 +114,7 @@ public class BookRecommendationServiceImplTest {
         bookRepository.save(book5);
         bookRepository.save(book6);
 
-        user = new User("rezi","1234");
+        user = new User("rezi","1234", "froste3110@gmail.com");
         userRepository.save(user);
 
         Set<Book> readBook = new HashSet<>();

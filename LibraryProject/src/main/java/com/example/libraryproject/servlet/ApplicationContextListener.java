@@ -32,6 +32,9 @@ public class ApplicationContextListener implements ServletContextListener {
             ReviewRepository reviewRepository = new ReviewRepository(sessionFactory);
 
             AuthorizationService authorizationService = new AuthorizationServiceImpl(userRepository);
+            MailService mailService = new MailServiceImpl();
+
+            AuthorizationService authorizationService = new AuthorizationServiceImpl(userRepository, bookKeeperRepository, mailService);
             event.getServletContext().setAttribute(AUTHORIZATION_SERVICE_ATTRIBUTE_NAME, authorizationService);
 
             if (userRepository.findByUsername("gmerti").isEmpty()) {
