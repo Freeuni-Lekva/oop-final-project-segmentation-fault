@@ -56,7 +56,11 @@
                 </button>
             </div>
             <div class="empty-state" id="readingEmpty" style="display: none;">
-                <div class="empty-state-icon">📖</div>
+                <div class="empty-state-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                    </svg>
+                </div>
                 <h3>No Currently Reading Books</h3>
                 <p>You don't have any books in progress at the moment.</p>
             </div>
@@ -79,7 +83,14 @@
                 </button>
             </div>
             <div class="empty-state" id="reservedEmpty" style="display: none;">
-                <div class="empty-state-icon">📚</div>
+                <div class="empty-state-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8.342c0-.53-.21-1.04-.586-1.414l-3.342-3.342A2 2 0 0014.658 3H6c-1.1 0-2 .9-2 2z"/>
+                        <path d="M14 3v5h5"/>
+                        <path d="M8 12h8"/>
+                        <path d="M8 16h8"/>
+                    </svg>
+                </div>
                 <h3>No Reserved Books</h3>
                 <p>You don't have any books reserved at the moment.</p>
             </div>
@@ -102,7 +113,15 @@
                 </button>
             </div>
             <div class="empty-state" id="completedEmpty" style="display: none;">
-                <div class="empty-state-icon">✅</div>
+                <div class="empty-state-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                        <path d="M8 7h8"/>
+                        <path d="M8 11h8"/>
+                        <path d="M8 15h5"/>
+                    </svg>
+                </div>
                 <h3>No Read Books</h3>
                 <p>You haven't marked any books as read yet.</p>
             </div>

@@ -66,18 +66,38 @@
 
   .empty-state {
     text-align: center;
-    padding: 60px 20px;
+    padding: 40px 20px;
     color: #718096;
-    font-size: 1.1rem;
+    font-size: 1rem;
     background: #f8fafa;
     border-radius: 8px;
     margin: 20px 0;
+    border: 1px solid #e2e8f0;
   }
 
   .empty-state-icon {
-    font-size: 3rem;
-    color: #d4c4b0;
-    margin-bottom: 20px;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 16px;
+    color: #8b7355;
+  }
+
+  .empty-state-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .empty-state h3 {
+    color: #4a5568;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .empty-state p {
+    color: #718096;
+    font-size: 0.95rem;
+    margin: 0;
   }
 
   .scroll-container {
