@@ -1,5 +1,8 @@
 package com.example.libraryproject.service.implementation;
 
+import com.example.libraryproject.model.dto.BookDTO;
+import com.example.libraryproject.model.dto.OrderDTO;
+import com.example.libraryproject.model.dto.ReviewDTO;
 import com.example.libraryproject.model.dto.UserDTO;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Order;
@@ -18,9 +21,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -247,7 +252,52 @@ public class UserServiceImpl implements UserService {
         logger.info("Found user: {} with role: {} and status: {}",
                    foundUser.getUsername(), foundUser.getRole(), foundUser.getStatus());
 
-        return Mappers.convertUserToDTO(foundUser);
+        // Get user's orders
+        Set<Order> userOrders = orderRepository.findOrdersByUserId(foundUser.getId());
+        List<OrderDTO> orderDTOs = userOrders.stream()
+                .filter(order -> order.getStatus() == OrderStatus.RESERVED)
+                .map(Mappers::mapOrderToDTO)
+                .collect(Collectors.toList());
+
+        // Get currently reading books
+        List<BookDTO> currentlyReadingDTOs = foundUser.getBorrowedBooks().stream()
+                .map(Mappers::mapBookToDTO)
+                .collect(Collectors.toList());
+
+        // Get read books, excluding currently borrowed or reserved books
+        Set<String> activeBookIds = new HashSet<>();
+        // Add borrowed book IDs
+        activeBookIds.addAll(foundUser.getBorrowedBooks().stream()
+                .map(Book::getPublicId)
+                .collect(Collectors.toSet()));
+        // Add reserved book IDs
+        activeBookIds.addAll(userOrders.stream()
+                .filter(order -> order.getStatus() == OrderStatus.RESERVED)
+                .map(order -> order.getBook().getPublicId())
+                .collect(Collectors.toSet()));
+
+        // Filter read books to exclude active books
+        List<BookDTO> readBookDTOs = foundUser.getReadBooks().stream()
+                .filter(book -> !activeBookIds.contains(book.getPublicId()))
+                .map(Mappers::mapBookToDTO)
+                .collect(Collectors.toList());
+
+        // Get reviews
+        List<ReviewDTO> reviewDTOs = foundUser.getReviews().stream()
+                .map(Mappers::mapReviewToDTO)
+                .collect(Collectors.toList());
+
+        return new UserDTO(
+                foundUser.getUsername(),
+                foundUser.getBio(),
+                foundUser.getReadBooks().size(),
+                reviewDTOs.size(),
+                reviewDTOs,
+                currentlyReadingDTOs,
+                orderDTOs,
+                readBookDTOs,
+                foundUser.getStatus().name()
+        );
     }
 
     @Override

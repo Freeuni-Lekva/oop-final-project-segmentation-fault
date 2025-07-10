@@ -19,8 +19,50 @@ public class ProfileViewServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/login.jsp");
             return;
         }
+
+        // Get the path info (everything after /user/)
+        String pathInfo = req.getPathInfo();
+        System.out.println("PathInfo: " + pathInfo); // Debug log
         
-        // User is authenticated, proceed to profile page
-        req.getRequestDispatcher("/profile.html").forward(req, resp);
+        if (pathInfo == null) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
+        // Split the path into segments
+        String[] segments = pathInfo.split("/");
+        System.out.println("Number of segments: " + segments.length); // Debug log
+        for (int i = 0; i < segments.length; i++) {
+            System.out.println("Segment " + i + ": " + segments[i]); // Debug log
+        }
+
+        if (segments.length < 2) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
+        String username = segments[1];
+        // Verify the user is accessing their own profile/books
+        String sessionUsername = (String) session.getAttribute("username");
+        if (!username.equals(sessionUsername)) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        // Check if this is a my-books request
+        if (segments.length >= 3 && "my-books".equals(segments[2])) {
+            System.out.println("Forwarding to my-books.jsp");
+            req.getRequestDispatcher("/my-books.jsp").forward(req, resp);
+            return;
+        } 
+        
+        // This is a profile request
+        System.out.println("Forwarding to profile view"); // Debug log
+        String view = req.getParameter("view");
+        if ("grid".equals(view)) {
+            req.getRequestDispatcher("/my-books.jsp").forward(req, resp);
+        } else {
+            req.getRequestDispatcher("/profile.html").forward(req, resp);
+        }
     }
 }
