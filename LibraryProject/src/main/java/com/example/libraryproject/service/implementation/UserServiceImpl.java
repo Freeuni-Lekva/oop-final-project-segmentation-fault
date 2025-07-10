@@ -290,7 +290,7 @@ public class UserServiceImpl implements UserService {
         return new UserDTO(
                 foundUser.getUsername(),
                 foundUser.getBio(),
-                foundUser.getReadBooks().size(),
+                readBookDTOs.size(),  // Changed from foundUser.getReadBooks().size()
                 reviewDTOs.size(),
                 reviewDTOs,
                 currentlyReadingDTOs,
