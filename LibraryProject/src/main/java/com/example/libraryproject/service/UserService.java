@@ -6,7 +6,7 @@ public interface UserService {
 
     boolean reviewBook(String username, String publicId, int rating, String comment);
 
-    boolean reserveBook(String username, String publicId);
+    boolean reserveBook(String username, String publicId, Long durationInDays);
 
     boolean cancelReservation(String username, String publicId);
 

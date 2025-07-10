@@ -84,7 +84,7 @@
                 <% } else { %>
                     <!-- User Actions -->
                     <div class="action-buttons">
-                        <button class="reserve-button" id="reserveButton" disabled onclick="reserveBook()">
+                        <button class="reserve-button" id="reserveButton" disabled>
                             <svg viewBox="0 0 24 24" class="nav-icon">
                                 <path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"></path>
                             </svg>
@@ -277,7 +277,10 @@
             if (currentBook && currentBook.currentAmount > 0) {
                 reserveButtonText.textContent = 'Reserve Book';
                 reserveButton.disabled = false;
-                reserveButton.onclick = reserveBook;
+                reserveButton.onclick = function(e) {
+                    e.preventDefault();
+                    showReservationModal();
+                };
             } else {
                 reserveButtonText.textContent = 'Unavailable';
                 reserveButton.disabled = true;
@@ -451,37 +454,36 @@
         document.getElementById('error').textContent = message;
     }
 
-    function reserveBook() {
-        if (!currentBook || !currentBook.publicId) {
-            alert('Unable to reserve book. Please refresh the page and try again.');
-            return;
-        }
-
-        fetch('<%= request.getContextPath() %>/api/books/reserve', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ bookId: currentBook.publicId })
-        })
-            .then(response => {
-                return response.json().then(data => {
-                    if (!response.ok) {
-                        throw new Error(data.message || 'Failed to reserve book');
-                    }
-                    return data;
-                });
-            })
-            .then(data => {
-                alert('Book reserved successfully!');
-                updateReserveButtonState(true);
-                // Removed loadBookDetails() call to prevent flickering
-            })
-            .catch(error => {
-                console.error('Error reserving book:', error);
-                alert(error.message || 'Failed to reserve book. Please try again.');
-            });
+    function reserveBook(days) {
+    if (!currentBook || !currentBook.publicId) {
+        alert('Unable to reserve book. Please refresh the page and try again.');
+        return;
     }
+
+    fetch('<%= request.getContextPath() %>/api/user/reserve', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ bookId: currentBook.publicId, duration: days })
+    })
+        .then(response => {
+            return response.json().then(data => {
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to reserve book');
+                }
+                return data;
+            });
+        })
+        .then(data => {
+            alert('Book reserved successfully!');
+            updateReserveButtonState(true);
+        })
+        .catch(error => {
+            console.error('Error reserving book:', error);
+            alert(error.message || 'Failed to reserve book. Please try again.');
+        });
+}
 
     function cancelReservation() {
         if (!currentBook || !currentBook.publicId) {
@@ -489,7 +491,7 @@
             return;
         }
 
-        fetch('<%= request.getContextPath() %>/api/books/cancel-reservation', {
+        fetch('<%= request.getContextPath() %>/api/user/cancel-reservation', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -633,6 +635,16 @@
         window.location.href = '<%= request.getContextPath() %>/bookkeeper-admin.jsp';
     }
 
+    function showReservationModal() {
+        var modal = document.getElementById('reservationModal');
+        modal.classList.add('show');
+        document.getElementById('reservationDays').value = 7;
+    }
+    function hideReservationModal() {
+        var modal = document.getElementById('reservationModal');
+        modal.classList.remove('show');
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         loadBookDetails();
         
@@ -709,6 +721,20 @@
                     });
             });
         }
+
+        // Modal event listeners
+        document.getElementById('closeReservationModal').onclick = hideReservationModal;
+        document.getElementById('cancelReservationBtn').onclick = hideReservationModal;
+        document.getElementById('confirmReservationBtn').onclick = function() {
+            const days = parseInt(document.getElementById('reservationDays').value, 10);
+            if (isNaN(days) || days < 1 || days > 30) {
+                alert('Please enter a valid number of days (1-30).');
+                return;
+            }
+            hideReservationModal();
+            console.log("Days: " + days)
+            reserveBook(days);
+        };
     });
 
     // Navigation functionality
@@ -742,6 +768,132 @@
         }
     };
 </script>
-
+<!-- Reservation Duration Modal -->
+<div id="reservationModal" class="modal" style="display:none;">
+    <div class="modal-content reservation-modal-content">
+        <button class="close-modal-btn" id="closeReservationModal" aria-label="Close">&times;</button>
+        <h2 class="modal-title">Reserve Book</h2>
+        <p class="modal-desc">How many days do you want to reserve this book for?</p>
+        <input type="number" id="reservationDays" min="1" max="30" value="7" required class="modal-input" />
+        <div class="modal-actions">
+            <button id="confirmReservationBtn" type="button" class="modal-btn confirm-btn">Confirm</button>
+            <button id="cancelReservationBtn" type="button" class="modal-btn cancel-btn">Cancel</button>
+        </div>
+    </div>
+</div>
+<style>
+/* Reservation Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0; top: 0; width: 100vw; height: 100vh;
+    background: rgba(30, 30, 40, 0.45);
+    justify-content: center;
+    align-items: center;
+    transition: background 0.2s;
+}
+.modal.show { display: flex !important; }
+.reservation-modal-content {
+    background: #fff;
+    color: #222;
+    font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+    padding: 2.5rem 2rem 2rem 2rem;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(30,30,60,0.18), 0 1.5px 6px rgba(0,0,0,0.08);
+    max-width: 350px;
+    width: 90vw;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: modalFadeIn 0.25s;
+}
+@keyframes modalFadeIn {
+    from { transform: translateY(40px) scale(0.98); opacity: 0; }
+    to { transform: none; opacity: 1; }
+}
+.close-modal-btn {
+    position: absolute;
+    right: 18px;
+    top: 14px;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #888;
+    cursor: pointer;
+    transition: color 0.15s;
+    z-index: 1;
+}
+.close-modal-btn:hover {
+    color: #d32f2f;
+}
+.modal-title {
+    font-size: 1.35rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #2a2a2a;
+    letter-spacing: 0.01em;
+}
+.modal-desc {
+    font-size: 1rem;
+    margin-bottom: 1.2rem;
+    color: #444;
+    text-align: center;
+}
+.modal-input {
+    width: 80px;
+    padding: 0.5rem 0.7rem;
+    font-size: 1.1rem;
+    border: 1.5px solid #bdbdbd;
+    border-radius: 8px;
+    outline: none;
+    margin-bottom: 1.3rem;
+    text-align: center;
+    transition: border 0.15s;
+}
+.modal-input:focus {
+    border-color: #1976d2;
+}
+.modal-actions {
+    display: flex;
+    gap: 0.7rem;
+    width: 100%;
+    justify-content: center;
+}
+.modal-btn {
+    padding: 0.5rem 1.3rem;
+    border-radius: 7px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+    box-shadow: 0 1px 3px rgba(30,30,60,0.07);
+}
+.confirm-btn {
+    background: #1976d2;
+    color: #fff;
+}
+.confirm-btn:hover, .confirm-btn:focus {
+    background: #1256a3;
+}
+.cancel-btn {
+    background: #f5f5f5;
+    color: #444;
+}
+.cancel-btn:hover, .cancel-btn:focus {
+    background: #e0e0e0;
+    color: #d32f2f;
+}
+@media (max-width: 500px) {
+    .reservation-modal-content {
+        padding: 1.2rem 0.7rem 1.2rem 0.7rem;
+        max-width: 95vw;
+    }
+    .modal-title { font-size: 1.1rem; }
+    .modal-input { font-size: 1rem; }
+}
+</style>
 </body>
 </html>

@@ -128,7 +128,7 @@ public class UserServiceImpl implements UserService {
         logger.info("User {} changed bio successfully", username);
     }
 
-    public boolean reserveBook(String username, String publicId) {
+    public boolean reserveBook(String username, String publicId, Long durationInDays) {
         Optional<Book> optionalBook = bookRepository.findByPublicId(publicId);
         if (optionalBook.isEmpty()) {
             logger.info("Book with publicId {} not found", publicId);
@@ -160,13 +160,14 @@ public class UserServiceImpl implements UserService {
             logger.info("User {} already has an active order for book {}", username, publicId);
             throw new IllegalStateException("You already have this book reserved or borrowed");
         }
-
         LocalDateTime now = LocalDateTime.now();
+        LocalDateTime borrowDate = now.plusDays(1);
+        LocalDateTime dueDate = borrowDate.plusDays(durationInDays);
 
         Order order = new Order(
                 UUID.randomUUID(),
-                now.plusDays(1),
-                now.plusDays(22),
+                borrowDate,
+                dueDate,
                 OrderStatus.RESERVED,
                 user,
                 book
