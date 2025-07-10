@@ -153,7 +153,7 @@
                 return defaultCovers[randomIndex];
             }
 
-            if (book.imageUrl) {
+            if (book.imageUrl && book.imageUrl !== 'NOT_FOUND') {
                 var imagePath = '/images/' + book.imageUrl;
                 imageHtml = '<img src="' + imagePath + '" alt="' + (book.name || 'Book cover') + '"' +
                     ' onerror="this.src=\'' + getRandomDefaultCover() + '\'">';
