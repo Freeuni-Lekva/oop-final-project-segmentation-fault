@@ -12,6 +12,7 @@ import com.example.libraryproject.model.enums.Role;
 import com.example.libraryproject.model.enums.UserStatus;
 import com.example.libraryproject.repository.BookRepository;
 import com.example.libraryproject.repository.OrderRepository;
+import com.example.libraryproject.repository.ReviewRepository;
 import com.example.libraryproject.repository.UserRepository;
 import com.example.libraryproject.service.BookKeeperService;
 import com.example.libraryproject.utilities.Mappers;
@@ -36,6 +37,7 @@ public class BookKeeperServiceImpl implements BookKeeperService {
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
+    private final ReviewRepository reviewRepository;
     private static final Logger logger = LoggerFactory.getLogger(BookKeeperServiceImpl.class);
 
 
@@ -90,8 +92,9 @@ public class BookKeeperServiceImpl implements BookKeeperService {
         if (activeOrderCount > 0) {
             throw new IllegalStateException("Cannot delete book with active reservations or borrowed copies");
         }
-        
-        // Completely delete the book from the database
+
+        reviewRepository.deleteAll(reviewRepository.findReviewsByBookId(book.getId()));
+        orderRepository.deleteAll(orderRepository.findOrdersByBookId(book.getId()));
         bookRepository.delete(book);
         logger.info("Book with title '{}' and publicId '{}' deleted successfully", book.getName(), bookPublicId);
     }

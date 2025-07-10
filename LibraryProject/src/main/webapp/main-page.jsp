@@ -142,14 +142,16 @@
     var contextPath = '<%= request.getContextPath() %>';
 
     var isLoggedIn = checkUserLogin();
+    var userRole = '<%= session.getAttribute("role") != null ? session.getAttribute("role").toString() : "" %>';
 
     console.log('User logged in:', isLoggedIn);
+    console.log('User role:', userRole);
 
-    if (isLoggedIn) {
+    if (isLoggedIn && userRole !== 'BOOKKEEPER') {
       document.getElementById('recommendationsSection').style.display = 'block';
       fetchRecommendations();
     } else {
-      console.log('User not logged in, hiding recommendations section');
+      console.log('User not logged in or is bookkeeper, hiding recommendations section');
       document.getElementById('recommendationsSection').style.display = 'none';
     }
 

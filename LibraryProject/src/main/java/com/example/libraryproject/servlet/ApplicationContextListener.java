@@ -32,7 +32,7 @@ public class ApplicationContextListener implements ServletContextListener {
             AuthorizationService authorizationService = new AuthorizationServiceImpl(userRepository);
             event.getServletContext().setAttribute(AUTHORIZATION_SERVICE_ATTRIBUTE_NAME, authorizationService);
 
-            BookKeeperService bookKeeperService = new BookKeeperServiceImpl(bookRepository, userRepository, orderRepository);
+            BookKeeperService bookKeeperService = new BookKeeperServiceImpl(bookRepository, userRepository, orderRepository, reviewRepository);
             event.getServletContext().setAttribute(BOOKKEEPER_SERVICE_ATTRIBUTE_NAME, bookKeeperService);
 
             SchedulerService schedulerService = new SchedulerServiceImpl(userRepository, orderRepository);
@@ -50,6 +50,10 @@ public class ApplicationContextListener implements ServletContextListener {
 
             GoogleBooksApiService googleBooksAPIService = new GoogleBooksApiServiceImpl(bookRepository);
             event.getServletContext().setAttribute(GOOGLE_BOOKS_API_ATTRIBUTE_NAME, googleBooksAPIService);
+
+            Thread fetcherThread = new Thread(googleBooksAPIService::fetchAndSaveBooks);
+            fetcherThread.setDaemon(true);
+            fetcherThread.start();
 
             ObjectMapper objectMapper = new ObjectMapper();
             event.getServletContext().setAttribute(OBJECT_MAPPER_ATTRIBUTE_NAME, objectMapper);
