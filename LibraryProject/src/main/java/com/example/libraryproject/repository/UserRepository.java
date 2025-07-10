@@ -112,6 +112,19 @@ public class UserRepository {
         return Optional.ofNullable(user);
     }
 
+    public Optional<User> findByMail(String mail) {
+        Session session = sessionFactory.openSession();
+
+        User user = session.createQuery(
+                        "FROM User u WHERE u.mail = :mail", User.class)
+                .setParameter("mail", mail)
+                .uniqueResult();
+
+        session.close();
+
+        return Optional.ofNullable(user);
+    }
+
     public Optional<User> findByUsernameAndRole(String username, Role role) {
         Session session = sessionFactory.openSession();
         User user = session.createQuery(

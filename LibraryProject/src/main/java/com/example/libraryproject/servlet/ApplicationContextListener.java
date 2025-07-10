@@ -43,10 +43,10 @@ public class ApplicationContextListener implements ServletContextListener {
                 logger.info("Default bookkeeper 'gmerti' already exists");
             }
 
-            BookKeeperService bookKeeperService = new BookKeeperServiceImpl(bookRepository, userRepository, orderRepository, reviewRepository);
+            BookKeeperService bookKeeperService = new BookKeeperServiceImpl(bookRepository, userRepository, orderRepository, reviewRepository, mailService);
             event.getServletContext().setAttribute(BOOKKEEPER_SERVICE_ATTRIBUTE_NAME, bookKeeperService);
 
-            SchedulerService schedulerService = new SchedulerServiceImpl(userRepository, orderRepository);
+            SchedulerService schedulerService = new SchedulerServiceImpl(userRepository, orderRepository, mailService);
             event.getServletContext().setAttribute(SCHEDULER_SERVICE_ATTRIBUTE_NAME, schedulerService);
             schedulerService.start();
 

@@ -33,4 +33,6 @@ public class ApplicationProperties {
     public static final String EMAIL_PASSWORD = "zpux dgjo uept afdn";
     public static final String SMTP_HOST = "smtp.googlemail.com";
     public static final int SMTP_PORT = 465;
+
+    public static final int SCHEDULER_BOOK_REMINDER_INTERVAL_HRS = 24;
 }

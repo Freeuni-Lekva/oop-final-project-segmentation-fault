@@ -31,6 +31,10 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         if (existingUser.isPresent()) {
             throw new IllegalArgumentException("This username already exists");
         }
+        Optional<User> existingUserWithMail = userRepository.findByMail(request.mail());
+        if (existingUserWithMail.isPresent()) {
+            throw new IllegalArgumentException("Account with this mail already exists");
+        }
         User user = Mappers.mapRequestToUser(request);
         try {
             mailService.sendEmail(
