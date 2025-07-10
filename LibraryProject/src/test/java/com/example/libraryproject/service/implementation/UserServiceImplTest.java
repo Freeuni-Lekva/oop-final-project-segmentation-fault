@@ -67,7 +67,7 @@ public class UserServiceImplTest {
                 300L, 3L, 3L, 3.0, ""
         );
 
-        user = new User("rezi", "1234");
+        user = new User("rezi", "1234", "froste3110@gmail.com");
         user.setId(1L);
         user.setPassword(BCrypt.hashpw("1234", BCrypt.gensalt()));
         user.setBorrowedBooks(new HashSet<>());

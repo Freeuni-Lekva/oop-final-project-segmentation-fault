@@ -6,6 +6,7 @@ import com.example.libraryproject.model.dto.RegistrationRequest;
 import com.example.libraryproject.model.entity.User;
 import com.example.libraryproject.model.enums.Role;
 import com.example.libraryproject.repository.UserRepository;
+import com.example.libraryproject.service.MailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mindrot.jbcrypt.BCrypt;
@@ -20,16 +21,17 @@ public class AuthorizationServiceImplTest {
 
     private UserRepository userRepository;
     private AuthorizationServiceImpl authorizationServiceImpl;
+    private MailService mailService;
 
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
-        authorizationServiceImpl = new AuthorizationServiceImpl(userRepository);
+        authorizationServiceImpl = new AuthorizationServiceImpl(userRepository, mailService);
     }
 
     @Test
     void testRegisterUser_Success() {
-        RegistrationRequest request = new RegistrationRequest("newuser", "pass123", Role.USER);
+        RegistrationRequest request = new RegistrationRequest("newuser", "pass123", "froste3110@gmail.com", Role.USER);
 
         when(userRepository.findByUsername("newuser")).thenReturn(Optional.empty());
 
@@ -40,7 +42,7 @@ public class AuthorizationServiceImplTest {
 
     @Test
     void testRegisterBookKeeper_Success() {
-        RegistrationRequest request = new RegistrationRequest("keeper", "pass123", Role.BOOKKEEPER);
+        RegistrationRequest request = new RegistrationRequest("keeper", "pass123", "froste3110@gmail.com", Role.BOOKKEEPER);
         when(userRepository.findByUsername("keeper")).thenReturn(Optional.empty());
 
         authorizationServiceImpl.register(request);
@@ -50,12 +52,12 @@ public class AuthorizationServiceImplTest {
 
     @Test
     void testRegisterUser_DuplicateUsername_ThrowsException() {
-        RegistrationRequest request = new RegistrationRequest("existing", "pass123", Role.USER);
+        RegistrationRequest request = new RegistrationRequest("existing", "pass123", "froste3110@gmail.com", Role.USER);
         User existingUser = new User();
         existingUser.setUsername("existing");
         when(userRepository.findByUsername("existing")).thenReturn(Optional.of(existingUser));
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, 
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
             () -> authorizationServiceImpl.register(request));
         assertEquals("This username already exists", ex.getMessage());
     }
@@ -105,7 +107,7 @@ public class AuthorizationServiceImplTest {
 
         LoginRequest request = new LoginRequest("user1", "wrong");
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, 
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
             () -> authorizationServiceImpl.login(request));
         assertEquals("Username or password is incorrect. Please try again.", ex.getMessage());
     }
@@ -116,7 +118,7 @@ public class AuthorizationServiceImplTest {
 
         LoginRequest request = new LoginRequest("ghost", "password");
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, 
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
             () -> authorizationServiceImpl.login(request));
         assertEquals("Username or password is incorrect. Please try again.", ex.getMessage());
     }

@@ -15,6 +15,7 @@ import com.example.libraryproject.repository.OrderRepository;
 import com.example.libraryproject.repository.ReviewRepository;
 import com.example.libraryproject.repository.UserRepository;
 import com.example.libraryproject.service.BookKeeperService;
+import com.example.libraryproject.service.MailService;
 import com.example.libraryproject.utilities.Mappers;
 import jakarta.servlet.http.Part;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class BookKeeperServiceImpl implements BookKeeperService {
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final ReviewRepository reviewRepository;
+    private final MailService mailService;
     private static final Logger logger = LoggerFactory.getLogger(BookKeeperServiceImpl.class);
 
 
@@ -118,7 +120,20 @@ public class BookKeeperServiceImpl implements BookKeeperService {
         Book book = order.getBook();
         user.getBorrowedBooks().add(book);
         userRepository.update(user);
-        
+        try {
+            mailService.sendEmail(
+                    List.of(user.getMail()),
+                    "Book Taken",
+                    "Dear " + user.getUsername() + ",\n\n" +
+                            "This is a confirmation that you have successfully borrowed the book \"" + book.getName() + "\" from the library.\n" +
+                            "Please make sure to return it by the due date as per library policy.\n\n" +
+                            "Thank you,\n" +
+                            "Library Team"
+            );
+        } catch (Exception e) {
+            logger.error("Failed to send confirmation email to {}: {}", user.getMail(), e.getMessage());
+        }
+
         logger.info("Order with public ID '{}' marked as BORROWED and book '{}' added to user '{}' borrowed books", 
                 orderPublicId, book.getName(), user.getUsername());
     }
@@ -183,6 +198,20 @@ public class BookKeeperServiceImpl implements BookKeeperService {
         
         user.setStatus(UserStatus.BANNED);
         userRepository.update(user);
+        try {
+            mailService.sendEmail(
+                    List.of(user.getMail()),
+                    "Library Account Banned",
+                    "Dear " + user.getUsername() + ",\n\n" +
+                            "We regret to inform you that your library account has been banned due to policy violations or other issues.\n" +
+                            "You will not be able to borrow books or access your account until further notice.\n\n" +
+                            "If you believe this was a mistake, please contact the library administration.\n\n" +
+                            "Sincerely,\n" +
+                            "Library Team"
+            );
+        } catch (Exception e) {
+            logger.error("Failed to send ban notification email to {}: {}", user.getMail(), e.getMessage());
+        }
         logger.info("User with username '{}' has been banned", username);
     }
 
@@ -203,6 +232,19 @@ public class BookKeeperServiceImpl implements BookKeeperService {
         
         user.setStatus(UserStatus.ACTIVE);
         userRepository.update(user);
+        try {
+            mailService.sendEmail(
+                    List.of(user.getMail()),
+                    "Library Account Unbanned",
+                    "Dear " + user.getUsername() + ",\n\n" +
+                            "Good news! Your library account has been reactivated. You may now borrow books and access all library services again.\n\n" +
+                            "Thank you for your cooperation.\n\n" +
+                            "Best regards,\n" +
+                            "Library Team"
+            );
+        } catch (Exception e) {
+            logger.error("Failed to send unban notification email to {}: {}", user.getMail(), e.getMessage());
+        }
         logger.info("User with username '{}' has been unbanned", username);
     }
 

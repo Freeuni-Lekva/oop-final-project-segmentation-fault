@@ -31,20 +31,22 @@ public class ApplicationContextListener implements ServletContextListener {
             OrderRepository orderRepository = new OrderRepository(sessionFactory);
             ReviewRepository reviewRepository = new ReviewRepository(sessionFactory);
 
-            AuthorizationService authorizationService = new AuthorizationServiceImpl(userRepository);
+            MailService mailService = new MailServiceImpl();
+
+            AuthorizationService authorizationService = new AuthorizationServiceImpl(userRepository, mailService);
             event.getServletContext().setAttribute(AUTHORIZATION_SERVICE_ATTRIBUTE_NAME, authorizationService);
 
             if (userRepository.findByUsername("gmerti").isEmpty()) {
-                RegistrationRequest request = new RegistrationRequest("gmerti", "123", Role.BOOKKEEPER);
+                RegistrationRequest request = new RegistrationRequest("gmerti", "123", "froste3110@gmail.com", Role.BOOKKEEPER);
                 authorizationService.register(request);
             } else {
                 logger.info("Default bookkeeper 'gmerti' already exists");
             }
 
-            BookKeeperService bookKeeperService = new BookKeeperServiceImpl(bookRepository, userRepository, orderRepository, reviewRepository);
+            BookKeeperService bookKeeperService = new BookKeeperServiceImpl(bookRepository, userRepository, orderRepository, reviewRepository, mailService);
             event.getServletContext().setAttribute(BOOKKEEPER_SERVICE_ATTRIBUTE_NAME, bookKeeperService);
 
-            SchedulerService schedulerService = new SchedulerServiceImpl(userRepository, orderRepository);
+            SchedulerService schedulerService = new SchedulerServiceImpl(userRepository, orderRepository, mailService);
             event.getServletContext().setAttribute(SCHEDULER_SERVICE_ATTRIBUTE_NAME, schedulerService);
             schedulerService.start();
 

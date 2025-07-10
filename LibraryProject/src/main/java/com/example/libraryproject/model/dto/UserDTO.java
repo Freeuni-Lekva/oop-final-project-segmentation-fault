@@ -11,5 +11,6 @@ public record UserDTO(
         List<BookDTO> currentlyReading,
         List<OrderDTO> orders,
         List<BookDTO> readBooks,
-        String status
+        String status,
+        String mail
 ) {}

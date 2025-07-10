@@ -296,7 +296,8 @@ public class UserServiceImpl implements UserService {
                 currentlyReadingDTOs,
                 orderDTOs,
                 readBookDTOs,
-                foundUser.getStatus().name()
+                foundUser.getStatus().name(),
+                foundUser.getMail()
         );
     }
 

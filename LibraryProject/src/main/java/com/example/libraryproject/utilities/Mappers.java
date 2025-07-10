@@ -32,6 +32,7 @@ public class Mappers {
         user.setBorrowedBooks(new HashSet<>());
         user.setReadBooks(new HashSet<>());
         user.setReviewCount(0L);
+        user.setMail(userRequest.mail());
         return user;
     }
 
@@ -131,7 +132,8 @@ public class Mappers {
                 currentlyReadingDTOs,
                 Collections.emptyList(), // Orders will be set by UserServiceImpl
                 readBookDTOs,
-                user.getStatus().name()
+                user.getStatus().name(),
+                user.getMail()
         );
     }
     public static BookDTO mapBookToDTO(Book book) {
