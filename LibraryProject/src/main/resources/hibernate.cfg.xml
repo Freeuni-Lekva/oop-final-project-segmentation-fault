@@ -19,7 +19,6 @@
         <!-- Mapped classes -->
         <mapping class="com.example.libraryproject.model.entity.Book"/>
         <mapping class="com.example.libraryproject.model.entity.User"/>
-        <mapping class="com.example.libraryproject.model.entity.BookKeeper"/>
         <mapping class="com.example.libraryproject.model.entity.Order"/>
         <mapping class="com.example.libraryproject.model.entity.Review"/>
     </session-factory>

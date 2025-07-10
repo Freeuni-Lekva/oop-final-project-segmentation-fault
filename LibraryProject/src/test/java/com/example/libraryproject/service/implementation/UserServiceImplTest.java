@@ -21,7 +21,6 @@ import static org.mockito.Mockito.*;
 
 public class UserServiceImplTest {
     private UserRepository userRepository;
-    private BookKeeperRepository bookKeeperRepository;
     private ReviewRepository reviewRepository;
     private UserServiceImpl userServiceImpl;
     private BookRepository bookRepository;
@@ -33,7 +32,6 @@ public class UserServiceImplTest {
     @BeforeEach
     void setup() {
         userRepository = mock(UserRepository.class);
-        bookKeeperRepository = mock(BookKeeperRepository.class);
         reviewRepository = mock(ReviewRepository.class);
         bookRepository = mock(BookRepository.class);
         orderRepository = mock(OrderRepository.class);
@@ -94,15 +92,19 @@ public class UserServiceImplTest {
         // Test successful reservation
         assertDoesNotThrow(() -> userServiceImpl.reserveBook(user.getUsername(), book1.getPublicId()));
 
+        // Test reservation when book is not available
         book2.setCurrentAmount(0L);
-        assertFalse(userServiceImpl.reserveBook(user.getUsername(), book2.getPublicId()));
+        assertThrows(IllegalStateException.class,
+                () -> userServiceImpl.reserveBook(user.getUsername(), book2.getPublicId()));
 
         // Test reservation with non-existent user
         book2.setCurrentAmount(1L);
-        assertFalse(userServiceImpl.reserveBook("nonexistent", book1.getPublicId()));
+        assertThrows(IllegalArgumentException.class,
+                () -> userServiceImpl.reserveBook("nonexistent", book1.getPublicId()));
 
         // Test reservation with non-existent book
-        assertFalse( userServiceImpl.reserveBook(user.getUsername(), "nonexistent"));
+        assertThrows(IllegalArgumentException.class,
+                () -> userServiceImpl.reserveBook(user.getUsername(), "nonexistent"));
     }
 
     @Test

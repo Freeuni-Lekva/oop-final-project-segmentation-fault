@@ -73,7 +73,10 @@ public class UserServiceImpl implements UserService {
         book = optionalBook.get();
         user = optionalUser.get();
 
-        // COMMENT THIS TO WRITE REVIEWS
+        if (user.getStatus() == com.example.libraryproject.model.enums.UserStatus.BANNED) {
+            throw new IllegalStateException("Your account is banned and cannot write reviews");
+        }
+
        if (!user.getReadBooks().contains(book)) {
            logger.info("User {} hasn't read book {}", username, publicId);
            return false;
@@ -101,7 +104,7 @@ public class UserServiceImpl implements UserService {
         user.setReviews(updatedReviews);
 
         userRepository.update(user);
-        
+
         double newAverageRating = calculateAverageRating(publicId);
         book.setRating(newAverageRating);
         bookRepository.update(book);
@@ -129,18 +132,23 @@ public class UserServiceImpl implements UserService {
         Optional<Book> optionalBook = bookRepository.findByPublicId(publicId);
         if (optionalBook.isEmpty()) {
             logger.info("Book with publicId {} not found", publicId);
-            return false;
+            throw new IllegalArgumentException("Book not found");
         }
         Optional<User> optionalUser = userRepository.findByUsername(username);
         if (optionalUser.isEmpty()) {
             logger.info("User with username {} not found", username);
-            return false;
+            throw new IllegalArgumentException("User not found");
         }
         Book book = optionalBook.get();
         User user = optionalUser.get();
+
+        if (user.getStatus() == com.example.libraryproject.model.enums.UserStatus.BANNED) {
+            logger.info("Banned user {} attempted to reserve book {}", username, publicId);
+            throw new IllegalStateException("Your account is banned and cannot reserve books");
+        }
         if (book.getCurrentAmount() <= 0) {
             logger.info("Book with publicId {} is not available for reservation", publicId);
-            return false;
+            throw new IllegalStateException("Book is currently unavailable - all copies are reserved or borrowed");
         }
 
         Set<Order> userOrders = orderRepository.findOrdersByUserId(user.getId());
@@ -150,7 +158,7 @@ public class UserServiceImpl implements UserService {
         );
         if (hasActiveOrder) {
             logger.info("User {} already has an active order for book {}", username, publicId);
-            return false;
+            throw new IllegalStateException("You already have this book reserved or borrowed");
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -164,6 +172,7 @@ public class UserServiceImpl implements UserService {
                 book
         );
 
+        // Decrease
         book.setCurrentAmount(book.getCurrentAmount() - 1);
         bookRepository.update(book);
         orderRepository.save(order);
@@ -198,6 +207,7 @@ public class UserServiceImpl implements UserService {
             return false;
         }
 
+        // Increase
         book.setCurrentAmount(book.getCurrentAmount() + 1);
         bookRepository.update(book);
         orderRepository.delete(reservation.get());
@@ -226,11 +236,17 @@ public class UserServiceImpl implements UserService {
 
     public UserDTO getUserInfo(String username) {
         Optional<User> user = userRepository.findByUsername(username);
+
         if (user.isEmpty()) {
+            logger.warn("User not found in database: {}", username);
             throw new IllegalArgumentException("user doesn't exist");
         }
 
-        return Mappers.convertUserToDTO(user.get());
+        User foundUser = user.get();
+        logger.info("Found user: {} with role: {} and status: {}",
+                   foundUser.getUsername(), foundUser.getRole(), foundUser.getStatus());
+
+        return Mappers.convertUserToDTO(foundUser);
     }
 
     @Override

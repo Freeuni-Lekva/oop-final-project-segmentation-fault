@@ -7,6 +7,8 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -14,6 +16,8 @@ import static com.example.libraryproject.configuration.ApplicationProperties.AUT
 
 @WebFilter(filterName = "BookKeeperAuthFilter", urlPatterns = {"/api/bookkeeper/*", "/api/user/*"})
 public class AuthorizationFilter implements Filter {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthorizationFilter.class);
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain)
@@ -27,29 +31,56 @@ public class AuthorizationFilter implements Filter {
 
         String username;
         if (session == null) {
+            logger.warn("No session found, returning 401");
             sendJsonError(response, HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized access");
             return;
         }
+
         boolean authenticated = false;
         username = (String) session.getAttribute("username");
+        Object roleObj = session.getAttribute("role");
+
+        if (username == null || roleObj == null) {
+            logger.warn("Username or role is null in session");
+            sendJsonError(response, HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized access");
+            return;
+        }
 
         String path = request.getServletPath().split("/")[2];
 
-        Role role =  Role.valueOf(session.getAttribute("role").toString());
-        if (path.equals("user") && role == Role.USER) {
-            authenticated = authorizationServiceImpl.checkUser(username);
+        try {
+            Role role = Role.valueOf(roleObj.toString());
+            logger.info("Parsed role enum: {}", role);
+
+            if (path.equals("user") && role == Role.USER) {
+                logger.info("Checking USER permissions for username: {}", username);
+                authenticated = authorizationServiceImpl.checkUser(username);
+                logger.info("USER authentication result: {}", authenticated);
+            }
+            else if (path.equals("bookkeeper") && role == Role.BOOKKEEPER) {
+                logger.info("Checking BOOKKEEPER permissions for username: {}", username);
+                authenticated = authorizationServiceImpl.checkBookkeeper(username);
+                logger.info("BOOKKEEPER authentication result: {}", authenticated);
+            } else {
+                authenticated = false;
+            }
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid role in session: {}", roleObj, e);
+            sendJsonError(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid role");
+            return;
         }
-        else if (path.equals("bookkeeper") && role == Role.BOOKKEEPER) {
-            authenticated = authorizationServiceImpl.checkBookkeeper(username);
-        }
+
         if (authenticated) {
+            logger.info("Authentication successful, proceeding with request");
             request.setAttribute("username", username);
-            request.setAttribute("role", role.name());
+            request.setAttribute("role", roleObj.toString());
             chain.doFilter(servletRequest, servletResponse);
         } else {
+            logger.warn("Authentication failed for user: {} with role: {} accessing path: {}", username, roleObj, path);
             sendJsonError(response, HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized access");
         }
     }
+
     private void sendJsonError(HttpServletResponse response, int status, String message) throws IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

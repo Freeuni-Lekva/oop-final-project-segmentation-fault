@@ -28,7 +28,19 @@ public class UserServlet extends HttpServlet {
         UserService userService = (UserService) req.getServletContext().getAttribute(ApplicationProperties.USER_SERVICE_ATTRIBUTE_NAME);
 
         String pathInfo = req.getPathInfo();
-        String sessionUsername = req.getAttribute("username").toString();
+        Object sessionUsernameObj = req.getAttribute("username");
+        
+        if (sessionUsernameObj == null) {
+            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("error", "Authentication required");
+            objectMapper.writeValue(resp.getWriter(), error);
+            return;
+        }
+        
+        String sessionUsername = sessionUsernameObj.toString();
+        
         if (pathInfo == null || pathInfo.equals("/")) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             Map<String, Object> error = new HashMap<>();
@@ -37,17 +49,19 @@ public class UserServlet extends HttpServlet {
             objectMapper.writeValue(resp.getWriter(), error);
             return;
         }
+        
         String username = pathInfo.substring(1);
 
         try {
             UserDTO userDTO = userService.getUserInfo(username);
-            boolean isSelf = sessionUsername != null && sessionUsername.equals(username);
+            boolean isSelf = sessionUsername.equals(username);
 
             Map<String, Object> response = new HashMap<>();
             response.put("user", userDTO);
             response.put("isSelf", isSelf);
 
             objectMapper.writeValue(resp.getWriter(), response);
+            
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             Map<String, Object> error = new HashMap<>();

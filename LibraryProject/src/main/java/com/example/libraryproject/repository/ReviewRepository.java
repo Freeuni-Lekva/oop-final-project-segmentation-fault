@@ -60,6 +60,24 @@ public class ReviewRepository {
         }
     }
 
+    public void deleteAll(Set<Review> reviews) {
+        Transaction tx = null;
+        try (Session session = sessionFactory.openSession()) {
+            tx = session.beginTransaction();
+            for (Review review : reviews) {
+                if (review != null) {
+                    session.remove(review);
+                }
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            throw new RuntimeException("Failed to delete all reviews", e);
+        }
+    }
+
     public Optional<Review> findById(Long id) {
         Session session = sessionFactory.openSession();
 

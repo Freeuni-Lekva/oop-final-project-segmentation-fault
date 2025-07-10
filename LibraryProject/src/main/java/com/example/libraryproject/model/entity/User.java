@@ -1,5 +1,6 @@
 package com.example.libraryproject.model.entity;
 
+import com.example.libraryproject.model.enums.Role;
 import com.example.libraryproject.model.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,6 +26,11 @@ public class User {
     @Column(name = "password", nullable = false)
     @NonNull
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    @NonNull
+    private Role role = Role.USER;
 
     @Column(name = "status", nullable = false)
     @NonNull
@@ -74,6 +80,7 @@ public class User {
         return "User{" +
                 "username='" + username + '\'' +
                 ", password='" + password + '\'' +
+                ", role=" + role +
                 ", bio='" + bio + '\'' +
                 ", borrowedBooks=" + borrowedBooks +
                 ", readBooks=" + readBooks +

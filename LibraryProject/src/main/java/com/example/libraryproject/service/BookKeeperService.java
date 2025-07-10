@@ -1,6 +1,7 @@
 package com.example.libraryproject.service;
 
 import com.example.libraryproject.model.dto.BookAdditionRequest;
+import com.example.libraryproject.model.dto.OrderDTO;
 import com.example.libraryproject.model.dto.UserDTO;
 import com.example.libraryproject.model.dto.BookDTO;
 import jakarta.servlet.http.Part;
@@ -27,5 +28,11 @@ public interface BookKeeperService {
     Set<BookDTO> getBooks();
 
     String downloadImage(Part filePart) throws IOException;
+
+    Set<OrderDTO> getOrdersByUsername(String username);
+
+    Set<OrderDTO> getAllActiveOrders();
+
+    Set<OrderDTO> getOverdueOrders();
 
 }

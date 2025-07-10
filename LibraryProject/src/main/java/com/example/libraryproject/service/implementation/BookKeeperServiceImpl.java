@@ -1,15 +1,18 @@
 package com.example.libraryproject.service.implementation;
 
 import com.example.libraryproject.model.dto.BookAdditionRequest;
+import com.example.libraryproject.model.dto.OrderDTO;
 import com.example.libraryproject.model.dto.UserDTO;
 import com.example.libraryproject.model.dto.BookDTO;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.entity.User;
 import com.example.libraryproject.model.enums.OrderStatus;
+import com.example.libraryproject.model.enums.Role;
 import com.example.libraryproject.model.enums.UserStatus;
 import com.example.libraryproject.repository.BookRepository;
 import com.example.libraryproject.repository.OrderRepository;
+import com.example.libraryproject.repository.ReviewRepository;
 import com.example.libraryproject.repository.UserRepository;
 import com.example.libraryproject.service.BookKeeperService;
 import com.example.libraryproject.utilities.Mappers;
@@ -34,6 +37,7 @@ public class BookKeeperServiceImpl implements BookKeeperService {
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
+    private final ReviewRepository reviewRepository;
     private static final Logger logger = LoggerFactory.getLogger(BookKeeperServiceImpl.class);
 
 
@@ -88,8 +92,9 @@ public class BookKeeperServiceImpl implements BookKeeperService {
         if (activeOrderCount > 0) {
             throw new IllegalStateException("Cannot delete book with active reservations or borrowed copies");
         }
-        
-        // Completely delete the book from the database
+
+        reviewRepository.deleteAll(reviewRepository.findReviewsByBookId(book.getId()));
+        orderRepository.deleteAll(orderRepository.findOrdersByBookId(book.getId()));
         bookRepository.delete(book);
         logger.info("Book with title '{}' and publicId '{}' deleted successfully", book.getName(), bookPublicId);
     }
@@ -107,7 +112,15 @@ public class BookKeeperServiceImpl implements BookKeeperService {
 
         order.setStatus(OrderStatus.BORROWED);
         orderRepository.update(order);
-        logger.info("Order with public ID '{}' marked as BORROWED", orderPublicId);
+        
+        // Add book to borrowed books collection
+        User user = order.getUser();
+        Book book = order.getBook();
+        user.getBorrowedBooks().add(book);
+        userRepository.update(user);
+        
+        logger.info("Order with public ID '{}' marked as BORROWED and book '{}' added to user '{}' borrowed books", 
+                orderPublicId, book.getName(), user.getUsername());
     }
 
     public void returnBook(String orderPublicId) {
@@ -121,17 +134,36 @@ public class BookKeeperServiceImpl implements BookKeeperService {
             throw new IllegalStateException("Invalid status: " + order.getStatus());
         }
 
-        // Update order status and set return date
-        order.setStatus(OrderStatus.RETURNED);
-        order.setReturnDate(java.time.LocalDateTime.now());
-        orderRepository.update(order);
-
-        // Increment book availability
+        User user = order.getUser();
         Book book = order.getBook();
+        
+        logger.debug("Returning book: {} by user: {}, borrowed books count before: {}", 
+                book.getName(), user.getUsername(), user.getBorrowedBooks().size());
+
+        boolean removed = user.getBorrowedBooks().remove(book);
+        logger.debug("Book removed from borrowed collection: {}", removed);
+
+        userRepository.update(user);
+
+        try {
+            user.getReadBooks().add(book);
+            userRepository.update(user);
+            logger.debug("Book added to read books collection");
+        } catch (Exception e) {
+            if (e.getMessage() != null && e.getMessage().contains("Duplicate entry")) {
+                logger.info("Book already exists in read books, but removal from borrowed books was successful");
+            } else {
+                logger.warn("Error adding book to read collection, but book removal from borrowed was successful: {}", e.getMessage());
+            }
+        }
+        
+        logger.debug("Borrowed books count after removal: {}", user.getBorrowedBooks().size());
+        orderRepository.delete(order);
+
         book.setCurrentAmount(book.getCurrentAmount() + 1);
         bookRepository.update(book);
-
-        logger.info("Order with public ID '{}' marked as RETURNED, book '{}' is now available", orderPublicId, book.getName());
+        logger.info("Book '{}' returned by user '{}', moved to read books and order deleted",
+                book.getName(), user.getUsername());
     }
 
     public void banUser(String username) {
@@ -140,6 +172,15 @@ public class BookKeeperServiceImpl implements BookKeeperService {
             throw new IllegalArgumentException("User not found");
         }
         User user = userOptional.get();
+
+        if (user.getRole() == Role.BOOKKEEPER) {
+            throw new IllegalArgumentException("Cannot ban a bookkeeper");
+        }
+        
+        if (user.getStatus() == UserStatus.BANNED) {
+            throw new IllegalArgumentException("User is already banned");
+        }
+        
         user.setStatus(UserStatus.BANNED);
         userRepository.update(user);
         logger.info("User with username '{}' has been banned", username);
@@ -151,13 +192,22 @@ public class BookKeeperServiceImpl implements BookKeeperService {
             throw new IllegalArgumentException("User not found");
         }
         User user = userOptional.get();
+
+        if (user.getRole() == Role.BOOKKEEPER) {
+            throw new IllegalArgumentException("Cannot unban a bookkeeper");
+        }
+        
+        if (user.getStatus() == UserStatus.ACTIVE) {
+            throw new IllegalArgumentException("User is already unbanned");
+        }
+        
         user.setStatus(UserStatus.ACTIVE);
         userRepository.update(user);
         logger.info("User with username '{}' has been unbanned", username);
     }
 
     public Set<UserDTO> getUsers() {
-        Set<User> users = userRepository.findAll();
+        Set<User> users = userRepository.findByRole(Role.USER);
         Set<UserDTO> usersWithStatus = new HashSet<>();
         for (User user : users) {
             usersWithStatus.add(Mappers.convertUserToDTO(user));
@@ -193,5 +243,32 @@ public class BookKeeperServiceImpl implements BookKeeperService {
             bookDTOs.add(Mappers.mapBookToDTO(book));
         }
         return bookDTOs;
+    }
+
+    public Set<OrderDTO> getOrdersByUsername(String username) {
+        Set<Order> orders = orderRepository.findOrdersByUsername(username);
+        Set<OrderDTO> orderDTOs = new HashSet<>();
+        for (Order order : orders) {
+            orderDTOs.add(Mappers.mapOrderToDTO(order));
+        }
+        return orderDTOs;
+    }
+
+    public Set<OrderDTO> getAllActiveOrders() {
+        Set<Order> orders = orderRepository.findActiveOrders();
+        Set<OrderDTO> orderDTOs = new HashSet<>();
+        for (Order order : orders) {
+            orderDTOs.add(Mappers.mapOrderToDTO(order));
+        }
+        return orderDTOs;
+    }
+
+    public Set<OrderDTO> getOverdueOrders() {
+        Set<Order> orders = orderRepository.findOverdueOrders();
+        Set<OrderDTO> orderDTOs = new HashSet<>();
+        for (Order order : orders) {
+            orderDTOs.add(Mappers.mapOrderToDTO(order));
+        }
+        return orderDTOs;
     }
 }

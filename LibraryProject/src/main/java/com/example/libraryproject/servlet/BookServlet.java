@@ -158,14 +158,14 @@ public class BookServlet extends HttpServlet {
             JsonNode jsonNode = objectMapper.readTree(jsonBuilder.toString());
             String bookId = jsonNode.get("bookId").asText();
 
-            boolean success = userService.reserveBook(username, bookId);
-
-            if (success) {
-                response.getWriter().write("{\"success\": true, \"message\": \"Book reserved successfully\"}");
-            } else {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("{\"success\": false, \"message\": \"Failed to reserve book. It might be unavailable.\"}");
-            }
+            userService.reserveBook(username, bookId);
+            response.getWriter().write("{\"success\": true, \"message\": \"Book reserved successfully\"}");
+        } catch (IllegalStateException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"success\": false, \"message\": \"" + e.getMessage() + "\"}");
+        } catch (IllegalArgumentException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"success\": false, \"message\": \"" + e.getMessage() + "\"}");
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write("{\"success\": false, \"message\": \"Server error: " + e.getMessage() + "\"}");

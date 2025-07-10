@@ -4,6 +4,7 @@ import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.model.dto.BookAdditionFromGoogleRequest;
 import com.example.libraryproject.model.dto.BookAdditionRequest;
 import com.example.libraryproject.model.dto.BookDTO;
+import com.example.libraryproject.model.dto.OrderDTO;
 import com.example.libraryproject.model.dto.UserDTO;
 import com.example.libraryproject.service.BookKeeperService;
 import com.example.libraryproject.service.GoogleBooksApiService;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @MultipartConfig
@@ -79,13 +81,45 @@ public class BookKeeperServlet extends HttpServlet {
                 break;
 
             case "/ban-user":
+                try {
+                    handleBanUser(request, bookKeeperService);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    Map<String, String> responseMap = new HashMap<>();
 
-                handleBanUser(request, bookKeeperService);
+                    responseMap.put("status", "success");
+                    responseMap.put("message", "User banned successfully");
+
+                    objectMapper.writeValue(response.getWriter(), responseMap);
+                } catch (Exception e) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    Map<String, String> responseMap = new HashMap<>();
+
+                    responseMap.put("status", "error");
+                    responseMap.put("message", e.getMessage());
+
+                    objectMapper.writeValue(response.getWriter(), responseMap);
+                }
                 break;
 
             case "/unban-user":
+                try {
+                    handleUnbanUser(request, bookKeeperService);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    Map<String, String> responseMap = new HashMap<>();
 
-                handleUnbanUser(request, bookKeeperService);
+                    responseMap.put("status", "success");
+                    responseMap.put("message", "User unbanned successfully");
+
+                    objectMapper.writeValue(response.getWriter(), responseMap);
+                } catch (Exception e) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    Map<String, String> responseMap = new HashMap<>();
+
+                    responseMap.put("status", "error");
+                    responseMap.put("message", e.getMessage());
+
+                    objectMapper.writeValue(response.getWriter(), responseMap);
+                }
                 break;
 
             default:
@@ -108,6 +142,8 @@ public class BookKeeperServlet extends HttpServlet {
             handleGetUsers(response, bookKeeperService);
         } else if ("/books".equals(path)) {
             handleGetBooks(response, bookKeeperService);
+        } else if ("/orders".equals(path)) {
+            handleGetOrders(request, response, bookKeeperService);
         } else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
@@ -288,6 +324,31 @@ public class BookKeeperServlet extends HttpServlet {
             throws IOException {
         Set<BookDTO> books = bookKeeperService.getBooks();
         objectMapper.writeValue(resp.getWriter(), books);
+        resp.setStatus(HttpServletResponse.SC_OK);
+    }
+
+    private void handleGetOrders(HttpServletRequest req, HttpServletResponse resp, BookKeeperService bookKeeperService)
+            throws IOException {
+        String username = req.getParameter("username");
+        String overdueParameter = req.getParameter("overdue");
+        boolean overdueOnly = "true".equals(overdueParameter);
+
+        Set<OrderDTO> orders;
+
+        if (username != null && !username.trim().isEmpty() && overdueOnly) {
+            Set<OrderDTO> userOrders = bookKeeperService.getOrdersByUsername(username);
+            orders = userOrders.stream()
+                    .filter(OrderDTO::isOverdue)
+                    .collect(Collectors.toSet());
+        } else if (username != null && !username.trim().isEmpty()) {
+            orders = bookKeeperService.getOrdersByUsername(username);
+        } else if (overdueOnly) {
+            orders = bookKeeperService.getOverdueOrders();
+        } else {
+            orders = bookKeeperService.getAllActiveOrders();
+        }
+
+        objectMapper.writeValue(resp.getWriter(), orders);
         resp.setStatus(HttpServletResponse.SC_OK);
     }
 
