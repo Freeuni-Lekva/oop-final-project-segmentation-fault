@@ -177,6 +177,10 @@ public class BookKeeperServiceImpl implements BookKeeperService {
             throw new IllegalArgumentException("Cannot ban a bookkeeper");
         }
         
+        if (user.getStatus() == UserStatus.BANNED) {
+            throw new IllegalArgumentException("User is already banned");
+        }
+        
         user.setStatus(UserStatus.BANNED);
         userRepository.update(user);
         logger.info("User with username '{}' has been banned", username);
@@ -191,6 +195,10 @@ public class BookKeeperServiceImpl implements BookKeeperService {
 
         if (user.getRole() == Role.BOOKKEEPER) {
             throw new IllegalArgumentException("Cannot unban a bookkeeper");
+        }
+        
+        if (user.getStatus() == UserStatus.ACTIVE) {
+            throw new IllegalArgumentException("User is already unbanned");
         }
         
         user.setStatus(UserStatus.ACTIVE);

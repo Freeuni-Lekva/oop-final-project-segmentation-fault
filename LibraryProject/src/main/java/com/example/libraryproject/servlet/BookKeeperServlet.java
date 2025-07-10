@@ -81,13 +81,45 @@ public class BookKeeperServlet extends HttpServlet {
                 break;
 
             case "/ban-user":
+                try {
+                    handleBanUser(request, bookKeeperService);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    Map<String, String> responseMap = new HashMap<>();
 
-                handleBanUser(request, bookKeeperService);
+                    responseMap.put("status", "success");
+                    responseMap.put("message", "User banned successfully");
+
+                    objectMapper.writeValue(response.getWriter(), responseMap);
+                } catch (Exception e) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    Map<String, String> responseMap = new HashMap<>();
+
+                    responseMap.put("status", "error");
+                    responseMap.put("message", e.getMessage());
+
+                    objectMapper.writeValue(response.getWriter(), responseMap);
+                }
                 break;
 
             case "/unban-user":
+                try {
+                    handleUnbanUser(request, bookKeeperService);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    Map<String, String> responseMap = new HashMap<>();
 
-                handleUnbanUser(request, bookKeeperService);
+                    responseMap.put("status", "success");
+                    responseMap.put("message", "User unbanned successfully");
+
+                    objectMapper.writeValue(response.getWriter(), responseMap);
+                } catch (Exception e) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    Map<String, String> responseMap = new HashMap<>();
+
+                    responseMap.put("status", "error");
+                    responseMap.put("message", e.getMessage());
+
+                    objectMapper.writeValue(response.getWriter(), responseMap);
+                }
                 break;
 
             default:

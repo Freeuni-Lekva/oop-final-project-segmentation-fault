@@ -487,6 +487,8 @@
   });
 
 
+  let messageTimeout;
+
   document.getElementById('banUserBtn').addEventListener('click', function () {
     const username = document.getElementById('usernameInput').value.trim();
     const button = this;
@@ -496,6 +498,9 @@
     button.textContent = 'Banning...';
 
     const msgBox = document.getElementById('userManagementMessage');
+    if (messageTimeout) {
+      clearTimeout(messageTimeout);
+    }
     msgBox.style.display = 'none';
 
     const payload = {
@@ -512,19 +517,37 @@
 
     })
             .then(function (response) {
-              if (response.ok) {
-                msgBox.textContent = 'User banned';
+              return response.json().then(data => {
+                console.log('Ban response:', response.status, data);
+                return {
+                  ok: response.ok,
+                  data: data
+                };
+              }).catch(jsonError => {
+                console.error('JSON parsing error:', jsonError);
+                return {
+                  ok: response.ok,
+                  data: { message: response.ok ? 'Operation completed' : 'Server error occurred' }
+                };
+              });
+            })
+            .then(function (result) {
+              if (result.ok) {
+                msgBox.textContent = result.data.message || 'User banned successfully';
                 msgBox.className = 'message-area success';
                 msgBox.style.display = 'block';
                 document.getElementById('usernameInput').value = '';
                 refreshUsersList();
-                setTimeout(function () {
+                messageTimeout = setTimeout(function () {
                   msgBox.style.display = 'none';
-                }, 5000);
+                }, 2000);
               } else {
-                msgBox.textContent = 'Failed to ban user';
+                msgBox.textContent = result.data.message || 'Failed to ban user';
                 msgBox.className = 'message-area error';
                 msgBox.style.display = 'block';
+                messageTimeout = setTimeout(function () {
+                  msgBox.style.display = 'none';
+                }, 2000);
               }
             })
             .catch(function (error) {
@@ -532,6 +555,9 @@
               msgBox.textContent = 'Error: Check your connection';
               msgBox.className = 'message-area error';
               msgBox.style.display = 'block';
+              messageTimeout = setTimeout(function () {
+                msgBox.style.display = 'none';
+              }, 2000);
             })
             .finally(function () {
               button.textContent = buttonText;
@@ -549,6 +575,10 @@
     button.textContent = 'Unbanning...';
 
     const msgBox = document.getElementById('userManagementMessage');
+    //delete old message when new activity happens
+    if (messageTimeout) {
+      clearTimeout(messageTimeout);
+    }
     msgBox.style.display = 'none';
 
     const payload = {
@@ -564,19 +594,37 @@
       credentials: "include"
     })
             .then(function (response) {
-              if (response.ok) {
-                msgBox.textContent = 'User unbanned';
+              return response.json().then(data => {
+                console.log('Unban response:', response.status, data);
+                return {
+                  ok: response.ok,
+                  data: data
+                };
+              }).catch(jsonError => {
+                console.error('JSON parsing error:', jsonError);
+                return {
+                  ok: response.ok,
+                  data: { message: response.ok ? 'Operation completed' : 'Server error occurred' }
+                };
+              });
+            })
+            .then(function (result) {
+              if (result.ok) {
+                msgBox.textContent = result.data.message || 'User unbanned successfully';
                 msgBox.className = 'message-area success';
                 msgBox.style.display = 'block';
                 document.getElementById('usernameInput').value = '';
                 refreshUsersList();
-                setTimeout(function () {
+                messageTimeout = setTimeout(function () {
                   msgBox.style.display = 'none';
-                }, 5000);
+                }, 2000);
               } else {
-                msgBox.textContent = 'Failed to unban user';
+                msgBox.textContent = result.data.message || 'Failed to unban user';
                 msgBox.className = 'message-area error';
                 msgBox.style.display = 'block';
+                messageTimeout = setTimeout(function () {
+                  msgBox.style.display = 'none';
+                }, 2000);
               }
             })
             .catch(function (error) {
@@ -584,6 +632,9 @@
               msgBox.textContent = 'Error: Check your connection';
               msgBox.className = 'message-area error';
               msgBox.style.display = 'block';
+              messageTimeout = setTimeout(function () {
+                msgBox.style.display = 'none';
+              }, 2000);
             })
             .finally(function () {
               button.textContent = buttonText;
