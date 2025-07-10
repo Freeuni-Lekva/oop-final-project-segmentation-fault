@@ -14,6 +14,7 @@ import com.example.libraryproject.repository.BookRepository;
 import com.example.libraryproject.repository.OrderRepository;
 import com.example.libraryproject.repository.ReviewRepository;
 import com.example.libraryproject.repository.UserRepository;
+import com.example.libraryproject.service.MailService;
 import com.example.libraryproject.service.UserService;
 import com.example.libraryproject.utilities.Mappers;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class UserServiceImpl implements UserService {
     private final BookRepository bookRepository;
     private final ReviewRepository reviewRepository;
     private final OrderRepository orderRepository;
+    private final MailService mailService;
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     /**
@@ -136,7 +138,7 @@ public class UserServiceImpl implements UserService {
         logger.info("User {} changed bio successfully", username);
     }
 
-    public ReservationResponse reserveBook(String username, String bookPublicId, Long durationInDays) {
+    public ReservationResponse reserveBook(String username, String bookPublicId, Long durationInDays){
         Optional<Book> optionalBook = bookRepository.findByPublicId(bookPublicId);
         if (optionalBook.isEmpty()) {
             logger.info("Book with publicId {} not found", bookPublicId);
@@ -186,8 +188,6 @@ public class UserServiceImpl implements UserService {
                 .book(book)
                 .build();
 
-        // Decrease
-
         if (orderStatus == OrderStatus.RESERVED) {
             book.setCurrentAmount(book.getCurrentAmount() - 1);
             bookRepository.update(book);
@@ -196,7 +196,34 @@ public class UserServiceImpl implements UserService {
         else {
             logger.info("User {} added to waitlist for book {} with order ID {}", username, bookPublicId, order.getPublicId());
         }
-
+        try {
+            mailService.sendEmail(
+                    List.of(user.getMail()),
+                    "Book Reservation Confirmation",
+                    String.format("""
+                                    Dear %s,
+                                    
+                                    Your reservation for the book '%s' has been %s.
+                                    Reservation ID: %s
+                                    Borrow Date: %s
+                                    Due Date: %s
+                                    %s
+                                    
+                                    Thank you for using our library service!
+                                    Best regards,
+                                    Library Team""",
+                            user.getUsername(),
+                            book.getName(),
+                            orderStatus == OrderStatus.RESERVED ? "confirmed" : "added to waitlist",
+                            order.getPublicId(),
+                            borrowDate != null ? borrowDate.toLocalDate() : "N/A",
+                            dueDate != null ? dueDate.toLocalDate() : "N/A",
+                            orderStatus == OrderStatus.RESERVED ? "Please pick up the book within 24 hours, otherwise reservation will be cancelled"
+                                    : "You will be notified when the book is available.")
+            );
+        }  catch (Exception e) {
+            logger.error("Failed to send confirmation email to {}: {}", user.getMail(), e.getMessage());
+        }
         orderRepository.save(order);
         return orderStatus == OrderStatus.RESERVED ? ReservationResponse.RESERVED : ReservationResponse.WAITLISTED;
     }
@@ -236,13 +263,38 @@ public class UserServiceImpl implements UserService {
             if (orderOptional.isPresent()) {
                 Order waitingOrder = orderOptional.get();
                 waitingOrder.setStatus(OrderStatus.RESERVED);
-                waitingOrder.setBorrowDate(LocalDateTime.now().plusDays(1));
-                waitingOrder.setDueDate(LocalDateTime.now().plusDays(1).plusDays(waitingOrder.getRequestedDurationInDays()));
+                waitingOrder.setBorrowDate(LocalDateTime.now().plusDays(3));
+                waitingOrder.setDueDate(LocalDateTime.now().plusDays(3).plusDays(waitingOrder.getRequestedDurationInDays()));
 
                 orderRepository.update(waitingOrder);
 
                 logger.info("User {} canceled reservation for book {}, next user in waitlist has been reserved", username, publicId);
-
+                try {
+                    mailService.sendEmail(
+                            List.of(waitingOrder.getUser().getMail()),
+                            "Book Reservation Confirmation",
+                            String.format("""
+                                            Dear %s,
+                                            
+                                            Your reservation for the book '%s' has been confirmed.
+                                            Reservation ID: %s
+                                            Borrow Date: %s
+                                            Due Date: %s
+                                            
+                                            Please pick up the book within 72 hours, otherwise reservation will be cancelled.
+                                            
+                                            Thank you for using our library service!
+                                            Best regards,
+                                            Library Team""",
+                                    waitingOrder.getUser().getUsername(),
+                                    book.getName(),
+                                    waitingOrder.getPublicId(),
+                                    waitingOrder.getBorrowDate().toLocalDate(),
+                                    waitingOrder.getDueDate().toLocalDate())
+                    );
+                } catch (Exception e) {
+                    logger.error("Failed to send confirmation email to {}: {}", user.getMail(), e.getMessage());
+                }
             } else {
                 book.setCurrentAmount(book.getCurrentAmount() + 1);
                 bookRepository.update(book);
@@ -361,4 +413,5 @@ public class UserServiceImpl implements UserService {
         return orderRepository.hasReservation(optionalUser.get().getId(), optionalBook.get().getId());
 
     }
+
 }

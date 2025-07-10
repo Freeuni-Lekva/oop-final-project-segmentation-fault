@@ -192,6 +192,32 @@ public class BookKeeperServiceImpl implements BookKeeperService {
                 orderRepository.update(waitingOrder);
                 logger.info("User {} canceled reservation for book {}, next user in waitlist has been reserved",
                         user.getUsername(), book.getPublicId());
+                try {
+                    mailService.sendEmail(
+                            List.of(waitingOrder.getUser().getMail()),
+                            "Book Reservation Confirmation",
+                            String.format("""
+                                            Dear %s,
+                                            
+                                            Your reservation for the book '%s' has been confirmed.
+                                            Reservation ID: %s
+                                            Borrow Date: %s
+                                            Due Date: %s
+                                            
+                                            Please pick up the book within 72 hours, otherwise reservation will be cancelled.
+                                            
+                                            Thank you for using our library service!
+                                            Best regards,
+                                            Library Team""",
+                                    waitingOrder.getUser().getUsername(),
+                                    book.getName(),
+                                    waitingOrder.getPublicId(),
+                                    waitingOrder.getBorrowDate().toLocalDate(),
+                                    waitingOrder.getDueDate().toLocalDate())
+                    );
+                } catch (Exception e) {
+                    logger.error("Failed to send confirmation email to {}: {}", user.getMail(), e.getMessage());
+                }
             }
             else {
                 book.setCurrentAmount(book.getCurrentAmount()+1);

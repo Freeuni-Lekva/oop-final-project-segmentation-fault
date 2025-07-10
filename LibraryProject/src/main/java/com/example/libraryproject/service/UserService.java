@@ -7,9 +7,9 @@ public interface UserService {
 
     boolean reviewBook(String username, String publicId, int rating, String comment);
 
-    ReservationResponse reserveBook(String username, String publicId, Long durationInDays);
+    ReservationResponse reserveBook(String username, String publicId, Long durationInDays) ;
 
-    boolean cancelReservation(String username, String publicId);
+    boolean cancelReservation(String username, String publicId) ;
 
     void changePassword(String username, String oldPassword, String newPassword);
 
