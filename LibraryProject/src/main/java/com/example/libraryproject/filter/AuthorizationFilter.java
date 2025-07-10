@@ -61,9 +61,8 @@ public class AuthorizationFilter implements Filter {
                 logger.info("Checking BOOKKEEPER permissions for username: {}", username);
                 authenticated = authorizationServiceImpl.checkBookkeeper(username);
                 logger.info("BOOKKEEPER authentication result: {}", authenticated);
-            } else {
-                authenticated = false;
             }
+
         } catch (IllegalArgumentException e) {
             logger.error("Invalid role in session: {}", roleObj, e);
             sendJsonError(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid role");

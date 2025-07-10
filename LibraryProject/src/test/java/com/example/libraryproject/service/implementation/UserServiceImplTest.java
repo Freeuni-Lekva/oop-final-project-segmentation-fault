@@ -90,21 +90,21 @@ public class UserServiceImplTest {
     @Test
     public void testReserve() {
         // Test successful reservation
-        assertDoesNotThrow(() -> userServiceImpl.reserveBook(user.getUsername(), book1.getPublicId()));
+        assertDoesNotThrow(() -> userServiceImpl.reserveBook(user.getUsername(), book1.getPublicId(), 2L));
 
         // Test reservation when book is not available
         book2.setCurrentAmount(0L);
         assertThrows(IllegalStateException.class,
-                () -> userServiceImpl.reserveBook(user.getUsername(), book2.getPublicId()));
+                () -> userServiceImpl.reserveBook(user.getUsername(), book2.getPublicId(), 2L));
 
         // Test reservation with non-existent user
         book2.setCurrentAmount(1L);
         assertThrows(IllegalArgumentException.class,
-                () -> userServiceImpl.reserveBook("nonexistent", book1.getPublicId()));
+                () -> userServiceImpl.reserveBook("nonexistent", book1.getPublicId(), 2L));
 
         // Test reservation with non-existent book
         assertThrows(IllegalArgumentException.class,
-                () -> userServiceImpl.reserveBook(user.getUsername(), "nonexistent"));
+                () -> userServiceImpl.reserveBook(user.getUsername(), "nonexistent", 2L));
     }
 
     @Test
