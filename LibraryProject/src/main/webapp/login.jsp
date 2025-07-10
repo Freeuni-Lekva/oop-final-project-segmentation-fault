@@ -48,15 +48,11 @@
   </form>
 
   <div class="signup-section">
-    <p>Not a member? <a href="#" onclick="showSignupOptions()">Sign up</a></p>
+    <p>Not a member? <a href="#" onclick="window.location.href='${pageContext.request.contextPath}/signup-user.jsp' ">Sign up</a></p>
     <small>
       By creating an account, you agree to the Freeuni Library's Terms of Service and Privacy Policy
     </small>
 
-    <div id="signup-options" style="display: none; margin-top: 1rem;">
-      <button onclick="window.location.href='${pageContext.request.contextPath}/signup-user.jsp'">Sign up as User</button>
-      <button onclick="window.location.href='${pageContext.request.contextPath}/signup-bookkeeper.jsp'">Sign up as Bookkeeper</button>
-    </div>
   </div>
 </div>
 

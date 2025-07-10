@@ -42,7 +42,7 @@
 
 <div class="login-box">
     <h2>
-        Sign Up as User
+        Sign Up
         <img src="images/cropped_circle_image.jpg" alt="owl" class="owl-icon">
     </h2>
 

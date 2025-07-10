@@ -1,6 +1,10 @@
 package com.example.libraryproject.servlet;
 
 import com.example.libraryproject.configuration.DBConnectionConfig;
+import com.example.libraryproject.model.dto.RegistrationRequest;
+import com.example.libraryproject.model.entity.User;
+import com.example.libraryproject.model.enums.Role;
+import com.example.libraryproject.model.enums.UserStatus;
 import com.example.libraryproject.repository.*;
 import com.example.libraryproject.service.*;
 import com.example.libraryproject.service.implementation.*;
@@ -29,8 +33,13 @@ public class ApplicationContextListener implements ServletContextListener {
             OrderRepository orderRepository = new OrderRepository(sessionFactory);
             ReviewRepository reviewRepository = new ReviewRepository(sessionFactory);
 
+            RegistrationRequest request = new RegistrationRequest("gmerti", "123", Role.BOOKKEEPER);
+
+
             AuthorizationService authorizationService = new AuthorizationServiceImpl(userRepository);
             event.getServletContext().setAttribute(AUTHORIZATION_SERVICE_ATTRIBUTE_NAME, authorizationService);
+
+            authorizationService.register(request);
 
             BookKeeperService bookKeeperService = new BookKeeperServiceImpl(bookRepository, userRepository, orderRepository, reviewRepository);
             event.getServletContext().setAttribute(BOOKKEEPER_SERVICE_ATTRIBUTE_NAME, bookKeeperService);
