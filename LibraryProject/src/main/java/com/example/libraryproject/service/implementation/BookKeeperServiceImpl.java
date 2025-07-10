@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -82,15 +83,15 @@ public class BookKeeperServiceImpl implements BookKeeperService {
         if (bookOptional.isEmpty()) {
             throw new IllegalArgumentException("Book not found");
         }
-        
+
         Book book = bookOptional.get();
-        
+
         // Check if there are any active orders for this book
         Set<Order> activeOrders = orderRepository.findOrdersByBookId(book.getId());
         long activeOrderCount = activeOrders.stream()
                 .filter(order -> order.getStatus() == OrderStatus.RESERVED || order.getStatus() == OrderStatus.BORROWED)
                 .count();
-        
+
         if (activeOrderCount > 0) {
             throw new IllegalStateException("Cannot delete book with active reservations or borrowed copies");
         }
@@ -114,7 +115,7 @@ public class BookKeeperServiceImpl implements BookKeeperService {
 
         order.setStatus(OrderStatus.BORROWED);
         orderRepository.update(order);
-        
+
         // Add book to borrowed books collection
         User user = order.getUser();
         Book book = order.getBook();
@@ -139,11 +140,15 @@ public class BookKeeperServiceImpl implements BookKeeperService {
     }
 
     public void returnBook(String orderPublicId) {
+
         Optional<Order> orderOptional = orderRepository.findByPublicId(orderPublicId);
+
         if (orderOptional.isEmpty()) {
             throw new IllegalArgumentException("Order not found");
         }
+
         Order order = orderOptional.get();
+
         if (order.getStatus() != OrderStatus.BORROWED) {
             logger.info("Attempted to mark order {} as RETURNED but it has status {}", orderPublicId, order.getStatus());
             throw new IllegalStateException("Invalid status: " + order.getStatus());
@@ -151,8 +156,8 @@ public class BookKeeperServiceImpl implements BookKeeperService {
 
         User user = order.getUser();
         Book book = order.getBook();
-        
-        logger.debug("Returning book: {} by user: {}, borrowed books count before: {}", 
+
+        logger.debug("Returning book: {} by user: {}, borrowed books count before: {}",
                 book.getName(), user.getUsername(), user.getBorrowedBooks().size());
 
         boolean removed = user.getBorrowedBooks().remove(book);
@@ -171,12 +176,35 @@ public class BookKeeperServiceImpl implements BookKeeperService {
                 logger.warn("Error adding book to read collection, but book removal from borrowed was successful: {}", e.getMessage());
             }
         }
-        
+
         logger.debug("Borrowed books count after removal: {}", user.getBorrowedBooks().size());
         orderRepository.delete(order);
 
-        book.setCurrentAmount(book.getCurrentAmount() + 1);
+        if (book.getCurrentAmount() == 0) {
+
+            Optional<Order> waitingOrderOptional = orderRepository.findFirstWaitingOrderByBookId(book.getId());
+            if (waitingOrderOptional.isPresent()) {
+                Order waitingOrder = waitingOrderOptional.get();
+                waitingOrder.setStatus(OrderStatus.RESERVED);
+                waitingOrder.setBorrowDate(LocalDateTime.now().plusDays(1));
+                waitingOrder.setDueDate(LocalDateTime.now().plusDays(1).plusDays(waitingOrder.getRequestedDurationInDays()));
+
+                orderRepository.update(waitingOrder);
+                logger.info("User {} canceled reservation for book {}, next user in waitlist has been reserved",
+                        user.getUsername(), book.getPublicId());
+            }
+
+            logger.info("User {} canceled reservation for book {}, no users in waitlist", user.getUsername(), book.getPublicId());
+
+        }
+        else {
+            book.setCurrentAmount(book.getCurrentAmount() + 1);
+        }
+        order.setStatus(OrderStatus.RETURNED);
+        orderRepository.update(order);
+
         bookRepository.update(book);
+
         logger.info("Book '{}' returned by user '{}', moved to read books and order deleted",
                 book.getName(), user.getUsername());
     }
@@ -191,11 +219,11 @@ public class BookKeeperServiceImpl implements BookKeeperService {
         if (user.getRole() == Role.BOOKKEEPER) {
             throw new IllegalArgumentException("Cannot ban a bookkeeper");
         }
-        
+
         if (user.getStatus() == UserStatus.BANNED) {
             throw new IllegalArgumentException("User is already banned");
         }
-        
+
         user.setStatus(UserStatus.BANNED);
         userRepository.update(user);
         try {
@@ -217,7 +245,7 @@ public class BookKeeperServiceImpl implements BookKeeperService {
 
     public void unbanUser(String username) {
         Optional<User> userOptional = userRepository.findByUsername(username);
-        if(userOptional.isEmpty()) {
+        if (userOptional.isEmpty()) {
             throw new IllegalArgumentException("User not found");
         }
         User user = userOptional.get();
@@ -225,11 +253,11 @@ public class BookKeeperServiceImpl implements BookKeeperService {
         if (user.getRole() == Role.BOOKKEEPER) {
             throw new IllegalArgumentException("Cannot unban a bookkeeper");
         }
-        
+
         if (user.getStatus() == UserStatus.ACTIVE) {
             throw new IllegalArgumentException("User is already unbanned");
         }
-        
+
         user.setStatus(UserStatus.ACTIVE);
         userRepository.update(user);
         try {
@@ -257,7 +285,7 @@ public class BookKeeperServiceImpl implements BookKeeperService {
         return usersWithStatus;
     }
 
-    public String downloadImage(Part filePart ) throws IOException  {
+    public String downloadImage(Part filePart) throws IOException {
         String submittedFileName = Path.of(filePart.getSubmittedFileName()).getFileName().toString();
         String safeFileName = submittedFileName.replaceAll("[^a-zA-Z0-9.\\-]", "_");
 

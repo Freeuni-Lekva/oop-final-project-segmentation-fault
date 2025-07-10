@@ -127,7 +127,8 @@ public class OrderRepository {
         Session session = sessionFactory.openSession();
 
         Set<Order> orders = Set.copyOf(session.createQuery(
-                        "SELECT o FROM Order o WHERE o.borrowDate > o.dueDate AND o.status = :status", Order.class)
+                        "SELECT o FROM Order o WHERE o.dueDate < :now  AND o.status = :status", Order.class)
+                .setParameter("now", LocalDateTime.now())
                 .setParameter("status", OrderStatus.BORROWED).
                 getResultList());
 
@@ -255,5 +256,21 @@ public class OrderRepository {
 
         session.close();
         return orderOptional.isPresent();
+    }
+
+    public Optional<Order> findFirstWaitingOrderByBookId(Long bookId) {
+
+        Session session = sessionFactory.openSession();
+
+        Optional<Order> order = Optional.ofNullable(session.createQuery(
+                        "SELECT o FROM Order o WHERE o.book.id = :bookId AND o.status = :status", Order.class)
+                .setParameter("bookId", bookId)
+                .setParameter("status", OrderStatus.WAITING)
+                .uniqueResult());
+
+        session.close();
+
+        return order;
+
     }
 }

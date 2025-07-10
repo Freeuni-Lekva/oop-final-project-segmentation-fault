@@ -92,11 +92,6 @@ public class UserServiceImplTest {
         // Test successful reservation
         assertDoesNotThrow(() -> userServiceImpl.reserveBook(user.getUsername(), book1.getPublicId(), 2L));
 
-        // Test reservation when book is not available
-        book2.setCurrentAmount(0L);
-        assertThrows(IllegalStateException.class,
-                () -> userServiceImpl.reserveBook(user.getUsername(), book2.getPublicId(), 2L));
-
         // Test reservation with non-existent user
         book2.setCurrentAmount(1L);
         assertThrows(IllegalArgumentException.class,
@@ -110,14 +105,15 @@ public class UserServiceImplTest {
     @Test
     public void testCancelReservation() {
         // Create a mock order
-        Order mockOrder = new Order(
-                UUID.randomUUID(),
-                LocalDateTime.now().plusDays(1),
-                LocalDateTime.now().plusDays(22),
-                OrderStatus.RESERVED,
-                user,
-                book1
-        );
+        Order mockOrder = Order.builder()
+                .publicId(UUID.randomUUID())
+                .borrowDate(LocalDateTime.now().plusDays(1))
+                .dueDate(LocalDateTime.now().plusDays(22))
+                .requestedDurationInDays(21L) // 22 - 1
+                .status(OrderStatus.RESERVED)
+                .user(user)
+                .book(book1)
+                .build();
 
         Set<Order> userOrders = new HashSet<>();
         userOrders.add(mockOrder);

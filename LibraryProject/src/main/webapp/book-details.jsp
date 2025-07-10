@@ -282,9 +282,12 @@
                     showReservationModal();
                 };
             } else {
-                reserveButtonText.textContent = 'Unavailable';
-                reserveButton.disabled = true;
-                reserveButton.onclick = null;
+                reserveButtonText.textContent = 'Reserve in Advance';
+                reserveButton.disabled = false;
+                reserveButton.onclick = function(e) {
+                    e.preventDefault();
+                    showReservationModal();
+                };
             }
         }
     }
