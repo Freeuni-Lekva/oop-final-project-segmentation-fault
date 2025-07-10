@@ -32,7 +32,7 @@ public class Order {
     @Column(name = "borrow_date")
     private LocalDateTime borrowDate;
 
-    @Column(name = "due_date", nullable = false)
+    @Column(name = "due_date")
     private LocalDateTime dueDate;
 
     @Column(name = "return_date")

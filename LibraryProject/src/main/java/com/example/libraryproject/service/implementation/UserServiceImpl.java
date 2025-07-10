@@ -9,6 +9,7 @@ import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.entity.Review;
 import com.example.libraryproject.model.entity.User;
 import com.example.libraryproject.model.enums.OrderStatus;
+import com.example.libraryproject.model.enums.ReservationResponse;
 import com.example.libraryproject.repository.BookRepository;
 import com.example.libraryproject.repository.OrderRepository;
 import com.example.libraryproject.repository.ReviewRepository;
@@ -135,7 +136,7 @@ public class UserServiceImpl implements UserService {
         logger.info("User {} changed bio successfully", username);
     }
 
-    public boolean reserveBook(String username, String bookPublicId, Long durationInDays) {
+    public ReservationResponse reserveBook(String username, String bookPublicId, Long durationInDays) {
         Optional<Book> optionalBook = bookRepository.findByPublicId(bookPublicId);
         if (optionalBook.isEmpty()) {
             logger.info("Book with publicId {} not found", bookPublicId);
@@ -164,14 +165,15 @@ public class UserServiceImpl implements UserService {
                 (order.getStatus() == OrderStatus.RESERVED ||
                         order.getStatus() == OrderStatus.BORROWED)
         );
+
         if (hasActiveOrder) {
             logger.info("User {} already has an active order for book {}", username, bookPublicId);
             throw new IllegalStateException("You already have this book reserved or borrowed");
         }
+
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime borrowDate = orderStatus == OrderStatus.RESERVED ? now.plusDays(1) : null;
-        LocalDateTime dueDate = orderStatus == OrderStatus.RESERVED ? borrowDate.plusDays(durationInDays) : null;
-
+        LocalDateTime dueDate = orderStatus == OrderStatus.RESERVED ? now.plusDays(1).plusDays(durationInDays) : null;
 
         Order order = Order.builder()
                 .publicId(UUID.randomUUID())
@@ -179,17 +181,24 @@ public class UserServiceImpl implements UserService {
                 .borrowDate(borrowDate)
                 .dueDate(dueDate)
                 .requestedDurationInDays(durationInDays)
-                .status(OrderStatus.RESERVED)
+                .status(orderStatus)
                 .user(user)
                 .book(book)
                 .build();
 
         // Decrease
-        book.setCurrentAmount(book.getCurrentAmount() - 1);
-        bookRepository.update(book);
+
+        if (orderStatus == OrderStatus.RESERVED) {
+            book.setCurrentAmount(book.getCurrentAmount() - 1);
+            bookRepository.update(book);
+            logger.info("User {} reserved book {} with order ID {}", username, bookPublicId, order.getPublicId());
+        }
+        else {
+            logger.info("User {} added to waitlist for book {} with order ID {}", username, bookPublicId, order.getPublicId());
+        }
+
         orderRepository.save(order);
-        logger.info("User {} reserved book {} with order ID {}", username, bookPublicId, order.getPublicId());
-        return true;
+        return orderStatus == OrderStatus.RESERVED ? ReservationResponse.RESERVED : ReservationResponse.WAITLISTED;
     }
 
     public boolean cancelReservation(String username, String publicId) {
@@ -235,6 +244,9 @@ public class UserServiceImpl implements UserService {
                 logger.info("User {} canceled reservation for book {}, next user in waitlist has been reserved", username, publicId);
 
             } else {
+                book.setCurrentAmount(book.getCurrentAmount() + 1);
+                bookRepository.update(book);
+
                 logger.info("User {} cancelled reservation for book {}, no users in waitlist", username, publicId);
             }
         } else {

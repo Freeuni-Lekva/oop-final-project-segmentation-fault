@@ -193,17 +193,21 @@ public class BookKeeperServiceImpl implements BookKeeperService {
                 logger.info("User {} canceled reservation for book {}, next user in waitlist has been reserved",
                         user.getUsername(), book.getPublicId());
             }
-
+            else {
+                book.setCurrentAmount(book.getCurrentAmount()+1);
+                bookRepository.update(book);
+            }
             logger.info("User {} canceled reservation for book {}, no users in waitlist", user.getUsername(), book.getPublicId());
 
         }
         else {
-            book.setCurrentAmount(book.getCurrentAmount() + 1);
+            book.setCurrentAmount(book.getCurrentAmount()+1);
+            bookRepository.update(book);
         }
+
         order.setStatus(OrderStatus.RETURNED);
         orderRepository.update(order);
 
-        bookRepository.update(book);
 
         logger.info("Book '{}' returned by user '{}', moved to read books and order deleted",
                 book.getName(), user.getUsername());

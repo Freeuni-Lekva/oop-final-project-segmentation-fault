@@ -479,7 +479,8 @@
             });
         })
         .then(data => {
-            alert('Book reserved successfully!');
+            console.log(data)
+            alert(data.message);
             updateReserveButtonState(true);
         })
         .catch(error => {
