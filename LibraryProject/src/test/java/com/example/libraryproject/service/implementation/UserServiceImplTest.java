@@ -5,6 +5,7 @@ import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.entity.User;
 import com.example.libraryproject.model.enums.OrderStatus;
 import com.example.libraryproject.repository.*;
+import com.example.libraryproject.service.MailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mindrot.jbcrypt.BCrypt;
@@ -25,6 +26,7 @@ public class UserServiceImplTest {
     private UserServiceImpl userServiceImpl;
     private BookRepository bookRepository;
     private OrderRepository orderRepository;
+    private final MailService mailService = mock(MailService.class);
     private User user;
 
     private Book book1, book2, book3;
@@ -35,7 +37,8 @@ public class UserServiceImplTest {
         reviewRepository = mock(ReviewRepository.class);
         bookRepository = mock(BookRepository.class);
         orderRepository = mock(OrderRepository.class);
-        userServiceImpl = new UserServiceImpl(userRepository, bookRepository, reviewRepository, orderRepository);
+
+        userServiceImpl = new UserServiceImpl(userRepository, bookRepository, reviewRepository, orderRepository, mailService);
 
         book1 = new Book(
                 "Shadow_Realms",
