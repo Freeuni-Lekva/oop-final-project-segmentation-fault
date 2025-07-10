@@ -44,9 +44,11 @@ public class TestReviewRepository {
         user = new User();
         user.setUsername("misha");
         user.setPassword("magaria");
+        user.setMail("misha@gmail.com");
         user2 = new User();
         user2.setUsername("kubdari");
         user2.setPassword("kubdari1234");
+        user2.setMail("kubdari@gmail.com");
 
         book1 = new Book("Dzalis_Gamogvidzeba","Dzalis Gamogvidzeba","Politics" , "Mikheil Saakashvili", LocalDate.now(), "A thrilling political fiction novel",
                 300L, 4L,  555L,4.0, "dzalisGamogvidzeba.jpg" );

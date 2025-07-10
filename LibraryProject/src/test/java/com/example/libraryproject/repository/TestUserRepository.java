@@ -45,6 +45,7 @@ public class TestUserRepository {
         User user = new User();
         user.setUsername("misha");
         user.setPassword("pass");
+        user.setMail("misha@gmail.com");
         userRepository.save(user);
 
         Optional<User> found = userRepository.findById(user.getId());
@@ -57,6 +58,7 @@ public class TestUserRepository {
         User user = new User();
         user.setUsername("original");
         user.setPassword("pass");
+        user.setMail("misha@gmail.com");
         userRepository.save(user);
 
         user.setUsername("updated");
@@ -73,6 +75,7 @@ public class TestUserRepository {
         User user = new User();
         user.setUsername("toDelete");
         user.setPassword("pass");
+        user.setMail("misha@gmail.com");
         userRepository.save(user);
 
         userRepository.delete(user);
@@ -87,6 +90,7 @@ public class TestUserRepository {
         User user = new User();
         user.setUsername("misha");
         user.setPassword("pass");
+        user.setMail("misha@gmail.com");
         userRepository.save(user);
 
         Optional<User> foundOptional = userRepository.findByUsername("misha");
@@ -101,11 +105,12 @@ public class TestUserRepository {
         User user1 = new User();
         user1.setUsername("misha");
         user1.setPassword("pass");
+        user1.setMail("misha@gmail.com");
 
         User user2 = new User();
         user2.setUsername("vano");
         user2.setPassword("pass");
-
+        user2.setMail("misha2@gmail.com");
         userRepository.save(user1);
         userRepository.save(user2);
 
@@ -130,7 +135,7 @@ public class TestUserRepository {
         borrowed.add(book1);
         borrowed.add(book2);
         user.setBorrowedBooks(borrowed);
-
+        user.setMail("misha@gmail.com");
         userRepository.save(user);
 
         Set<Book> foundBooks = userRepository.findBorrowedBooksByUserId(user.getId());
