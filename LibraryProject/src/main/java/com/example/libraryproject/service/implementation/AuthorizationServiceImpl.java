@@ -23,7 +23,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthorizationServiceImpl.class);
     private final UserRepository userRepository;
-    private final BookKeeperRepository bookKeeperRepository;
     private final MailService mailService;
 
     public void register(RegistrationRequest request) {

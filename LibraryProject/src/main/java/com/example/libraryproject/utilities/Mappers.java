@@ -132,7 +132,6 @@ public class Mappers {
                 currentlyReadingDTOs,
                 Collections.emptyList(), // Orders will be set by UserServiceImpl
                 readBookDTOs,
-                user.getStatus().name()
                 user.getStatus().name(),
                 user.getMail()
         );
