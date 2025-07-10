@@ -20,7 +20,7 @@
         position: relative;
         width: 100%;
         height: 230px;
-        background-image: url('images/image0.jpg');
+        background-image: url('${pageContext.request.contextPath}/images/image0.jpg');
         background-size: cover;
         background-position: center 75%;
         background-repeat: no-repeat;

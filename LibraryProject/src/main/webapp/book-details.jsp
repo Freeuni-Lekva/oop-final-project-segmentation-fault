@@ -788,111 +788,176 @@
     position: fixed;
     z-index: 2000;
     left: 0; top: 0; width: 100vw; height: 100vh;
-    background: rgba(30, 30, 40, 0.45);
+    background: rgba(30, 30, 40, 0.65);
+    backdrop-filter: blur(4px);
     justify-content: center;
     align-items: center;
-    transition: background 0.2s;
+    transition: all 0.3s ease;
 }
-.modal.show { display: flex !important; }
+
+.modal.show { 
+    display: flex !important;
+    animation: modalBackdropShow 0.3s ease;
+}
+
 .reservation-modal-content {
-    background: #fff;
-    color: #222;
-    font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
-    padding: 2.5rem 2rem 2rem 2rem;
-    border-radius: 18px;
-    box-shadow: 0 8px 32px rgba(30,30,60,0.18), 0 1.5px 6px rgba(0,0,0,0.08);
-    max-width: 350px;
+    background: linear-gradient(to bottom, #ffffff, #fefdf8);
+    color: #2d3748;
+    font-family: 'Poppins', sans-serif;
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow: 
+        0 10px 25px rgba(30,30,60,0.1),
+        0 6px 12px rgba(0,0,0,0.08),
+        0 0 0 1px rgba(255,255,255,0.1);
+    max-width: 400px;
     width: 90vw;
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    animation: modalFadeIn 0.25s;
+    transform: translateY(20px);
+    opacity: 0;
+    animation: modalContentShow 0.4s ease forwards;
 }
-@keyframes modalFadeIn {
-    from { transform: translateY(40px) scale(0.98); opacity: 0; }
-    to { transform: none; opacity: 1; }
+
+@keyframes modalBackdropShow {
+    from { background: rgba(30, 30, 40, 0); backdrop-filter: blur(0px); }
+    to { background: rgba(30, 30, 40, 0.65); backdrop-filter: blur(4px); }
 }
+
+@keyframes modalContentShow {
+    to { transform: translateY(0); opacity: 1; }
+}
+
 .close-modal-btn {
     position: absolute;
-    right: 18px;
-    top: 14px;
-    background: none;
+    right: 20px;
+    top: 20px;
+    background: #f7f5f2;
     border: none;
-    font-size: 2rem;
-    color: #888;
+    width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    font-size: 20px;
+    color: #8b7355;
     cursor: pointer;
-    transition: color 0.15s;
-    z-index: 1;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+
 .close-modal-btn:hover {
+    background: #f2ede6;
     color: #d32f2f;
+    transform: rotate(90deg);
 }
+
 .modal-title {
-    font-size: 1.35rem;
+    font-size: 1.5rem;
     font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: #2a2a2a;
-    letter-spacing: 0.01em;
+    margin-bottom: 1rem;
+    color: #5a4d25;
+    letter-spacing: -0.01em;
 }
+
 .modal-desc {
     font-size: 1rem;
-    margin-bottom: 1.2rem;
-    color: #444;
+    margin-bottom: 1.5rem;
+    color: #718096;
     text-align: center;
+    line-height: 1.5;
 }
+
 .modal-input {
-    width: 80px;
-    padding: 0.5rem 0.7rem;
+    width: 100px;
+    padding: 0.75rem 1rem;
     font-size: 1.1rem;
-    border: 1.5px solid #bdbdbd;
-    border-radius: 8px;
+    border: 2px solid #e6cb58;
+    border-radius: 12px;
     outline: none;
-    margin-bottom: 1.3rem;
+    margin-bottom: 1.5rem;
     text-align: center;
-    transition: border 0.15s;
+    transition: all 0.2s ease;
+    background: #fefdf8;
+    color: #5a4d25;
+    font-family: 'Poppins', sans-serif;
 }
+
 .modal-input:focus {
-    border-color: #1976d2;
+    border-color: #f5c45e;
+    box-shadow: 0 0 0 3px rgba(245, 196, 94, 0.15);
+    background: #ffffff;
 }
+
+.modal-input::-webkit-inner-spin-button,
+.modal-input::-webkit-outer-spin-button {
+    opacity: 1;
+    height: 24px;
+}
+
 .modal-actions {
     display: flex;
-    gap: 0.7rem;
+    gap: 1rem;
     width: 100%;
     justify-content: center;
 }
+
 .modal-btn {
-    padding: 0.5rem 1.3rem;
-    border-radius: 7px;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
     border: none;
     font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
-    transition: background 0.15s, color 0.15s, box-shadow 0.15s;
-    box-shadow: 0 1px 3px rgba(30,30,60,0.07);
+    transition: all 0.2s ease;
+    font-family: 'Poppins', sans-serif;
 }
+
 .confirm-btn {
-    background: #1976d2;
-    color: #fff;
+    background: linear-gradient(135deg, #F5C45E 0%, #E8B850 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(245, 196, 94, 0.3);
 }
-.confirm-btn:hover, .confirm-btn:focus {
-    background: #1256a3;
+
+.confirm-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(245, 196, 94, 0.4);
+    background: linear-gradient(135deg, #E8B850 0%, #DBAC48 100%);
 }
+
+.confirm-btn:active {
+    transform: translateY(0);
+}
+
 .cancel-btn {
-    background: #f5f5f5;
-    color: #444;
+    background: #f7f5f2;
+    color: #8b7355;
+    border: 1px solid #e6cb58;
 }
-.cancel-btn:hover, .cancel-btn:focus {
-    background: #e0e0e0;
+
+.cancel-btn:hover {
+    background: #f2ede6;
     color: #d32f2f;
+    border-color: #d32f2f;
 }
+
 @media (max-width: 500px) {
     .reservation-modal-content {
-        padding: 1.2rem 0.7rem 1.2rem 0.7rem;
+        padding: 2rem 1.5rem;
         max-width: 95vw;
     }
-    .modal-title { font-size: 1.1rem; }
-    .modal-input { font-size: 1rem; }
+    .modal-title { 
+        font-size: 1.25rem; 
+    }
+    .modal-desc {
+        font-size: 0.95rem;
+    }
+    .modal-btn {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.95rem;
+    }
 }
 </style>
 </body>

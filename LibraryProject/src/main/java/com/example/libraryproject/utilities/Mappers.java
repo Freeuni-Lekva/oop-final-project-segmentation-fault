@@ -10,12 +10,14 @@ import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.entity.Review;
 import com.example.libraryproject.model.entity.User;
+import com.example.libraryproject.model.enums.OrderStatus;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Collections;
 
 import java.util.stream.Collectors;
 
@@ -105,6 +107,21 @@ public class Mappers {
                         book.getDate() != null ? book.getDate().toString() : ""))
                 .collect(Collectors.toList());
 
+        List<BookDTO> readBookDTOs = user.getReadBooks().stream()
+                .map(book -> new BookDTO(
+                        book.getPublicId() != null ? book.getPublicId() : "",
+                        book.getName() != null ? book.getName() : "Unknown Book",
+                        book.getDescription() != null ? book.getDescription() : "",
+                        book.getGenre() != null ? book.getGenre() : "Unknown",
+                        book.getAuthor() != null ? book.getAuthor() : "Unknown Author",
+                        book.getImageUrl() != null ? book.getImageUrl() : "",
+                        book.getTotalAmount() != null ? book.getTotalAmount() : 0L,
+                        book.getCurrentAmount() != null ? book.getCurrentAmount() : 0L,
+                        book.getVolume() != null ? book.getVolume() : 0L,
+                        book.getRating() != null ? book.getRating() : 0.0,
+                        book.getDate() != null ? book.getDate().toString() : ""))
+                .collect(Collectors.toList());
+
         return new UserDTO(
                 user.getUsername(),
                 user.getBio(),
@@ -112,6 +129,8 @@ public class Mappers {
                 reviewDTOs.size(),
                 reviewDTOs,
                 currentlyReadingDTOs,
+                Collections.emptyList(), // Orders will be set by UserServiceImpl
+                readBookDTOs,
                 user.getStatus().name()
         );
     }
@@ -160,10 +179,7 @@ public class Mappers {
         String orderPublicId = order.getPublicId() != null ? order.getPublicId().toString() : "";
         String username = order.getUser() != null && order.getUser().getUsername() != null
                 ? order.getUser().getUsername() : "Unknown";
-        String bookTitle = order.getBook() != null && order.getBook().getName() != null
-                ? order.getBook().getName() : "Unknown Book";
-        String bookPublicId = order.getBook() != null && order.getBook().getPublicId() != null
-                ? order.getBook().getPublicId() : "";
+        BookDTO bookDTO = order.getBook() != null ? mapBookToDTO(order.getBook()) : null;
         String status = order.getStatus() != null ? order.getStatus().toString() : "UNKNOWN";
 
         String reservedDate = order.getCreateDate() != null ? order.getCreateDate().toString() : "";
@@ -176,8 +192,7 @@ public class Mappers {
         return new OrderDTO(
                 orderPublicId,
                 username,
-                bookTitle,
-                bookPublicId,
+                bookDTO,
                 status,
                 reservedDate,
                 dueDate,
