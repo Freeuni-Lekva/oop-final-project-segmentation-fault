@@ -49,8 +49,15 @@ public class ProfileViewServlet extends HttpServlet {
         }
 
         if (segments.length == 2) {
-            // Just /user/username - forward to profile view
-            req.getRequestDispatcher("/profile.html").forward(req, resp);
+            // Check if there's a view parameter for grid view
+            String viewParam = req.getParameter("view");
+            if ("grid".equals(viewParam)) {
+                // Grid view requested - forward to my-books view
+                req.getRequestDispatcher("/my-books.jsp").forward(req, resp);
+            } else {
+                // Just /user/username - forward to profile view
+                req.getRequestDispatcher("/profile.html").forward(req, resp);
+            }
         } else if (segments.length >= 3 && "my-books".equals(segments[2])) {
             // /user/username/my-books - forward to my-books view
             req.getRequestDispatcher("/my-books.jsp").forward(req, resp);

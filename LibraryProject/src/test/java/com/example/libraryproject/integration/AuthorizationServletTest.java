@@ -3,7 +3,10 @@ package com.example.libraryproject.integration;
 import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.model.enums.UserStatus;
 import com.example.libraryproject.repository.UserRepository;
+import com.example.libraryproject.repository.AccountActivationRepository;
 import com.example.libraryproject.service.MailService;
+import com.example.libraryproject.service.AccountActivationService;
+import com.example.libraryproject.service.implementation.AccountActivationServiceImpl;
 import com.example.libraryproject.servlet.AuthorizationServlet;
 import com.example.libraryproject.service.implementation.AuthorizationServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,8 +70,15 @@ public class AuthorizationServletTest {
 
 
             UserRepository userRepository = new UserRepository(sessionFactory);
+            AccountActivationRepository accountActivationRepository = new AccountActivationRepository(sessionFactory);
 
             MailService mailService = Mockito.mock(MailService.class);
+            
+            AccountActivationService accountActivationService = new AccountActivationServiceImpl(
+                accountActivationRepository, 
+                userRepository, 
+                mailService
+            );
 
             AuthorizationServiceImpl authorizationService = new AuthorizationServiceImpl(userRepository, mailService);
 
@@ -77,6 +87,7 @@ public class AuthorizationServletTest {
 
             context.setAttribute(ApplicationProperties.OBJECT_MAPPER_ATTRIBUTE_NAME, objectMapper);
             context.setAttribute(ApplicationProperties.AUTHORIZATION_SERVICE_ATTRIBUTE_NAME, authorizationService);
+            context.setAttribute(ApplicationProperties.ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME, accountActivationService);
             context.setAttribute("sessionFactory", sessionFactory);
 
             server.setHandler(context);
@@ -121,6 +132,7 @@ public class AuthorizationServletTest {
         logger.info("Setting up test case...");
         cleanDatabase();
         registerTestUser();
+        activateTestUser(); // Activate the user after registration
     }
 
     private void cleanDatabase() {
@@ -162,6 +174,12 @@ public class AuthorizationServletTest {
             throw new RuntimeException("Failed to register test user: " + response.body());
         }
         logger.info("Test user registered successfully");
+    }
+
+    private void activateTestUser() {
+        logger.info("Activating test user...");
+        updateUserStatus(TEST_USERNAME, UserStatus.ACTIVE);
+        logger.info("Test user activated successfully");
     }
 
     @Test
@@ -215,7 +233,7 @@ public class AuthorizationServletTest {
         logger.info("Sending login request...");
         HttpResponse<String> response = httpClient.send(request,
                 HttpResponse.BodyHandlers.ofString());
-
+        
         logger.info("Login response: {} - {}", response.statusCode(), response.body());
         assertEquals(200, response.statusCode(), "Valid login should succeed with status 200");
 
@@ -395,8 +413,11 @@ public class AuthorizationServletTest {
         
         logger.info("Registration response: {} - {}", response.statusCode(), response.body());
         assertEquals(201, response.statusCode(), "Bookkeeper registration should succeed");
-        assertTrue(response.body().contains("\"/bookkeeper-admin.jsp\""),
-                "Response should contain bookkeeper-specific redirect path");
+        assertTrue(response.body().contains("registration-success.jsp"),
+                "Response should contain registration success redirect");
+
+        // Activate the bookkeeper before attempting login
+        updateUserStatus("bookkeeper1", UserStatus.ACTIVE);
 
         String loginPayload = """
             {
@@ -413,6 +434,7 @@ public class AuthorizationServletTest {
 
         HttpResponse<String> loginResponse = httpClient.send(loginRequest, HttpResponse.BodyHandlers.ofString());
         
+        logger.info("Bookkeeper login response: {} - {}", loginResponse.statusCode(), loginResponse.body());
         assertEquals(200, loginResponse.statusCode(), "Bookkeeper login should succeed");
         assertTrue(loginResponse.body().contains("\"/bookkeeper-admin.jsp\""),
                 "Login response should contain bookkeeper-specific redirect path");
@@ -457,11 +479,9 @@ public class AuthorizationServletTest {
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         
-        logger.info("Login response: {} - {}", response.statusCode(), response.body());
-        assertEquals(200, response.statusCode(), "Banned user should still be able to login");
-        assertTrue(response.body().contains("\"message\":\"Login successful\""),
-                "Response should indicate successful login");
-        assertTrue(response.body().contains("\"redirect\":\"/main-page.jsp\""),
-                "Response should contain correct redirect path");
+        logger.info("Banned user login response: {} - {}", response.statusCode(), response.body());
+        assertEquals(401, response.statusCode(), "Banned user login should fail with 401");
+        assertTrue(response.body().contains("Your account has been banned"),
+                "Response should indicate account is banned");
     }
 }
