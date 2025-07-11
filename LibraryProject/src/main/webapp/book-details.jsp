@@ -698,27 +698,27 @@
                 })
                     .then(response => {
                         return response.json().then(data => {
-                            if (!response.ok) {
+                        if (!response.ok) {
                                 throw new Error(data.message || 'Failed to submit review');
-                            }
+                        }
                             return data;
                         });
                     })
                     .then(data => {
                         if (data.success) {
-                            alert('Review submitted successfully!');
-                            document.getElementById('reviewForm').classList.remove('show');
-                            this.reset();
-                            // Reset star rating
-                            document.querySelectorAll('.star').forEach(star => {
-                                star.classList.remove('filled');
-                            });
-                            document.getElementById('selectedRating').value = '';
-                            document.getElementById('ratingText').textContent = 'Click to rate';
-                            document.getElementById('ratingText').classList.remove('selected');
-                            
-                            // Instantly refresh rating and reviews without loading states
-                            refreshBookRatingAndReviews();
+                        alert('Review submitted successfully!');
+                        document.getElementById('reviewForm').classList.remove('show');
+                        this.reset();
+                        // Reset star rating
+                        document.querySelectorAll('.star').forEach(star => {
+                            star.classList.remove('filled');
+                        });
+                        document.getElementById('selectedRating').value = '';
+                        document.getElementById('ratingText').textContent = 'Click to rate';
+                        document.getElementById('ratingText').classList.remove('selected');
+                        
+                        // Instantly refresh rating and reviews without loading states
+                        refreshBookRatingAndReviews();
                         } else {
                             throw new Error(data.message || 'Failed to submit review');
                         }

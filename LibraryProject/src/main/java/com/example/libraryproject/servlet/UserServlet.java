@@ -2,7 +2,6 @@ package com.example.libraryproject.servlet;
 
 import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.model.dto.UserDTO;
-import com.example.libraryproject.model.enums.ReservationResponse;
 import com.example.libraryproject.service.UserService;
 import com.example.libraryproject.service.implementation.UserServiceImpl;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -160,13 +159,8 @@ public class UserServlet extends HttpServlet {
         try {
             String bookId = jsonNode.get("bookId").asText();
             Long duration = jsonNode.get("duration").asLong();
-            ReservationResponse resp = userService.reserveBook(username, bookId, duration);
-
-            String message = resp == ReservationResponse.RESERVED
-                    ? "Book reserved successfully"
-                    : "You have been added to the waitlist for this book";
-
-            response.getWriter().write("{\"success\": true, \"message\": \"" + message + "\"}");
+            userService.reserveBook(username, bookId, duration);
+            response.getWriter().write("{\"success\": true, \"message\": \"Book reserved successfully\"}");
         } catch (IllegalStateException | IllegalArgumentException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"success\": false, \"message\": \"" + e.getMessage() + "\"}");
@@ -180,9 +174,11 @@ public class UserServlet extends HttpServlet {
                                          UserService userService, HttpServletResponse response) throws IOException {
         try {
             String bookId = jsonNode.get("bookId").asText();
-
             userService.cancelReservation(username, bookId);
-
+            response.getWriter().write("{\"success\": true, \"message\": \"Reservation canceled successfully\"}");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"success\": false, \"message\": \"" + e.getMessage() + "\"}");
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write("{\"success\": false, \"message\": \"Server error: " + e.getMessage() + "\"}");

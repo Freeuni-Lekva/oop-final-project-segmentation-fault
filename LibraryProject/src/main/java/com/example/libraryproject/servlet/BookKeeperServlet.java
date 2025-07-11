@@ -253,16 +253,11 @@ public class BookKeeperServlet extends HttpServlet {
 
     private void handleAddBook(HttpServletRequest req, HttpServletResponse response, BookKeeperService bookKeeperService) throws IOException {
         try {
-            // Log incoming request
-            System.out.println("=== ADD BOOK REQUEST STARTED ===");
-            
-            // Read and log the raw JSON
+            // Read the request body
             String requestBody = req.getReader().lines().collect(java.util.stream.Collectors.joining("\n"));
-            System.out.println("Raw request body: " + requestBody);
             
             // Parse the request
             JsonNode jsonNode = objectMapper.readTree(requestBody);
-            System.out.println("Parsed JSON: " + jsonNode.toString());
             
             // Extract and validate fields
             String title = jsonNode.has("title") ? jsonNode.get("title").asText() : null;
@@ -274,18 +269,15 @@ public class BookKeeperServlet extends HttpServlet {
             String publicationDate = jsonNode.has("publicationDate") ? jsonNode.get("publicationDate").asText() : null;
             String imageUrl = jsonNode.has("imageUrl") ? jsonNode.get("imageUrl").asText() : null;
             
-            System.out.println("Extracted fields - Title: " + title + ", Author: " + author + ", Genre: " + genre + 
-                             ", Volume: " + volumeStr + ", Copies: " + copies + ", Date: " + publicationDate + ", ImageUrl: " + imageUrl);
-            
             // Validate required fields
             if (title == null || title.trim().isEmpty()) {
-                throw new IllegalArgumentException("Title is required to add a new book.");
-            }
-            
+            throw new IllegalArgumentException("Title is required to add a new book.");
+        }
+        
             if (author == null || author.trim().isEmpty()) {
-                throw new IllegalArgumentException("Author is required to add a new book.");
-            }
-            
+            throw new IllegalArgumentException("Author is required to add a new book.");
+        }
+
             if (genre == null || genre.trim().isEmpty()) {
                 throw new IllegalArgumentException("Genre is required to add a new book.");
             }
@@ -293,8 +285,6 @@ public class BookKeeperServlet extends HttpServlet {
             if (publicationDate == null || publicationDate.trim().isEmpty()) {
                 throw new IllegalArgumentException("Publication date is required to add a new book.");
             }
-            
-            System.out.println("Volume string received: " + volumeStr);
             
             // Create the request object
             BookAdditionRequest request = new BookAdditionRequest(
@@ -308,21 +298,15 @@ public class BookKeeperServlet extends HttpServlet {
                 imageUrl != null ? imageUrl.trim() : null
             );
             
-            System.out.println("Created BookAdditionRequest: " + request.toString());
-            
             // Call the service
-            bookKeeperService.addBook(request);
-            
-            System.out.println("Book added successfully!");
+        bookKeeperService.addBook(request);
             
             // Return success response
-            response.setStatus(HttpServletResponse.SC_OK);
-            Map<String, String> responseMap = new HashMap<>();
-            responseMap.put("status", "success");
-            responseMap.put("message", "Book successfully added to library");
-            objectMapper.writeValue(response.getWriter(), responseMap);
-            
-            System.out.println("=== ADD BOOK REQUEST COMPLETED SUCCESSFULLY ===");
+        response.setStatus(HttpServletResponse.SC_OK);
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("status", "success");
+        responseMap.put("message", "Book successfully added to library");
+        objectMapper.writeValue(response.getWriter(), responseMap);
             
         } catch (IllegalArgumentException e) {
             System.err.println("Validation error in add book: " + e.getMessage());

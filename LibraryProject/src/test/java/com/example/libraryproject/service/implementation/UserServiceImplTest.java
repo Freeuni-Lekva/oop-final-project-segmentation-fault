@@ -5,7 +5,6 @@ import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.entity.User;
 import com.example.libraryproject.model.enums.OrderStatus;
 import com.example.libraryproject.repository.*;
-import com.example.libraryproject.service.MailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mindrot.jbcrypt.BCrypt;
@@ -26,7 +25,6 @@ public class UserServiceImplTest {
     private UserServiceImpl userServiceImpl;
     private BookRepository bookRepository;
     private OrderRepository orderRepository;
-    private final MailService mailService = mock(MailService.class);
     private User user;
 
     private Book book1, book2, book3;
@@ -37,8 +35,7 @@ public class UserServiceImplTest {
         reviewRepository = mock(ReviewRepository.class);
         bookRepository = mock(BookRepository.class);
         orderRepository = mock(OrderRepository.class);
-
-        userServiceImpl = new UserServiceImpl(userRepository, bookRepository, reviewRepository, orderRepository, mailService);
+        userServiceImpl = new UserServiceImpl(userRepository, bookRepository, reviewRepository, orderRepository);
 
         book1 = new Book(
                 "Shadow_Realms",
@@ -95,6 +92,11 @@ public class UserServiceImplTest {
         // Test successful reservation
         assertDoesNotThrow(() -> userServiceImpl.reserveBook(user.getUsername(), book1.getPublicId(), 2L));
 
+        // Test reservation when book is not available
+        book2.setCurrentAmount(0L);
+        assertThrows(IllegalStateException.class,
+                () -> userServiceImpl.reserveBook(user.getUsername(), book2.getPublicId(), 2L));
+
         // Test reservation with non-existent user
         book2.setCurrentAmount(1L);
         assertThrows(IllegalArgumentException.class,
@@ -108,15 +110,14 @@ public class UserServiceImplTest {
     @Test
     public void testCancelReservation() {
         // Create a mock order
-        Order mockOrder = Order.builder()
-                .publicId(UUID.randomUUID())
-                .borrowDate(LocalDateTime.now().plusDays(1))
-                .dueDate(LocalDateTime.now().plusDays(22))
-                .requestedDurationInDays(21L) // 22 - 1
-                .status(OrderStatus.RESERVED)
-                .user(user)
-                .book(book1)
-                .build();
+        Order mockOrder = new Order(
+                UUID.randomUUID(),
+                LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(22),
+                OrderStatus.RESERVED,
+                user,
+                book1
+        );
 
         Set<Order> userOrders = new HashSet<>();
         userOrders.add(mockOrder);
@@ -135,11 +136,11 @@ public class UserServiceImplTest {
                 () -> userServiceImpl.cancelReservation(user.getUsername(), book3.getPublicId()));
 
         // Test cancellation with non-existent user
-        assertThrows(IllegalStateException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> userServiceImpl.cancelReservation("nonexistent", book1.getPublicId()));
 
         // Test cancellation with non-existent book
-        assertThrows(IllegalStateException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> userServiceImpl.cancelReservation(user.getUsername(), "nonexistent"));
     }
 
@@ -164,22 +165,21 @@ public class UserServiceImplTest {
         Set<Book> updatedReadBooks = new HashSet<>(user.getReadBooks());
         updatedReadBooks.add(book1);
         user.setReadBooks(updatedReadBooks);
+        user.setBorrowedBooks(new HashSet<>());
 
         // Test review for book not read by user
         assertThrows(IllegalStateException.class,
-                () -> userServiceImpl.reviewBook(user.getUsername(), book2.getPublicId(), 4, "good"));
+                () -> userServiceImpl.reviewBook(user.getUsername(), book2.getPublicId(), 5, "Excellent!"));
 
         // Test successful review for read book
-        assertDoesNotThrow(() -> userServiceImpl.reviewBook(user.getUsername(), book1.getPublicId(), 4, "good"));
+        assertDoesNotThrow(() -> userServiceImpl.reviewBook(user.getUsername(), book1.getPublicId(), 4, "Good"));
 
         // Test review with non-existent user
         assertThrows(IllegalStateException.class,
-                () -> userServiceImpl.reviewBook("nonexistent", book1.getPublicId(), 4, "good"));
-
+                () -> userServiceImpl.reviewBook("nonexistent", book1.getPublicId(), 4, "Good"));
         // Test review with non-existent book
         assertThrows(IllegalStateException.class,
-                () -> userServiceImpl.reviewBook(user.getUsername(), "nonexistent", 4, "good"));
-
+                () -> userServiceImpl.reviewBook(user.getUsername(), "nonexistent", 4, "Good"));
         // Verify that bookRepository.update was called to update the book's rating
         verify(bookRepository, atLeastOnce()).update(any(Book.class));
     }

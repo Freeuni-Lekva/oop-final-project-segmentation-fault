@@ -29,7 +29,6 @@ document.getElementById('banUserBtn').addEventListener('click', function () {
   })
           .then(function (response) {
             return response.json().then(data => {
-              console.log('Ban response:', response.status, data);
               return {
                 ok: response.ok,
                 data: data
@@ -105,7 +104,6 @@ document.getElementById('unbanUserBtn').addEventListener('click', function () {
   })
           .then(function (response) {
             return response.json().then(data => {
-              console.log('Unban response:', response.status, data);
               return {
                 ok: response.ok,
                 data: data

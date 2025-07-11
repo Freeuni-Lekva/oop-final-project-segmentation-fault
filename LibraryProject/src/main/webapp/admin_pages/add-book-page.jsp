@@ -37,14 +37,14 @@
     <form id="addBookForm" enctype="multipart/form-data">
       
       <!-- Primary Book Information -->
-      <div class="form-grid">
-        <div class="form-group">
+    <div class="form-grid">
+      <div class="form-group">
           <label for="title">Title *</label>
           <input type="text" id="title" name="title" placeholder="Book title" required>
-        </div>
+      </div>
         
-        <div class="form-group">
-          <label for="author">Author *</label>
+      <div class="form-group">
+        <label for="author">Author *</label>
           <input type="text" id="author" name="author" placeholder="Author name" required>
         </div>
         
@@ -56,9 +56,9 @@
         <div class="form-group">
           <label for="volume">Pages</label>
           <input type="number" id="volume" name="volume" placeholder="Number of pages" min="1" value="1" step="1">
-        </div>
+      </div>
         
-        <div class="form-group">
+      <div class="form-group">
           <label for="genre">Genre *</label>
           <select id="genre" name="genre" required>
             <option value="">Choose a genre</option>
@@ -79,10 +79,10 @@
             <option value="art">Art</option>
             <option value="religion">Religion</option>
             <option value="politics">Politics</option>
-          </select>
-        </div>
+        </select>
+      </div>
         
-        <div class="form-group">
+      <div class="form-group">
           <label for="publicationDate">Release Date *</label>
           <input type="date" id="publicationDate" name="publicationDate" required>
         </div>
@@ -106,27 +106,27 @@
               </svg>
               <div class="file-upload-text">Upload Book Cover</div>
               <div class="file-upload-subtext">JPG, PNG up to 5MB</div>
-            </div>
-          </div>
+      </div>
+    </div>
           <div class="file-preview" id="imagePreview" style="display: none;">
             <img id="imagePreviewImg" src="" alt="Preview" style="max-width: 100px; max-height: 150px; border-radius: 4px;">
-            <div class="file-preview-name" id="imagePreviewName"></div>
-          </div>
-        </div>
+        <div class="file-preview-name" id="imagePreviewName"></div>
+      </div>
+    </div>
       </div>
 
       <!-- Submit Button -->
-      <div class="action-buttons">
-        <button type="submit" class="btn" id="addBookBtn">
-          <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-          </svg>
+    <div class="action-buttons">
+      <button type="submit" class="btn" id="addBookBtn">
+        <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+        </svg>
           Add Book to Collection
-        </button>
-      </div>
+      </button>
+    </div>
       
       <!-- Message Area -->
-      <div id="addBookMessage" class="message-area" style="display: none;"></div>
-    </form>
+    <div id="addBookMessage" class="message-area" style="display: none;"></div>
+  </form>
   </div>
 </div> 

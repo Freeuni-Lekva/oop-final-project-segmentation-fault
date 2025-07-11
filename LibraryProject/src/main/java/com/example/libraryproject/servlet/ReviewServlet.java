@@ -85,12 +85,10 @@ public class ReviewServlet extends HttpServlet {
 
             try {
                 userService.reviewBook(username, bookId, rating, reviewText);
-                
-                // Return success response
+                // Success response
                 response.setStatus(HttpServletResponse.SC_OK);
                 response.getWriter().write("{\"success\": true, \"message\": \"Review submitted successfully\"}");
                 return;
-
             } catch (IllegalStateException e) {
                 // Handle specific validation errors with proper messages
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
