@@ -71,6 +71,7 @@ public class AuthorizationServiceImplTest {
         user.setUsername("user1");
         user.setPassword(hashedPassword);
         user.setRole(Role.USER);
+        user.setStatus(UserStatus.ACTIVE); // Set status to ACTIVE for successful login
 
         when(userRepository.findByUsername("user1")).thenReturn(Optional.of(user));
 
@@ -88,6 +89,7 @@ public class AuthorizationServiceImplTest {
         user.setUsername("keeper1");
         user.setPassword(hashedPassword);
         user.setRole(Role.BOOKKEEPER);
+        user.setStatus(UserStatus.ACTIVE); // Set status to ACTIVE for successful login
 
         when(userRepository.findByUsername("keeper1")).thenReturn(Optional.of(user));
 
@@ -104,6 +106,7 @@ public class AuthorizationServiceImplTest {
         User user = new User();
         user.setUsername("user1");
         user.setPassword(hashedPassword);
+        user.setStatus(UserStatus.ACTIVE); // Set status to ACTIVE so test fails on password, not status
 
         when(userRepository.findByUsername("user1")).thenReturn(Optional.of(user));
 
@@ -177,5 +180,59 @@ public class AuthorizationServiceImplTest {
 
         assertFalse(result);
         verify(userRepository).findByUsernameAndRole("nonexistent", Role.USER);
+    }
+
+    @Test
+    void testLogin_Failure_InactiveUser() {
+        String hashedPassword = BCrypt.hashpw("secret", BCrypt.gensalt());
+        User user = new User();
+        user.setUsername("inactive");
+        user.setPassword(hashedPassword);
+        user.setRole(Role.USER);
+        user.setStatus(UserStatus.INACTIVE);
+
+        when(userRepository.findByUsername("inactive")).thenReturn(Optional.of(user));
+
+        LoginRequest request = new LoginRequest("inactive", "secret");
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+            () -> authorizationServiceImpl.login(request));
+        assertEquals("Your account is not activated yet. Please check your email for the activation link.", ex.getMessage());
+    }
+
+    @Test
+    void testLogin_Failure_BannedUser() {
+        String hashedPassword = BCrypt.hashpw("secret", BCrypt.gensalt());
+        User user = new User();
+        user.setUsername("banned");
+        user.setPassword(hashedPassword);
+        user.setRole(Role.USER);
+        user.setStatus(UserStatus.BANNED);
+
+        when(userRepository.findByUsername("banned")).thenReturn(Optional.of(user));
+
+        LoginRequest request = new LoginRequest("banned", "secret");
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+            () -> authorizationServiceImpl.login(request));
+        assertEquals("Your account has been banned. Please contact support.", ex.getMessage());
+    }
+
+    @Test
+    void testLogin_Failure_ClosedUser() {
+        String hashedPassword = BCrypt.hashpw("secret", BCrypt.gensalt());
+        User user = new User();
+        user.setUsername("closed");
+        user.setPassword(hashedPassword);
+        user.setRole(Role.USER);
+        user.setStatus(UserStatus.CLOSED);
+
+        when(userRepository.findByUsername("closed")).thenReturn(Optional.of(user));
+
+        LoginRequest request = new LoginRequest("closed", "secret");
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+            () -> authorizationServiceImpl.login(request));
+        assertEquals("Your account has been closed. Please contact support.", ex.getMessage());
     }
 }
