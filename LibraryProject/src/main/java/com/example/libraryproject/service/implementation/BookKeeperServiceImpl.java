@@ -285,6 +285,7 @@ public class BookKeeperServiceImpl implements BookKeeperService {
         }
 
         order.setStatus(OrderStatus.RETURNED);
+        order.setReturnDate(LocalDateTime.now());
         orderRepository.update(order);
 
 
