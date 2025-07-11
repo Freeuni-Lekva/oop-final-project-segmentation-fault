@@ -27,14 +27,17 @@ public class AuthorizationServlet extends HttpServlet {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthorizationServlet.class);
 
+    private static final String AUTHORIZATION_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.authorization-service");
+    private static final String OBJECT_MAPPER_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.object-mapper");
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         ObjectMapper objectMapper = (ObjectMapper) request.getServletContext()
-                .getAttribute(ApplicationProperties.OBJECT_MAPPER_ATTRIBUTE_NAME);
+                .getAttribute(OBJECT_MAPPER_ATTRIBUTE_NAME);
 
         AuthorizationService authorizationService = (AuthorizationServiceImpl) request.getServletContext()
-                .getAttribute(ApplicationProperties.AUTHORIZATION_SERVICE_ATTRIBUTE_NAME);
+                .getAttribute(AUTHORIZATION_SERVICE_ATTRIBUTE_NAME);
 
         AccountActivationService accountActivationService = (AccountActivationService) request.getServletContext()
                 .getAttribute(ApplicationProperties.ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME);
@@ -61,9 +64,9 @@ public class AuthorizationServlet extends HttpServlet {
                     }
 
                     response.setStatus(HttpServletResponse.SC_CREATED);
-                    
+
                     // Redirect to registration success page with email parameter for resend functionality
-                    String redirectPath = request.getContextPath() + "/registration-success.jsp?email=" + 
+                    String redirectPath = request.getContextPath() + "/registration-success.jsp?email=" +
                         java.net.URLEncoder.encode(user.getMail(), StandardCharsets.UTF_8);
 
                     objectMapper.writeValue(response.getWriter(),

@@ -1,6 +1,7 @@
  package com.example.libraryproject.repository;
 
 
+import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.entity.Review;
@@ -21,11 +22,11 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static com.example.libraryproject.configuration.ApplicationProperties.STALE_ORDER_TIMEOUT_HRS;
 
 
 public class TestOrderRepository {
 
+    private static final int STALE_ORDER_TIMEOUT_HRS = Integer.parseInt(ApplicationProperties.get("order.stale-timeout-hours"));
     private SessionFactory sessionFactory;
     private OrderRepository orderRepository;
     private Order order;

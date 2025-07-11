@@ -1,5 +1,6 @@
 package com.example.libraryproject.service.implementation;
 
+import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.model.dto.BookAdditionFromGoogleRequest;
 import com.example.libraryproject.model.dto.GoogleBooksResponse;
 import com.example.libraryproject.model.entity.Book;
@@ -23,7 +24,6 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
 
-import static com.example.libraryproject.configuration.ApplicationProperties.*;
 
 @RequiredArgsConstructor
 public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
@@ -32,6 +32,10 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
     private static final Logger logger = LoggerFactory.getLogger(GoogleBooksApiServiceImpl.class);
     private static final HttpClient httpClient = HttpClient.newHttpClient();
 
+    private static final String GOOGLE_API_URL = ApplicationProperties.get("google.books.api.url");
+    private static final int GOOGLE_BOOKS_API_MAX_PAGE = Integer.parseInt(ApplicationProperties.get("google.books.api.max-page"));
+    private static final int BOOKS_PER_REQUEST = Integer.parseInt(ApplicationProperties.get("google.books.api.books-per-request"));
+    private static final String[] GOOGLE_BOOKS_GENRES = ApplicationProperties.get("google.books.api.genres").split(",");
 
     public boolean fetchBook(BookAdditionFromGoogleRequest request, int copies) {
         Book book = getBookFromGoogle(request.title(), request.author());

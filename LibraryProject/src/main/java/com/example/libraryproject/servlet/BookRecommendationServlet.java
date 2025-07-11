@@ -1,5 +1,6 @@
 package com.example.libraryproject.servlet;
 
+import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.model.dto.BookDTO;
 import com.example.libraryproject.service.BookRecommendationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,10 +13,11 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Set;
 
-import static com.example.libraryproject.configuration.ApplicationProperties.BOOK_RECOMMENDATION_SERVICE_ATTRIBUTE_NAME;
 
 @WebServlet(name = "BookRecommendationServlet", urlPatterns = "/api/user/recommend")
 public class BookRecommendationServlet extends HttpServlet {
+
+    private static final String BOOK_RECOMMENDATION_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.book-recommendation-service");
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {

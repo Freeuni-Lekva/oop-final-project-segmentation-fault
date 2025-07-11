@@ -16,10 +16,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.example.libraryproject.configuration.ApplicationProperties.OBJECT_MAPPER_ATTRIBUTE_NAME;
 
 @WebServlet(name = "UserServlet", urlPatterns = "/api/user/*")
 public class UserServlet extends HttpServlet {
+    private static final String OBJECT_MAPPER_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.object-mapper");
+
+    private static final String USER_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.user-service");
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -27,7 +29,7 @@ public class UserServlet extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
 
         ObjectMapper objectMapper = (ObjectMapper) getServletContext().getAttribute(OBJECT_MAPPER_ATTRIBUTE_NAME);
-        UserService userService = (UserService) req.getServletContext().getAttribute(ApplicationProperties.USER_SERVICE_ATTRIBUTE_NAME);
+        UserService userService = (UserService) req.getServletContext().getAttribute(USER_SERVICE_ATTRIBUTE_NAME);
 
         String pathInfo = req.getPathInfo();
         Object sessionUsernameObj = req.getAttribute("username");
@@ -81,7 +83,7 @@ public class UserServlet extends HttpServlet {
 
         ObjectMapper objectMapper = (ObjectMapper) getServletContext().getAttribute(OBJECT_MAPPER_ATTRIBUTE_NAME);
         UserService userService = (UserServiceImpl) request.getServletContext()
-                .getAttribute(ApplicationProperties.USER_SERVICE_ATTRIBUTE_NAME);
+                .getAttribute(USER_SERVICE_ATTRIBUTE_NAME);
 
         String path = request.getPathInfo();
 

@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RequiredArgsConstructor
@@ -30,6 +29,7 @@ public class BookServiceImpl implements BookService {
         if (bookOptional.isEmpty()) {
             throw new IllegalArgumentException("Book not found");
         }
+
         Book book = bookOptional.get();
         return new BookDTO(
                 book.getPublicId(),

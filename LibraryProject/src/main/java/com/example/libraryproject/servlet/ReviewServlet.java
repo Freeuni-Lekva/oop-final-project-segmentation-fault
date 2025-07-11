@@ -1,5 +1,6 @@
 package com.example.libraryproject.servlet;
 
+import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.service.BookService;
 import com.example.libraryproject.service.UserService;
 import com.example.libraryproject.service.implementation.BookServiceImpl;
@@ -13,10 +14,12 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
-import static com.example.libraryproject.configuration.ApplicationProperties.*;
-
 @WebServlet(name = "ReviewServlet", urlPatterns = {"/api/reviews/*"})
 public class ReviewServlet extends HttpServlet {
+
+    private static final String OBJECT_MAPPER_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.object-mapper");
+    private static final String BOOK_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.book-service");
+    private static final String USER_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.user-service");
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {

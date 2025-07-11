@@ -1,13 +1,17 @@
 package com.example.libraryproject.service.implementation;
 
+import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.service.MailService;
 import org.apache.commons.mail.*;
 
 import java.util.List;
 
-import static com.example.libraryproject.configuration.ApplicationProperties.*;
-
 public class MailServiceImpl implements MailService {
+
+    private static final String SMTP_HOST = ApplicationProperties.get("email.smtp.host");
+    private static final int SMTP_PORT = Integer.parseInt(ApplicationProperties.get("email.smtp.port"));
+    private static final String EMAIL_ADDRESS = ApplicationProperties.get("email.address");
+    private static final String EMAIL_PASSWORD = ApplicationProperties.get("email.password");
 
     public void sendEmail(List<String> recipients, String subject, String message) {
         try {

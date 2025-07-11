@@ -16,12 +16,21 @@ import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.example.libraryproject.configuration.ApplicationProperties.*;
 
 @WebListener
 public class ApplicationContextListener implements ServletContextListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ApplicationContextListener.class);
+
+    private static final String AUTHORIZATION_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.authorization-service");
+    private static final String BOOKKEEPER_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.bookkeeper-service");
+    private static final String SCHEDULER_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.scheduler-service");
+    private static final String BOOK_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.book-service");
+    private static final String BOOK_RECOMMENDATION_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.book-recommendation-service");
+    private static final String USER_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.user-service");
+    private static final String GOOGLE_BOOKS_API_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.google-books-api");
+    private static final String OBJECT_MAPPER_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.object-mapper");
+
 
     @Override
     public void contextInitialized(ServletContextEvent event) {

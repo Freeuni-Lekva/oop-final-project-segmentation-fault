@@ -1,5 +1,6 @@
 package com.example.libraryproject.filter;
 
+import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.model.enums.Role;
 import com.example.libraryproject.service.implementation.AuthorizationServiceImpl;
 import jakarta.servlet.*;
@@ -12,10 +13,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-import static com.example.libraryproject.configuration.ApplicationProperties.AUTHORIZATION_SERVICE_ATTRIBUTE_NAME;
-
 @WebFilter(filterName = "BookKeeperAuthFilter", urlPatterns = {"/api/bookkeeper/*", "/api/user/*"})
 public class AuthorizationFilter implements Filter {
+
+    private static final String AUTHORIZATION_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.authorization-service");
 
     private static final Logger logger = LoggerFactory.getLogger(AuthorizationFilter.class);
 

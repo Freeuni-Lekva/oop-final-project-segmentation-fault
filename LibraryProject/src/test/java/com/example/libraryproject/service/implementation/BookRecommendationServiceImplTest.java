@@ -1,5 +1,6 @@
 package com.example.libraryproject.service.implementation;
 
+import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.model.dto.BookDTO;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Review;
@@ -16,7 +17,6 @@ import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.*;
 
-import static com.example.libraryproject.configuration.ApplicationProperties.RECOMMENDED_COUNT;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BookRecommendationServiceImplTest {
@@ -24,6 +24,8 @@ public class BookRecommendationServiceImplTest {
     private BookRepository bookRepository;
     private BookRecommendationServiceImpl recommendationService;
     private Set<BookDTO> recommendedBooks;
+
+    private static final int RECOMMENDED_COUNT = Integer.parseInt(ApplicationProperties.get("recommendation.recommended-count"));
 
     private User user;
 

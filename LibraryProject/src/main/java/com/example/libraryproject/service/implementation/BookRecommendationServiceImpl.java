@@ -1,5 +1,6 @@
 package com.example.libraryproject.service.implementation;
 
+import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.model.dto.BookDTO;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Review;
@@ -15,12 +16,14 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.example.libraryproject.configuration.ApplicationProperties.*;
-
 @RequiredArgsConstructor
 public class BookRecommendationServiceImpl implements BookRecommendationService {
 
     private static final int[] coefficients = {0, -3,-1,0,1,3};
+
+    private static final int RECOMMENDED_COUNT = Integer.parseInt(ApplicationProperties.get("recommendation.recommended-count"));
+    private static final int TOP_GENRE_COUNT = Integer.parseInt(ApplicationProperties.get("recommendation.top-genre-count"));
+    private static final int TOP_AUTHORS_COUNT = Integer.parseInt(ApplicationProperties.get("recommendation.top-authors-count"));
 
     private final BookRepository bookRepository;
     private final UserRepository userRepository;

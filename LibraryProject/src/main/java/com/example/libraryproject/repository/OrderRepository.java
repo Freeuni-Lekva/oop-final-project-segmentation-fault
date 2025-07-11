@@ -1,23 +1,22 @@
 package com.example.libraryproject.repository;
 
+import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.enums.OrderStatus;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import static com.example.libraryproject.configuration.ApplicationProperties.STALE_ORDER_TIMEOUT_HRS;
-
 
 @RequiredArgsConstructor
 public class OrderRepository {
 
+    private static final int STALE_ORDER_TIMEOUT_HRS = Integer.parseInt(ApplicationProperties.get("order.stale-timeout-hours"));
     private final SessionFactory sessionFactory;
 
     public void save(Order order) {

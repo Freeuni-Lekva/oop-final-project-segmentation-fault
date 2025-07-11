@@ -1,5 +1,6 @@
 package com.example.libraryproject.service.implementation;
 
+import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.entity.User;
 import com.example.libraryproject.model.enums.OrderStatus;
@@ -12,9 +13,6 @@ import com.example.libraryproject.service.SchedulerService;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static com.example.libraryproject.configuration.ApplicationProperties.SCHEDULER_BOOK_REMINDER_INTERVAL_HRS;
-import static com.example.libraryproject.configuration.ApplicationProperties.SCHEDULER_UPDATE_INTERVAL_HRS;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -33,12 +31,14 @@ public class SchedulerServiceImpl implements SchedulerService {
     private AccountActivationRepository accountActivationRepository;
     private MailService mailService;
     private static final Logger logger = LoggerFactory.getLogger(SchedulerServiceImpl.class);
+    private static final int SCHEDULER_UPDATE_INTERVAL_HRS = Integer.parseInt(ApplicationProperties.get("scheduler.update-interval-hours"));
+    private static final int SCHEDULER_BOOK_REMINDER_INTERVAL_HRS = Integer.parseInt(ApplicationProperties.get("scheduler.book-reminder-interval-hours"));
 
 
     public void start() {
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         scheduler.scheduleAtFixedRate(this::banDueUsers, 0, SCHEDULER_UPDATE_INTERVAL_HRS, TimeUnit.HOURS);
-        scheduler.scheduleAtFixedRate(this::deleteStaleOrders,0,1, TimeUnit.HOURS);
+        scheduler.scheduleAtFixedRate(this::deleteStaleOrders, 0, 1, TimeUnit.HOURS);
         scheduler.scheduleAtFixedRate(this::remindBorrowedUsers, 0, SCHEDULER_BOOK_REMINDER_INTERVAL_HRS, TimeUnit.HOURS);
         scheduler.scheduleAtFixedRate(this::cleanupExpiredTokens, 0, 24, TimeUnit.HOURS);
     }
