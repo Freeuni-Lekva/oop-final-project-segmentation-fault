@@ -52,11 +52,11 @@ public class UserServletTest {
     private static final String TEST_USERNAME = "testuser";
     private static final String TEST_PASSWORD = "password123";
     private static final String TEST_EMAIL = "testuser@example.com";
-    
+
     private static final String SECOND_USERNAME = "seconduser";
     private static final String SECOND_PASSWORD = "password123";
     private static final String SECOND_EMAIL = "seconduser@example.com";
-    
+
     private static String testBookId;
 
     @BeforeAll
@@ -106,11 +106,11 @@ public class UserServletTest {
                 public void init(jakarta.servlet.FilterConfig filterConfig) {}
 
                 @Override
-                public void doFilter(jakarta.servlet.ServletRequest request, jakarta.servlet.ServletResponse response, 
-                        jakarta.servlet.FilterChain chain) throws java.io.IOException, jakarta.servlet.ServletException {
+                public void doFilter(jakarta.servlet.ServletRequest request, jakarta.servlet.ServletResponse response,
+                                     jakarta.servlet.FilterChain chain) throws java.io.IOException, jakarta.servlet.ServletException {
                     jakarta.servlet.http.HttpServletRequest httpRequest = (jakarta.servlet.http.HttpServletRequest) request;
                     String cookie = httpRequest.getHeader("Cookie");
-                    
+
                     if (cookie != null) {
                         // For test purposes, we'll extract the username directly from the cookie
                         // In a real application, this would involve validating the session
@@ -122,7 +122,7 @@ public class UserServletTest {
                             logger.info("Set username attribute to 'seconduser'");
                         }
                     }
-                    
+
                     chain.doFilter(request, response);
                 }
 
@@ -204,24 +204,24 @@ public class UserServletTest {
         // Check if users already exist
         try (var session = sessionFactory.openSession()) {
             var transaction = session.beginTransaction();
-            
+
             // Check if test user exists
             var testUser = session.createQuery("FROM User u WHERE u.username = :username", User.class)
                     .setParameter("username", TEST_USERNAME)
                     .getResultList();
-                    
+
             // Check if second user exists
             var secondUser = session.createQuery("FROM User u WHERE u.username = :username", User.class)
                     .setParameter("username", SECOND_USERNAME)
                     .getResultList();
-                    
+
             // If both users exist, return early
             if (!testUser.isEmpty() && !secondUser.isEmpty()) {
                 logger.info("Test users already exist, skipping registration");
                 transaction.commit();
                 return;
             }
-            
+
             transaction.commit();
         }
 
@@ -229,28 +229,28 @@ public class UserServletTest {
         if (registerUserIfNeeded(TEST_USERNAME, TEST_PASSWORD, TEST_EMAIL)) {
             logger.info("Registered test user: {}", TEST_USERNAME);
         }
-        
+
         // Register second user if needed
         if (registerUserIfNeeded(SECOND_USERNAME, SECOND_PASSWORD, SECOND_EMAIL)) {
             logger.info("Registered second test user: {}", SECOND_USERNAME);
         }
-        
+
         logger.info("Test users registration completed");
     }
-    
+
     private boolean registerUserIfNeeded(String username, String password, String email) throws Exception {
         // First check if user exists
         try (var session = sessionFactory.openSession()) {
             var existingUser = session.createQuery("FROM User u WHERE u.username = :username", User.class)
                     .setParameter("username", username)
                     .getResultList();
-                    
+
             if (!existingUser.isEmpty()) {
                 logger.info("User {} already exists, skipping registration", username);
                 return false;
             }
         }
-        
+
         String userPayload = String.format("""
             {
                 "username": "%s",
@@ -267,18 +267,18 @@ public class UserServletTest {
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         if (response.statusCode() != 201) {
             throw new RuntimeException("Failed to register user: " + response.body());
         }
-        
+
         return true;
     }
-    
+
     private void createTestBook() {
         try (var session = sessionFactory.openSession()) {
             var transaction = session.beginTransaction();
-            
+
             Book book = new Book();
             book.setName("Test Book");
             book.setAuthor("Test Author");
@@ -291,10 +291,10 @@ public class UserServletTest {
             book.setRating(0.0);
             book.setVolume(1L);
             book.setImageUrl("/images/default.jpg");
-            
+
             session.persist(book);
             transaction.commit();
-            
+
             testBookId = book.getPublicId();
             logger.info("Test book created with ID: {}", testBookId);
         }
@@ -315,11 +315,11 @@ public class UserServletTest {
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         if (response.statusCode() != 200) {
             throw new RuntimeException("Failed to login: " + response.body());
         }
-        
+
         // For testing purposes, create a cookie with the username to identify the user
         // This simulates the session cookie that would normally be set by the server
         return "JSESSIONID=test-session-id-" + username;
@@ -329,111 +329,111 @@ public class UserServletTest {
     @Order(1)
     public void testGetUserInfo() throws Exception {
         logger.info("Starting testGetUserInfo...");
-        
+
         String sessionCookie = loginAndGetSessionCookie(TEST_USERNAME, TEST_PASSWORD);
-        
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/api/user/" + TEST_USERNAME))
                 .header("Cookie", sessionCookie)
                 .GET()
                 .build();
-                
+
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         assertEquals(200, response.statusCode(), "Should get user info successfully");
-        
+
         JsonNode responseJson = objectMapper.readTree(response.body());
         assertTrue(responseJson.has("user"), "Response should contain user data");
         assertEquals(TEST_USERNAME, responseJson.get("user").get("username").asText(), "Username should match");
         assertTrue(responseJson.get("isSelf").asBoolean(), "Should recognize as self");
-        
+
         // Test getting another user's profile
         request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/api/user/" + SECOND_USERNAME))
                 .header("Cookie", sessionCookie)
                 .GET()
                 .build();
-                
+
         response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         assertEquals(200, response.statusCode(), "Should get other user info successfully");
-        
+
         responseJson = objectMapper.readTree(response.body());
         assertTrue(responseJson.has("user"), "Response should contain user data");
         assertEquals(SECOND_USERNAME, responseJson.get("user").get("username").asText(), "Username should match");
         assertFalse(responseJson.get("isSelf").asBoolean(), "Should not recognize as self");
     }
-    
+
     @Test
     @Order(2)
     public void testChangeBio() throws Exception {
         logger.info("Starting testChangeBio...");
-        
+
         String sessionCookie = loginAndGetSessionCookie(TEST_USERNAME, TEST_PASSWORD);
         String newBio = "This is my new bio for testing purposes";
-        
+
         String bioPayload = String.format("""
             {
                 "newBio": "%s"
             }
             """, newBio);
-            
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/api/user/change-bio"))
                 .header("Content-Type", "application/json")
                 .header("Cookie", sessionCookie)
                 .POST(HttpRequest.BodyPublishers.ofString(bioPayload))
                 .build();
-                
+
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         assertEquals(200, response.statusCode(), "Bio change should succeed");
-        
+
         JsonNode responseJson = objectMapper.readTree(response.body());
         assertTrue(responseJson.get("success").asBoolean(), "Response should indicate success");
-        
+
         // Verify bio was updated by getting user info
         request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/api/user/" + TEST_USERNAME))
                 .header("Cookie", sessionCookie)
                 .GET()
                 .build();
-                
+
         response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         responseJson = objectMapper.readTree(response.body());
         assertEquals(newBio, responseJson.get("user").get("bio").asText(), "Bio should be updated");
     }
-    
+
     @Test
     @Order(3)
     public void testChangePassword() throws Exception {
         logger.info("Starting testChangePassword...");
-        
+
         String sessionCookie = loginAndGetSessionCookie(TEST_USERNAME, TEST_PASSWORD);
         String newPassword = "newPassword456";
-        
+
         String passwordPayload = String.format("""
             {
                 "oldPassword": "%s",
                 "newPassword": "%s"
             }
             """, TEST_PASSWORD, newPassword);
-            
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/api/user/change-password"))
                 .header("Content-Type", "application/json")
                 .header("Cookie", sessionCookie)
                 .POST(HttpRequest.BodyPublishers.ofString(passwordPayload))
                 .build();
-                
+
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         assertEquals(200, response.statusCode(), "Password change should succeed");
-        
+
         JsonNode responseJson = objectMapper.readTree(response.body());
         assertTrue(responseJson.get("success").asBoolean(), "Response should indicate success");
-        
+
         // Verify by logging in with new password
         String loginPayload = String.format("""
             {
@@ -449,92 +449,92 @@ public class UserServletTest {
                 .build();
 
         response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         assertEquals(200, response.statusCode(), "Should be able to login with new password");
     }
-    
+
     @Test
     @Order(4)
     public void testReserveBook() throws Exception {
         logger.info("Starting testReserveBook...");
-        
+
         String sessionCookie = loginAndGetSessionCookie(TEST_USERNAME, TEST_PASSWORD);
-        
+
         String reservePayload = String.format("""
             {
                 "bookId": "%s",
                 "duration": 7
             }
             """, testBookId);
-            
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/api/user/reserve"))
                 .header("Content-Type", "application/json")
                 .header("Cookie", sessionCookie)
                 .POST(HttpRequest.BodyPublishers.ofString(reservePayload))
                 .build();
-                
+
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         assertEquals(200, response.statusCode(), "Book reservation should succeed");
-        
+
         JsonNode responseJson = objectMapper.readTree(response.body());
         assertTrue(responseJson.get("success").asBoolean(), "Response should indicate success");
-        assertTrue(responseJson.get("message").asText().contains("Book reserved successfully"), 
+        assertTrue(responseJson.get("message").asText().contains("Book reserved successfully"),
                 "Message should indicate successful reservation");
     }
-    
+
     @Test
     @Order(5)
     public void testReviewBook() throws Exception {
         logger.info("Starting testReviewBook...");
-        
+
         // First reserve the book
         String sessionCookie = loginAndGetSessionCookie(TEST_USERNAME, TEST_PASSWORD);
-        
+
         String reservePayload = String.format("""
             {
                 "bookId": "%s",
                 "duration": 7
             }
             """, testBookId);
-            
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/api/user/reserve"))
                 .header("Content-Type", "application/json")
                 .header("Cookie", sessionCookie)
                 .POST(HttpRequest.BodyPublishers.ofString(reservePayload))
                 .build();
-                
+
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         assertEquals(200, response.statusCode(), "Book reservation should succeed");
-        
+
         // Add the book to the user's borrowed books collection
         try (var session = sessionFactory.openSession()) {
             var transaction = session.beginTransaction();
-            
+
             // Get the book and user
             var user = session.createQuery("FROM User u WHERE u.username = :username", User.class)
                     .setParameter("username", TEST_USERNAME)
                     .getSingleResult();
-            
+
             var book = session.createQuery("FROM Book b WHERE b.publicId = :publicId", Book.class)
                     .setParameter("publicId", testBookId)
                     .getSingleResult();
-            
+
             // Add book to user's borrowed books
             if (user.getBorrowedBooks() == null) {
                 user.setBorrowedBooks(new java.util.HashSet<>());
             }
             user.getBorrowedBooks().add(book);
-            
+
             session.merge(user);
             transaction.commit();
-            
+
             logger.info("Added book to user's borrowed books collection");
         }
-        
+
         // Now submit the review
         String reviewPayload = String.format("""
             {
@@ -543,95 +543,95 @@ public class UserServletTest {
                 "comment": "This is a great test book!"
             }
             """, testBookId);
-            
+
         request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/api/user/review"))
                 .header("Content-Type", "application/json")
                 .header("Cookie", sessionCookie)
                 .POST(HttpRequest.BodyPublishers.ofString(reviewPayload))
                 .build();
-                
+
         response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         assertEquals(200, response.statusCode(), "Review submission should succeed");
-        
+
         JsonNode responseJson = objectMapper.readTree(response.body());
         assertTrue(responseJson.get("success").asBoolean(), "Response should indicate success");
-        assertEquals("Review submitted successfully.", responseJson.get("message").asText(), 
+        assertEquals("Review submitted successfully.", responseJson.get("message").asText(),
                 "Message should indicate successful review");
     }
-    
+
     @Test
     @Order(6)
     public void testCancelReservation() throws Exception {
         logger.info("Starting testCancelReservation...");
-        
+
         // First reserve a book
         String sessionCookie = loginAndGetSessionCookie(TEST_USERNAME, TEST_PASSWORD);
-        
+
         String reservePayload = String.format("""
             {
                 "bookId": "%s",
                 "duration": 7
             }
             """, testBookId);
-            
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/api/user/reserve"))
                 .header("Content-Type", "application/json")
                 .header("Cookie", sessionCookie)
                 .POST(HttpRequest.BodyPublishers.ofString(reservePayload))
                 .build();
-                
+
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         assertEquals(200, response.statusCode(), "Book reservation should succeed");
-        
+
         // Now cancel the reservation
         String cancelPayload = String.format("""
             {
                 "bookId": "%s"
             }
             """, testBookId);
-            
+
         request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/api/user/cancel-reservation"))
                 .header("Content-Type", "application/json")
                 .header("Cookie", sessionCookie)
                 .POST(HttpRequest.BodyPublishers.ofString(cancelPayload))
                 .build();
-                
+
         response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         assertEquals(200, response.statusCode(), "Cancellation should succeed");
     }
-    
+
     @Test
     @Order(7)
     public void testInvalidEndpoint() throws Exception {
         logger.info("Starting testInvalidEndpoint...");
-        
+
         String sessionCookie = loginAndGetSessionCookie(TEST_USERNAME, TEST_PASSWORD);
-        
+
         String payload = "{}";
-            
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/api/user/invalid-endpoint"))
                 .header("Content-Type", "application/json")
                 .header("Cookie", sessionCookie)
                 .POST(HttpRequest.BodyPublishers.ofString(payload))
                 .build();
-                
+
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         assertEquals(404, response.statusCode(), "Invalid endpoint should return 404");
-        
+
         JsonNode responseJson = objectMapper.readTree(response.body());
         assertFalse(responseJson.get("success").asBoolean(), "Response should indicate failure");
-        assertEquals("Invalid endpoint.", responseJson.get("error").asText(), 
+        assertEquals("Invalid endpoint.", responseJson.get("error").asText(),
                 "Error message should indicate invalid endpoint");
     }
-    
+
     @Test
     @Order(8)
     public void testUnauthorizedAccess() throws Exception {
@@ -641,14 +641,14 @@ public class UserServletTest {
                 .uri(URI.create(BASE_URL + "/api/user/" + TEST_USERNAME))
                 .GET()
                 .build();
-                
+
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         assertEquals(401, response.statusCode(), "Unauthenticated request should return 401");
-        
+
         JsonNode responseJson = objectMapper.readTree(response.body());
         assertFalse(responseJson.get("success").asBoolean(), "Response should indicate failure");
-        assertEquals("Authentication required", responseJson.get("error").asText(), 
+        assertEquals("Authentication required", responseJson.get("error").asText(),
                 "Error message should indicate authentication required");
     }
-}
+} 

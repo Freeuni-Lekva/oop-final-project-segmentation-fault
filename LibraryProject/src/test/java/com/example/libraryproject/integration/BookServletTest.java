@@ -54,7 +54,7 @@ public class BookServletTest {
     private static final String FANTASY_GENRE = "Fantasy";
     private static final String TEST_PASSWORD = "password123";
     private static final String TEST_EMAIL = "test@example.com";
-    
+
     // Generate unique username for each test run to avoid conflicts
     private String testUsername;
 
@@ -81,10 +81,10 @@ public class BookServletTest {
             ReviewRepository reviewRepository = new ReviewRepository(sessionFactory);
             UserRepository userRepository = new UserRepository(sessionFactory);
             OrderRepository orderRepository = new OrderRepository(sessionFactory);
-            
+
             // Mock mail service
             MailService mailService = Mockito.mock(MailService.class);
-            
+
             // Create real services
             BookService bookService = new BookServiceImpl(bookRepository, reviewRepository);
             UserService userService = new UserServiceImpl(userRepository, bookRepository, reviewRepository, orderRepository, mailService);
@@ -154,13 +154,13 @@ public class BookServletTest {
                 session.createNativeQuery("DELETE FROM borrowed_books", Integer.class).executeUpdate();
                 session.createNativeQuery("DELETE FROM read_books", Integer.class).executeUpdate();
                 session.createNativeQuery("DELETE FROM user_reviews", Integer.class).executeUpdate();
-                
+
                 // Then delete entities
                 session.createQuery("DELETE FROM Review").executeUpdate();
                 session.createQuery("DELETE FROM Order").executeUpdate();
                 session.createQuery("DELETE FROM Book").executeUpdate();
                 session.createQuery("DELETE FROM User").executeUpdate();
-                
+
                 logger.info("Database cleaned successfully");
             } catch (Exception e) {
                 logger.warn("Could not clean tables (might not exist yet): {}", e.getMessage());
@@ -171,7 +171,7 @@ public class BookServletTest {
                 // Create a new transaction for the next operations
                 transaction = session.beginTransaction();
             }
-            
+
             if (transaction.isActive()) {
                 transaction.commit();
             }
@@ -183,7 +183,7 @@ public class BookServletTest {
 
     private void setupTestData() {
         logger.info("Setting up test data...");
-        
+
         try (var session = sessionFactory.openSession()) {
             var transaction = session.beginTransaction();
 
@@ -195,7 +195,7 @@ public class BookServletTest {
             Book fictionBook = createBook("Fiction Book", "Author C", "Fiction", 4.0);
             Book unavailableBook = createBook("Unavailable Book", "Author D", "Mystery", 3.8);
             unavailableBook.setCurrentAmount(0L);
-            
+
             session.persist(fantasyBook1);
             session.persist(fantasyBook2);
             session.persist(fictionBook);
@@ -203,12 +203,12 @@ public class BookServletTest {
 
             Review review1 = createReview(user, fantasyBook1, 5, "Great book!");
             Review review2 = createReview(user, fictionBook, 4, "Good book");
-            
+
             session.persist(review1);
             session.persist(review2);
 
             user.getBorrowedBooks().add(fantasyBook1);
-            
+
             transaction.commit();
             logger.info("Test data setup completed successfully");
         } catch (Exception e) {
@@ -216,7 +216,7 @@ public class BookServletTest {
             throw new RuntimeException("Failed to set up test data", e);
         }
     }
-    
+
     private User createUser(String username, String password, String email) {
         User user = new User();
         user.setUsername(username);
@@ -228,7 +228,7 @@ public class BookServletTest {
         user.setReviews(new HashSet<>());
         return user;
     }
-    
+
     private Book createBook(String name, String author, String genre, double rating) {
         Book book = new Book();
         book.setName(name);
@@ -244,7 +244,7 @@ public class BookServletTest {
         book.setVolume(1L);
         return book;
     }
-    
+
     private Review createReview(User user, Book book, int rating, String comment) {
         Review review = new Review();
         review.setUser(user);
@@ -259,74 +259,74 @@ public class BookServletTest {
     @Order(1)
     public void testGetAllBooks() throws Exception {
         logger.info("Starting testGetAllBooks...");
-        
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/api/books/all"))
                 .GET()
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         logger.info("Get all books response: {} - {}", response.statusCode(), response.body());
         assertEquals(200, response.statusCode(), "Getting all books should succeed");
-        
+
         JsonNode books = objectMapper.readTree(response.body());
         assertTrue(books.isArray(), "Response should be an array");
         assertEquals(4, books.size(), "Should return all 4 books");
     }
-    
+
     @Test
     @Order(2)
     public void testGetBooksByGenre() throws Exception {
         logger.info("Starting testGetBooksByGenre...");
-        
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/api/books/get-books-by-genre/" + FANTASY_GENRE))
                 .GET()
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         logger.info("Get books by genre response: {} - {}", response.statusCode(), response.body());
         assertEquals(200, response.statusCode(), "Getting books by genre should succeed");
-        
+
         JsonNode books = objectMapper.readTree(response.body());
         assertTrue(books.isArray(), "Response should be an array");
         assertEquals(2, books.size(), "Should return 2 fantasy books");
-        
+
         for (JsonNode book : books) {
             assertEquals(FANTASY_GENRE, book.get("genre").asText(), "All books should be of Fantasy genre");
         }
     }
-    
+
     @Test
     @Order(3)
     public void testGetAvailableBooks() throws Exception {
         logger.info("Starting testGetAvailableBooks...");
-        
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/api/books/available"))
                 .GET()
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         logger.info("Get available books response: {} - {}", response.statusCode(), response.body());
         assertEquals(200, response.statusCode(), "Getting available books should succeed");
-        
+
         JsonNode books = objectMapper.readTree(response.body());
         assertTrue(books.isArray(), "Response should be an array");
 
         int availableCount = 0;
         int unavailableCount = 0;
-        
+
         for (JsonNode book : books) {
             long currentAmount = book.get("currentAmount").asLong();
             if (currentAmount > 0) {
                 availableCount++;
             } else {
                 unavailableCount++;
-                assertEquals("Unavailable Book", book.get("name").asText(), 
+                assertEquals("Unavailable Book", book.get("name").asText(),
                         "Only the book named 'Unavailable Book' should have currentAmount = 0");
             }
         }
@@ -335,90 +335,90 @@ public class BookServletTest {
         assertEquals(1, unavailableCount, "Should have 1 unavailable book");
         assertEquals(4, books.size(), "Should return all 4 books");
     }
-    
+
     @Test
     @Order(4)
     public void testGetBookDetails() throws Exception {
         logger.info("Starting testGetBookDetails...");
 
         String bookPublicId = "Fantasy_Book_1";
-        
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/api/books/details/" + bookPublicId))
                 .GET()
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         logger.info("Get book details response: {} - {}", response.statusCode(), response.body());
         assertEquals(200, response.statusCode(), "Getting book details should succeed");
-        
+
         JsonNode book = objectMapper.readTree(response.body());
         assertEquals("Fantasy Book 1", book.get("name").asText(), "Should return correct book");
         assertEquals("Author A", book.get("author").asText(), "Should return correct author");
         assertEquals(FANTASY_GENRE, book.get("genre").asText(), "Should return correct genre");
         assertEquals(4.5, book.get("rating").asDouble(), "Should return correct rating");
     }
-    
+
     @Test
     @Order(5)
     public void testGetBookReviews() throws Exception {
         logger.info("Starting testGetBookReviews...");
 
         String bookPublicId = "Fantasy_Book_1";
-        
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/api/books/book/" + bookPublicId))
                 .GET()
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         logger.info("Get book reviews response: {} - {}", response.statusCode(), response.body());
         assertEquals(200, response.statusCode(), "Getting book reviews should succeed");
-        
+
         JsonNode reviews = objectMapper.readTree(response.body());
         assertTrue(reviews.isArray(), "Response should be an array");
         assertEquals(1, reviews.size(), "Should return 1 review for Fantasy Book 1");
-        
+
         JsonNode review = reviews.get(0);
         assertEquals(5, review.get("rating").asInt(), "Should return correct rating");
         assertEquals("Great book!", review.get("comment").asText(), "Should return correct comment");
     }
-    
+
     @Test
     @Order(6)
     public void testGetBookDetailsWithInvalidId() throws Exception {
         logger.info("Starting testGetBookDetailsWithInvalidId...");
-        
+
         String invalidBookId = "nonexistent-book";
-        
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/api/books/details/" + invalidBookId))
                 .GET()
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         logger.info("Get book details with invalid ID response: {} - {}", response.statusCode(), response.body());
         assertEquals(500, response.statusCode(), "Should return 500 for invalid book ID");
     }
-    
+
     @Test
     @Order(7)
     public void testGetBooksByGenreWithSorting() throws Exception {
         logger.info("Starting testGetBooksByGenreWithSorting...");
-        
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/api/books/get-books-by-genre/" + FANTASY_GENRE + "?sort=rating"))
                 .GET()
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         logger.info("Get books by genre with sorting response: {} - {}", response.statusCode(), response.body());
         assertEquals(200, response.statusCode(), "Getting books by genre with sorting should succeed");
-        
+
         JsonNode books = objectMapper.readTree(response.body());
         assertTrue(books.isArray(), "Response should be an array");
         assertEquals(2, books.size(), "Should return 2 fantasy books");
@@ -430,27 +430,27 @@ public class BookServletTest {
             previousRating = currentRating;
         }
     }
-    
+
     @Test
     @Order(8)
     public void testMissingBookIdForDetails() throws Exception {
         logger.info("Starting testMissingBookIdForDetails...");
-        
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/api/books/details/"))
                 .GET()
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
         logger.info("Missing book ID response: {} - {}", response.statusCode(), response.body());
         assertEquals(400, response.statusCode(), "Should return 400 for missing book ID");
-        
+
         JsonNode errorResponse = objectMapper.readTree(response.body());
         assertTrue(errorResponse.has("error"), "Response should contain error message");
         assertEquals("Book ID is required", errorResponse.get("error").asText());
     }
-    
+
     @Test
     @Order(9)
     public void testCheckReservation() throws Exception {
@@ -465,10 +465,10 @@ public class BookServletTest {
                 .build();
 
         HttpResponse<String> response = httpClient.send(loginRequest, HttpResponse.BodyHandlers.ofString());
-        
+
         logger.info("Check reservation response: {} - {}", response.statusCode(), response.body());
         assertEquals(200, response.statusCode(), "Check reservation should succeed");
-        
+
         JsonNode reservationStatus = objectMapper.readTree(response.body());
         assertTrue(reservationStatus.has("reserved"), "Response should contain reservation status");
         assertFalse(reservationStatus.get("reserved").asBoolean(), "Book should not be reserved by default");
