@@ -155,9 +155,14 @@
             return defaultCovers[Math.floor(Math.random() * defaultCovers.length)];
         };
 
-        const imageUrl = book.imageUrl
-            ? '/images/' + book.imageUrl
-            : getRandomDefaultCover();
+        let imageUrl;
+        if (!book.imageUrl) {
+            imageUrl = getRandomDefaultCover();
+        } else if (book.imageUrl.startsWith('noCover')) {
+            imageUrl = '${pageContext.request.contextPath}/images/' + book.imageUrl;
+        } else {
+            imageUrl = '/images/' + book.imageUrl;
+        }
 
         const rating = book.rating || 0;
         const fullStars = Math.floor(rating);
