@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.example.libraryproject.configuration.ApplicationProperties.ACTIVATION_BASE_URL;
+
 @RequiredArgsConstructor
 public class AccountActivationServiceImpl implements AccountActivationService {
 
@@ -29,7 +31,6 @@ public class AccountActivationServiceImpl implements AccountActivationService {
     private final UserRepository userRepository;
     private final MailService mailService;
 
-    private static final String ACTIVATION_BASE_URL = ApplicationProperties.get("activation.base-url");
 
     @Override
     public boolean createActivation(User user, String activationBaseUrl) {
