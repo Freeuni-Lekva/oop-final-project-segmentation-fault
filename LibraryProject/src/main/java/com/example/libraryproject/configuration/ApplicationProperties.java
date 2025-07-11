@@ -9,6 +9,7 @@ public class ApplicationProperties {
     public static final String BOOK_SERVICE_ATTRIBUTE_NAME = "BookService";
     public static final String USER_SERVICE_ATTRIBUTE_NAME = "UserService";
     public static final String SCHEDULER_SERVICE_ATTRIBUTE_NAME = "SchedulerService";
+    public static final String ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME = "AccountActivationService";
     public static final String OBJECT_MAPPER_ATTRIBUTE_NAME = "ObjectMapper";
 
     public static final String[] GOOGLE_BOOKS_GENRES = {
@@ -21,7 +22,6 @@ public class ApplicationProperties {
     public static final int BOOKS_PER_REQUEST = 40;
     public static final int GOOGLE_BOOKS_API_MAX_PAGE = 150;
 
-    public static final int DEFAULT_RATING = 3;
     public static final int RECOMMENDED_COUNT = 25;
     public static final int TOP_AUTHORS_COUNT = 3;
     public static final int TOP_GENRE_COUNT = 3;
@@ -34,5 +34,10 @@ public class ApplicationProperties {
     public static final String SMTP_HOST = "smtp.googlemail.com";
     public static final int SMTP_PORT = 465;
 
+    public static final String ADMIN_EMAIL = "";
+
     public static final int SCHEDULER_BOOK_REMINDER_INTERVAL_HRS = 24;
+
+    public static final String ACTIVATION_BASE_URL = System.getenv("ACTIVATION_BASE_URL") != null ? 
+            System.getenv("ACTIVATION_BASE_URL") : "http://localhost:8080/LibraryProject_war_exploded";
 }

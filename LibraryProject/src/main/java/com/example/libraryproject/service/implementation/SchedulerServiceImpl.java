@@ -4,6 +4,7 @@ import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.entity.User;
 import com.example.libraryproject.model.enums.OrderStatus;
 import com.example.libraryproject.model.enums.UserStatus;
+import com.example.libraryproject.repository.AccountActivationRepository;
 import com.example.libraryproject.repository.OrderRepository;
 import com.example.libraryproject.repository.UserRepository;
 import com.example.libraryproject.service.MailService;
@@ -29,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 public class SchedulerServiceImpl implements SchedulerService {
     private UserRepository userRepository;
     private OrderRepository orderRepository;
+    private AccountActivationRepository accountActivationRepository;
     private MailService mailService;
     private static final Logger logger = LoggerFactory.getLogger(SchedulerServiceImpl.class);
 
@@ -38,6 +40,7 @@ public class SchedulerServiceImpl implements SchedulerService {
         scheduler.scheduleAtFixedRate(this::banDueUsers, 0, SCHEDULER_UPDATE_INTERVAL_HRS, TimeUnit.HOURS);
         scheduler.scheduleAtFixedRate(this::deleteStaleOrders,0,1, TimeUnit.HOURS);
         scheduler.scheduleAtFixedRate(this::remindBorrowedUsers, 0, SCHEDULER_BOOK_REMINDER_INTERVAL_HRS, TimeUnit.HOURS);
+        scheduler.scheduleAtFixedRate(this::cleanupExpiredTokens, 0, 24, TimeUnit.HOURS);
     }
 
     private void deleteStaleOrders() {
@@ -96,6 +99,15 @@ public class SchedulerServiceImpl implements SchedulerService {
         }
 
         logger.info("Sent reminder emails to {} users with borrowed books", notifiedUserNames.size());
+    }
+
+    private void cleanupExpiredTokens() {
+        try {
+            accountActivationRepository.deleteExpiredActivations();
+            logger.info("Cleaned up expired activation tokens");
+        } catch (Exception e) {
+            logger.error("Failed to cleanup expired activation tokens: {}", e.getMessage(), e);
+        }
     }
 
 }
