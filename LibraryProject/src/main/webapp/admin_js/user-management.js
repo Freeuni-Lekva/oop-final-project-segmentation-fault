@@ -153,11 +153,12 @@ document.getElementById('unbanUserBtn').addEventListener('click', function () {
 });
 
 document.getElementById('usernameInput').addEventListener('input', function(e) {
-  const nameInSearch = e.target.value.toLowerCase();
+  const searchText = e.target.value.toLowerCase();
   const allUsers = document.querySelectorAll('.user-item');
   allUsers.forEach(function(item) {
     const username = item.querySelector('.username').textContent.toLowerCase();
-    if (username.includes(nameInSearch)) {
+    const email = item.querySelector('.email').textContent.toLowerCase();
+    if (username.includes(searchText) || email.includes(searchText)) {
       item.style.display = 'block';
     } else {
       item.style.display = 'none';
@@ -190,14 +191,21 @@ function loadUsersList() {
               listMember.className = 'user-item ' + user.status.toLowerCase();
 
               const usernameElement = document.createElement('span');
+              const emailElement = document.createElement('span');
               const statusElement = document.createElement('span');
+              
               usernameElement.className = 'username';
+              emailElement.className = 'email';
               statusElement.className = 'status';
+              
               usernameElement.textContent = user.username;
+              emailElement.textContent = user.mail || 'No email';
               statusElement.textContent = user.status;
 
               listMember.appendChild(usernameElement);
+              listMember.appendChild(emailElement);
               listMember.appendChild(statusElement);
+              
               listMember.onclick = function() {
                 document.getElementById('usernameInput').value = user.username;
               };

@@ -2,7 +2,7 @@
   <h2 class="form-section-title">User Management</h2>
   <div class="user-management-container">
     <div class="username-action-row">
-      <input type="text" id="usernameInput" name="username" placeholder="Type username to search, ban, or unban" class="username-search-input" autocomplete="off" required>
+      <input type="text" id="usernameInput" name="username" placeholder="Search by username or email to ban/unban users" class="username-search-input" autocomplete="off" required>
       <button type="button" class="btn btn-danger" id="banUserBtn" style="margin-left: 10px;">
         <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11H7v-2h10v2z"/>

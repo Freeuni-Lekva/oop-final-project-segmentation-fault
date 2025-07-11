@@ -594,7 +594,6 @@
 
     .user-item {
         padding: 12px 15px;
-        padding-right: 80px;
         border-bottom: 1px solid #f5f0e6;
         cursor: pointer;
         transition: background-color 0.2s;
@@ -603,6 +602,7 @@
         display: flex;
         align-items: center;
         color: #5d4e37;
+        gap: 15px;
     }
 
     .user-item:hover {
@@ -628,21 +628,32 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        flex: 0 0 140px;
+        min-width: 140px;
+        color: #5d4e37;
+    }
+
+    .user-item .email {
+        font-size: 13px;
+        color: #8b7355;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
         flex: 1;
+        min-width: 150px;
+        padding: 0 10px;
     }
 
     .user-item .status {
-        position: absolute;
-        right: 15px;
-        top: 50%;
-        transform: translateY(-50%);
         font-size: 12px;
-        font-weight: 400;
-        padding: 2px 8px;
+        font-weight: 500;
+        padding: 4px 10px;
         border-radius: 12px;
         background: rgba(184, 167, 107, 0.1);
-        width: 60px;
         text-align: center;
+        flex-shrink: 0;
+        min-width: 60px;
+        text-transform: uppercase;
     }
 
     .user-item.banned .status {

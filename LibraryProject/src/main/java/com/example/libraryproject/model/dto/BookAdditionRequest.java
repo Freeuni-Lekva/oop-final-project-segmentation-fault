@@ -5,8 +5,9 @@ public record BookAdditionRequest(
         String author,
         String description,
         String genre,
-        Long volume,
+        String volume,
         Long copies,
-        String publicationDate
+        String publicationDate,
+        String imageUrl
 ) {
 }

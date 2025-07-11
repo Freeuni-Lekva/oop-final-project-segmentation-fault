@@ -55,10 +55,21 @@ public class BookKeeperServlet extends HttpServlet {
 
         switch (path) {
             case "/upload-image":
-
-                String imageUrl = handleUploadImage(request, bookKeeperService);
-                objectMapper.writeValue(response.getWriter(), imageUrl);
-                response.setStatus(HttpServletResponse.SC_OK);
+                try {
+                    String imageUrl = handleUploadImage(request, bookKeeperService);
+                    Map<String, String> responseMap = new HashMap<>();
+                    responseMap.put("status", "success");
+                    responseMap.put("imageUrl", imageUrl);
+                    responseMap.put("message", "Image uploaded successfully");
+                    objectMapper.writeValue(response.getWriter(), responseMap);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                } catch (Exception e) {
+                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    Map<String, String> errorMap = new HashMap<>();
+                    errorMap.put("status", "error");
+                    errorMap.put("message", "Image upload failed: " + e.getMessage());
+                    objectMapper.writeValue(response.getWriter(), errorMap);
+                }
                 break;
 
             case "/add-book":
@@ -224,30 +235,112 @@ public class BookKeeperServlet extends HttpServlet {
         if (filePart == null || filePart.getSize() == 0) {
             throw new IllegalArgumentException("Image file is required.");
         }
+        
+        // Validate file type
+        String contentType = filePart.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new IllegalArgumentException("Only image files are allowed.");
+        }
+        
+        // Validate file size (5MB limit)
+        final long maxSize = 5 * 1024 * 1024; // 5MB
+        if (filePart.getSize() > maxSize) {
+            throw new IllegalArgumentException("Image file size must be less than 5MB.");
+        }
+        
         return bookKeeperService.downloadImage(filePart);
     }
 
     private void handleAddBook(HttpServletRequest req, HttpServletResponse response, BookKeeperService bookKeeperService) throws IOException {
-
-        BookAdditionRequest request = objectMapper.readValue(req.getInputStream(), BookAdditionRequest.class);
-
-        if (request.title() == null || request.title().trim().isEmpty()) {
-            throw new IllegalArgumentException("Title is required to add a new book.");
+        try {
+            // Log incoming request
+            System.out.println("=== ADD BOOK REQUEST STARTED ===");
+            
+            // Read and log the raw JSON
+            String requestBody = req.getReader().lines().collect(java.util.stream.Collectors.joining("\n"));
+            System.out.println("Raw request body: " + requestBody);
+            
+            // Parse the request
+            JsonNode jsonNode = objectMapper.readTree(requestBody);
+            System.out.println("Parsed JSON: " + jsonNode.toString());
+            
+            // Extract and validate fields
+            String title = jsonNode.has("title") ? jsonNode.get("title").asText() : null;
+            String author = jsonNode.has("author") ? jsonNode.get("author").asText() : null;
+            String description = jsonNode.has("description") ? jsonNode.get("description").asText() : "";
+            String genre = jsonNode.has("genre") ? jsonNode.get("genre").asText() : null;
+            String volumeStr = jsonNode.has("volume") ? jsonNode.get("volume").asText() : null;
+            Long copies = jsonNode.has("copies") ? jsonNode.get("copies").asLong(1L) : 1L;
+            String publicationDate = jsonNode.has("publicationDate") ? jsonNode.get("publicationDate").asText() : null;
+            String imageUrl = jsonNode.has("imageUrl") ? jsonNode.get("imageUrl").asText() : null;
+            
+            System.out.println("Extracted fields - Title: " + title + ", Author: " + author + ", Genre: " + genre + 
+                             ", Volume: " + volumeStr + ", Copies: " + copies + ", Date: " + publicationDate + ", ImageUrl: " + imageUrl);
+            
+            // Validate required fields
+            if (title == null || title.trim().isEmpty()) {
+                throw new IllegalArgumentException("Title is required to add a new book.");
+            }
+            
+            if (author == null || author.trim().isEmpty()) {
+                throw new IllegalArgumentException("Author is required to add a new book.");
+            }
+            
+            if (genre == null || genre.trim().isEmpty()) {
+                throw new IllegalArgumentException("Genre is required to add a new book.");
+            }
+            
+            if (publicationDate == null || publicationDate.trim().isEmpty()) {
+                throw new IllegalArgumentException("Publication date is required to add a new book.");
+            }
+            
+            System.out.println("Volume string received: " + volumeStr);
+            
+            // Create the request object
+            BookAdditionRequest request = new BookAdditionRequest(
+                title.trim(),
+                author.trim(), 
+                description.trim(),
+                genre.trim(),
+                volumeStr != null ? volumeStr.trim() : null,
+                copies,
+                publicationDate.trim(),
+                imageUrl != null ? imageUrl.trim() : null
+            );
+            
+            System.out.println("Created BookAdditionRequest: " + request.toString());
+            
+            // Call the service
+            bookKeeperService.addBook(request);
+            
+            System.out.println("Book added successfully!");
+            
+            // Return success response
+            response.setStatus(HttpServletResponse.SC_OK);
+            Map<String, String> responseMap = new HashMap<>();
+            responseMap.put("status", "success");
+            responseMap.put("message", "Book successfully added to library");
+            objectMapper.writeValue(response.getWriter(), responseMap);
+            
+            System.out.println("=== ADD BOOK REQUEST COMPLETED SUCCESSFULLY ===");
+            
+        } catch (IllegalArgumentException e) {
+            System.err.println("Validation error in add book: " + e.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            Map<String, String> responseMap = new HashMap<>();
+            responseMap.put("status", "error");
+            responseMap.put("message", e.getMessage());
+            objectMapper.writeValue(response.getWriter(), responseMap);
+            
+        } catch (Exception e) {
+            System.err.println("Unexpected error in add book: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            Map<String, String> responseMap = new HashMap<>();
+            responseMap.put("status", "error");
+            responseMap.put("message", "Failed to add book: " + e.getMessage());
+            objectMapper.writeValue(response.getWriter(), responseMap);
         }
-        
-        if (request.author() == null || request.author().trim().isEmpty()) {
-            throw new IllegalArgumentException("Author is required to add a new book.");
-        }
-
-        bookKeeperService.addBook(request);
-        
-        response.setStatus(HttpServletResponse.SC_OK);
-        
-        Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("status", "success");
-        responseMap.put("message", "Book successfully added to library");
-        objectMapper.writeValue(response.getWriter(), responseMap);
-
     }
 
     private void handleMarkBorrowed(HttpServletRequest req, BookKeeperService bookKeeperService) throws IOException {

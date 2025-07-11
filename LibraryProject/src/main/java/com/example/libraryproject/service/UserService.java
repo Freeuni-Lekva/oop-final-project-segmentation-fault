@@ -5,11 +5,11 @@ import com.example.libraryproject.model.enums.ReservationResponse;
 
 public interface UserService {
 
-    boolean reviewBook(String username, String publicId, int rating, String comment);
+    void reviewBook(String username, String publicId, int rating, String comment);
 
     ReservationResponse reserveBook(String username, String publicId, Long durationInDays) ;
 
-    boolean cancelReservation(String username, String publicId) ;
+    void cancelReservation(String username, String publicId) ;
 
     void changePassword(String username, String oldPassword, String newPassword);
 
