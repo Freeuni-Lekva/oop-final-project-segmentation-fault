@@ -89,7 +89,14 @@ public class AuthorizationServlet extends HttpServlet {
                     );
 
 
+                } catch (IllegalArgumentException e) {
+                    // Invalid credentials should return 401
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    objectMapper.writeValue(response.getWriter(),
+                            new JsonResponse("Invalid credentials: " + e.getMessage(), null)
+                    );
                 } catch (Exception e) {
+                    // Other errors still return 400
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     objectMapper.writeValue(response.getWriter(),
                             new JsonResponse("Login failed: " + e.getMessage(), null)

@@ -92,8 +92,13 @@ public class ReviewServlet extends HttpServlet {
                 return;
 
             } catch (IllegalStateException e) {
-                // Handle specific validation errors with proper messages
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                // Check if it's a "Book not found" error
+                if (e.getMessage().contains("Book not found")) {
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                } else {
+                    // Handle other validation errors with proper messages
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                }
                 response.getWriter().write("{\"success\": false, \"message\": \"" + e.getMessage() + "\"}");
                 return;
             } catch (IllegalArgumentException e) {
