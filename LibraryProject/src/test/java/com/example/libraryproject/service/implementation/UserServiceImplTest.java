@@ -6,7 +6,6 @@ import com.example.libraryproject.model.entity.User;
 import com.example.libraryproject.model.enums.OrderStatus;
 import com.example.libraryproject.model.enums.UserStatus;
 import com.example.libraryproject.repository.*;
-import com.example.libraryproject.service.AccountActivationService;
 import com.example.libraryproject.service.MailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
