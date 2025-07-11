@@ -269,13 +269,13 @@ public class BookKeeperServlet extends HttpServlet {
             String author = jsonNode.has("author") ? jsonNode.get("author").asText() : null;
             String description = jsonNode.has("description") ? jsonNode.get("description").asText() : "";
             String genre = jsonNode.has("genre") ? jsonNode.get("genre").asText() : null;
-            String volumeStr = jsonNode.has("volume") ? jsonNode.get("volume").asText() : null;
+            Long volume = jsonNode.has("volume") ? jsonNode.get("volume").asLong(1L) : 1L;
             Long copies = jsonNode.has("copies") ? jsonNode.get("copies").asLong(1L) : 1L;
             String publicationDate = jsonNode.has("publicationDate") ? jsonNode.get("publicationDate").asText() : null;
             String imageUrl = jsonNode.has("imageUrl") ? jsonNode.get("imageUrl").asText() : null;
             
             System.out.println("Extracted fields - Title: " + title + ", Author: " + author + ", Genre: " + genre + 
-                             ", Volume: " + volumeStr + ", Copies: " + copies + ", Date: " + publicationDate + ", ImageUrl: " + imageUrl);
+                             ", Volume: " + volume + ", Copies: " + copies + ", Date: " + publicationDate + ", ImageUrl: " + imageUrl);
             
             // Validate required fields
             if (title == null || title.trim().isEmpty()) {
@@ -294,15 +294,13 @@ public class BookKeeperServlet extends HttpServlet {
                 throw new IllegalArgumentException("Publication date is required to add a new book.");
             }
             
-            System.out.println("Volume string received: " + volumeStr);
-            
             // Create the request object
             BookAdditionRequest request = new BookAdditionRequest(
                 title.trim(),
                 author.trim(), 
                 description.trim(),
                 genre.trim(),
-                volumeStr != null ? volumeStr.trim() : null,
+                volume,
                 copies,
                 publicationDate.trim(),
                 imageUrl != null ? imageUrl.trim() : null

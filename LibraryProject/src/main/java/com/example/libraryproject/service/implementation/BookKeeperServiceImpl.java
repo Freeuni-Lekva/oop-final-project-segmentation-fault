@@ -66,25 +66,7 @@ public class BookKeeperServiceImpl implements BookKeeperService {
             } else {
                 book.setImageUrl(bookRequest.title().replaceAll("[^a-zA-Z0-9.\\-]", "_") + ".jpg");
             }
-            // Handle volume conversion from String to Long
-            if (bookRequest.volume() != null && !bookRequest.volume().trim().isEmpty()) {
-                try {
-                    // Try to parse as Long first
-                    Long volumeNumber = Long.parseLong(bookRequest.volume().trim());
-                    book.setVolume(volumeNumber);
-                } catch (NumberFormatException e) {
-                    // If that fails, try to extract number from string like "Volume 1"
-                    String numStr = bookRequest.volume().replaceAll("[^0-9]", "");
-                    if (!numStr.isEmpty()) {
-                        book.setVolume(Long.parseLong(numStr));
-                    } else {
-                        // Default to 1 if no number found
-                        book.setVolume(1L);
-                    }
-                }
-            } else {
-                book.setVolume(1L); // Default volume
-            }
+            book.setVolume(bookRequest.volume());
             // Parse and set the publication date
             if (bookRequest.publicationDate() != null && !bookRequest.publicationDate().isEmpty()) {
                 book.setDate(java.time.LocalDate.parse(bookRequest.publicationDate()));
