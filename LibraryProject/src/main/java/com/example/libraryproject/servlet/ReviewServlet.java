@@ -83,13 +83,24 @@ public class ReviewServlet extends HttpServlet {
                 return;
             }
 
-            boolean success = userService.reviewBook(username, bookId, rating, reviewText);
-
-            if (success) {
+            try {
+                userService.reviewBook(username, bookId, rating, reviewText);
+                
+                // Return success response
+                response.setStatus(HttpServletResponse.SC_OK);
                 response.getWriter().write("{\"success\": true, \"message\": \"Review submitted successfully\"}");
-            } else {
+                return;
+
+            } catch (IllegalStateException e) {
+                // Handle specific validation errors with proper messages
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("{\"success\": false, \"message\": \"Failed to submit review. You may have already reviewed this book.\"}");
+                response.getWriter().write("{\"success\": false, \"message\": \"" + e.getMessage() + "\"}");
+                return;
+            } catch (IllegalArgumentException e) {
+                // Handle not found errors
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.getWriter().write("{\"success\": false, \"message\": \"" + e.getMessage() + "\"}");
+                return;
             }
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

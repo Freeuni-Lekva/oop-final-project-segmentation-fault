@@ -11,6 +11,8 @@ public enum BookSortCriteria {
     AUTHOR("author"), 
     RATING("rating"),
     AVAILABLE("available"),
+    DATE("date"), // Sort by publication date, most recent first
+    RECENT("recent"), // Sort by when added to system (ID), most recent first
     DEFAULT("rating"); // Default sorting by rating
     
     private final String value;

@@ -31,73 +31,102 @@
     </form>
   </div>
 
-  <!-- Manual Add Section -->
+  <!-- Manual Book Entry Section -->
   <div class="manual-add-section">
-    <h3 class="subsection-title">Manual Add (Custom Book)</h3>
+    <h3 class="subsection-title">Manual Book Entry</h3>
     <form id="addBookForm" enctype="multipart/form-data">
-    <div class="form-grid">
+      
+      <!-- Primary Book Information -->
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="title">Title *</label>
+          <input type="text" id="title" name="title" placeholder="Book title" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="author">Author *</label>
+          <input type="text" id="author" name="author" placeholder="Author name" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="copies">Number of Copies *</label>
+          <input type="number" id="copies" name="copies" placeholder="1" min="1" value="1" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="volume">Pages</label>
+          <input type="number" id="volume" name="volume" placeholder="Number of pages" min="1" value="1" step="1">
+        </div>
+        
+        <div class="form-group">
+          <label for="genre">Genre *</label>
+          <select id="genre" name="genre" required>
+            <option value="">Choose a genre</option>
+            <option value="classics">Classics</option>
+            <option value="fiction">Fiction</option>
+            <option value="crime">Crime</option>
+            <option value="mystery">Mystery</option>
+            <option value="romance">Romance</option>
+            <option value="memoir">Memoir</option>
+            <option value="fantasy">Fantasy</option>
+            <option value="horror">Horror</option>
+            <option value="history">History</option>
+            <option value="poetry">Poetry</option>
+            <option value="adventure">Adventure</option>
+            <option value="comedy">Comedy</option>
+            <option value="philosophy">Philosophy</option>
+            <option value="psychology">Psychology</option>
+            <option value="art">Art</option>
+            <option value="religion">Religion</option>
+            <option value="politics">Politics</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="publicationDate">Release Date *</label>
+          <input type="date" id="publicationDate" name="publicationDate" required>
+        </div>
+      </div>
+
+      <!-- Book Description -->
       <div class="form-group">
-        <label for="title">Book Title *</label>
-        <input type="text" id="title" name="title" placeholder="Enter book title" required>
+        <label for="description">Description</label>
+        <textarea id="description" name="description" placeholder="Optional book description..." rows="3"></textarea>
       </div>
+
+      <!-- Image Upload Section -->
       <div class="form-group">
-        <label for="author">Author *</label>
-        <input type="text" id="author" name="author" placeholder="Enter author name" required>
+        <label for="bookImage">Book Cover Photo</label>
+        <div class="file-upload-container">
+          <input type="file" id="bookImage" name="bookImage" accept="image/png,image/jpg,image/jpeg" class="file-input" style="display: none;">
+          <div class="file-upload-area" id="fileUploadClickArea">
+            <div class="upload-content">
+              <svg class="file-upload-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+              </svg>
+              <div class="file-upload-text">Upload Book Cover</div>
+              <div class="file-upload-subtext">JPG, PNG up to 5MB</div>
+            </div>
+          </div>
+          <div class="file-preview" id="imagePreview" style="display: none;">
+            <img id="imagePreviewImg" src="" alt="Preview" style="max-width: 100px; max-height: 150px; border-radius: 4px;">
+            <div class="file-preview-name" id="imagePreviewName"></div>
+          </div>
+        </div>
       </div>
-      <div class="form-group">
-        <label for="genre">Genre</label>
-        <select id="genre" name="genre">
-          <option value="">Select Genre</option>
-          <option value="Fiction">Fiction</option>
-          <option value="Non-Fiction">Non-Fiction</option>
-          <option value="Mystery">Mystery</option>
-          <option value="Romance">Romance</option>
-          <option value="Sci-Fi">Science Fiction</option>
-          <option value="Fantasy">Fantasy</option>
-          <option value="Biography">Biography</option>
-          <option value="History">History</option>
-        </select>
+
+      <!-- Submit Button -->
+      <div class="action-buttons">
+        <button type="submit" class="btn" id="addBookBtn">
+          <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
+          Add Book to Collection
+        </button>
       </div>
-      <div class="form-group">
-        <label for="volume">Volume</label>
-        <input type="text" id="volume" name="volume" placeholder="e.g., 1st Edition, Volume 2">
-      </div>
-      <div class="form-group">
-        <label for="copies">Number of Copies *</label>
-        <input type="number" id="copies" name="copies" placeholder="Enter number of copies" min="1" value="1" required>
-      </div>
-      <div class="form-group">
-        <label for="publicationDate">Publication Date *</label>
-        <input type="date" id="publicationDate" name="publicationDate" required>
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="description">Description</label>
-      <textarea id="description" name="description" placeholder="Brief description of the book..."></textarea>
-    </div>
-    <div class="form-group">
-      <label for="bookImage">Book Cover Image</label>
-      <div class="file-upload-area" onclick="document.getElementById('bookImage').click()">
-        <input type="file" id="bookImage" name="bookImage" accept="image/*" class="file-input">
-        <svg class="file-upload-icon" viewBox="0 0 24 24">
-          <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-        </svg>
-        <div class="file-upload-text">Click to upload book cover</div>
-        <div class="file-upload-subtext">PNG, JPG, JPEG up to 5MB</div>
-      </div>
-      <div class="file-preview" id="imagePreview">
-        <div class="file-preview-name" id="imagePreviewName"></div>
-      </div>
-    </div>
-    <div class="action-buttons">
-      <button type="submit" class="btn" id="addBookBtn">
-        <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-        </svg>
-        Add Book
-      </button>
-    </div>
-    <div id="addBookMessage" class="message-area" style="display: none;"></div>
-  </form>
-  </div> <!-- End manual-add-section -->
+      
+      <!-- Message Area -->
+      <div id="addBookMessage" class="message-area" style="display: none;"></div>
+    </form>
+  </div>
 </div> 

@@ -62,10 +62,10 @@ public class UserServiceImpl implements UserService {
         return Math.round(average * 10.0) / 10.0;
     }
 
-    public boolean reviewBook(String username, String publicId, int rating, String comment) {
+    public void reviewBook(String username, String publicId, int rating, String comment) {
         if (username == null) {
             logger.info("Review attempt failed: no user logged in");
-            return false;
+            throw new IllegalStateException("User not logged in");
         }
 
         User user;
@@ -73,30 +73,35 @@ public class UserServiceImpl implements UserService {
         Optional<Book> optionalBook = bookRepository.findByPublicId(publicId);
         if (optionalBook.isEmpty()) {
             logger.info("Book with publicId {} not found", publicId);
-            return false;
+            throw new IllegalStateException("Book not found");
         }
         Optional<User> optionalUser = userRepository.findByUsername(username);
         if (optionalUser.isEmpty()) {
             logger.info("User with username {} not found", username);
-            return false;
+            throw new IllegalStateException("User not found");
         }
         book = optionalBook.get();
         user = optionalUser.get();
 
         if (user.getStatus() == com.example.libraryproject.model.enums.UserStatus.BANNED) {
+            logger.warn("Banned user {} attempted to write review for book {}", username, publicId);
             throw new IllegalStateException("Your account is banned and cannot write reviews");
         }
 
-        if (!user.getReadBooks().contains(book)) {
-            logger.info("User {} hasn't read book {}", username, publicId);
-            return false;
+        // Check if user has either borrowed or read the book
+        boolean hasBorrowed = user.getBorrowedBooks().contains(book);
+        boolean hasRead = user.getReadBooks().contains(book);
+
+        if (!hasBorrowed && !hasRead) {
+            logger.info("User {} attempted to review book {} without borrowing or reading it first", username, publicId);
+            throw new IllegalStateException("You can only review books you have borrowed or read");
         }
 
         Set<Review> reviews = user.getReviews();
 
-        if (!reviews.stream().filter(r -> r.getBook().equals(book)).toList().isEmpty()) {
-            logger.info("User {} already left a review for book {}", username, publicId);
-            return false;
+        if(!reviews.stream().filter(r -> r.getBook().equals(book)).toList().isEmpty()) {
+            logger.info("User {} attempted duplicate review for book {}", username, publicId);
+            throw new IllegalStateException("You have already reviewed this book");
         }
 
         Review review = new Review();
@@ -118,10 +123,9 @@ public class UserServiceImpl implements UserService {
         double newAverageRating = calculateAverageRating(publicId);
         book.setRating(newAverageRating);
         bookRepository.update(book);
-
-        logger.info("User {} reviewed book {} with rating {} and comment '{}'. Book rating updated to {}",
-                username, publicId, rating, comment, newAverageRating);
-        return true;
+        
+        logger.info("User {} reviewed book {} with rating {} and comment '{}'. Book rating updated to {}", 
+                   username, publicId, rating, comment, newAverageRating);
     }
 
     public void changeBio(String username, String bio) {
@@ -228,20 +232,17 @@ public class UserServiceImpl implements UserService {
         return orderStatus == OrderStatus.RESERVED ? ReservationResponse.RESERVED : ReservationResponse.WAITLISTED;
     }
 
-    public boolean cancelReservation(String username, String publicId) {
+    public void cancelReservation(String username, String publicId) {
         Optional<Book> optionalBook = bookRepository.findByPublicId(publicId);
         if (optionalBook.isEmpty()) {
             logger.info("Book with publicId {} not found", publicId);
-            return false;
+            throw new IllegalStateException("Book not found");
         }
-
         Optional<User> optionalUser = userRepository.findByUsername(username);
-
         if (optionalUser.isEmpty()) {
             logger.info("User with username {} not found", username);
-            return false;
+            throw new IllegalStateException("User not found");
         }
-
         Book book = optionalBook.get();
         User user = optionalUser.get();
 
@@ -255,7 +256,7 @@ public class UserServiceImpl implements UserService {
 
         if (reservation.isEmpty()) {
             logger.info("User {} does not have book {} reserved", username, publicId);
-            return false;
+            throw new IllegalStateException("You don't have this book reserved");
         }
 
         if (book.getCurrentAmount() == 0) {
@@ -311,8 +312,6 @@ public class UserServiceImpl implements UserService {
         orderRepository.update(order);
 
         logger.info("User {} canceled reservation for book {}", username, publicId);
-
-        return true;
 
     }
 

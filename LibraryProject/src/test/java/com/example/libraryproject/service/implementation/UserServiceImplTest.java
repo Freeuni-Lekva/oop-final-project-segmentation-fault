@@ -131,13 +131,16 @@ public class UserServiceImplTest {
         when(orderRepository.findOrdersByUserId(1L)).thenReturn(new HashSet<>());
 
         // Test cancellation when book is not reserved
-        assertFalse(userServiceImpl.cancelReservation(user.getUsername(), book3.getPublicId()));
+        assertThrows(IllegalStateException.class,
+                () -> userServiceImpl.cancelReservation(user.getUsername(), book3.getPublicId()));
 
         // Test cancellation with non-existent user
-        assertFalse(userServiceImpl.cancelReservation("nonexistent", book1.getPublicId()));
+        assertThrows(IllegalStateException.class,
+                () -> userServiceImpl.cancelReservation("nonexistent", book1.getPublicId()));
 
         // Test cancellation with non-existent book
-        assertFalse(userServiceImpl.cancelReservation(user.getUsername(), "nonexistent"));
+        assertThrows(IllegalStateException.class,
+                () -> userServiceImpl.cancelReservation(user.getUsername(), "nonexistent"));
     }
 
     @Test
@@ -163,17 +166,20 @@ public class UserServiceImplTest {
         user.setReadBooks(updatedReadBooks);
 
         // Test review for book not read by user
-        assertFalse(userServiceImpl.reviewBook(user.getUsername(), book2.getPublicId(), 4, "good"));
+        assertThrows(IllegalStateException.class,
+                () -> userServiceImpl.reviewBook(user.getUsername(), book2.getPublicId(), 4, "good"));
 
         // Test successful review for read book
-        assertTrue(userServiceImpl.reviewBook(user.getUsername(), book1.getPublicId(), 4, "good"));
+        assertDoesNotThrow(() -> userServiceImpl.reviewBook(user.getUsername(), book1.getPublicId(), 4, "good"));
 
         // Test review with non-existent user
-        assertFalse(userServiceImpl.reviewBook("nonexistent", book1.getPublicId(), 4, "good"));
+        assertThrows(IllegalStateException.class,
+                () -> userServiceImpl.reviewBook("nonexistent", book1.getPublicId(), 4, "good"));
 
         // Test review with non-existent book
-        assertFalse(userServiceImpl.reviewBook(user.getUsername(), "nonexistent", 4, "good"));
-        
+        assertThrows(IllegalStateException.class,
+                () -> userServiceImpl.reviewBook(user.getUsername(), "nonexistent", 4, "good"));
+
         // Verify that bookRepository.update was called to update the book's rating
         verify(bookRepository, atLeastOnce()).update(any(Book.class));
     }

@@ -143,8 +143,10 @@ public class BookServiceImpl implements BookService {
             case AUTHOR -> Comparator.comparing(book ->
                     book.getAuthor().toLowerCase()
             );
-            case AVAILABLE -> Comparator.<Book>comparingLong(Book::getCurrentAmount).reversed(); // Most available first
-            default -> Comparator.<Book>comparingDouble(Book::getRating).reversed(); // Highest rating first
+            case AVAILABLE -> Comparator.comparingLong(Book::getCurrentAmount).reversed(); // Most available first
+            case DATE -> Comparator.comparing(Book::getDate).reversed(); // Most recent publication date first
+            case RECENT -> Comparator.comparingLong(Book::getId).reversed(); // Most recently added to system first
+            default -> Comparator.comparingDouble(Book::getRating).reversed(); // Highest rating first
         };
 
         return bookStream
@@ -196,6 +198,8 @@ public class BookServiceImpl implements BookService {
             case "title" -> BookSortCriteria.TITLE;
             case "author" -> BookSortCriteria.AUTHOR;
             case "available" -> BookSortCriteria.AVAILABLE;
+            case "date" -> BookSortCriteria.DATE;
+            case "recent" -> BookSortCriteria.RECENT;
             default -> BookSortCriteria.RATING;
         };
     }

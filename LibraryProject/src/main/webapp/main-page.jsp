@@ -324,7 +324,8 @@
     function fetchRecentBooks() {
       var recentScroll = document.getElementById('recentScroll');
 
-      fetch(contextPath + '/api/books/all')
+      // Use backend sorting for recently added books
+      fetch(contextPath + '/api/books/all?sort=recent')
               .then(function(response) {
                 if (!response.ok) {
                   throw new Error('HTTP error! status: ' + response.status);
@@ -332,7 +333,12 @@
                 return response.json();
               })
               .then(function(books) {
-                var recentBooks = books.slice(25, 50);
+                console.log('Recently added books received from backend:', books.length);
+                
+                // Take the first 25 books (already sorted by backend)
+                var recentBooks = books.slice(0, 25);
+                console.log('Displaying first 25 recently added books');
+                
                 displayBooks(recentBooks, recentScroll);
               })
               .catch(function(error) {

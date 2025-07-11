@@ -61,7 +61,11 @@ public class BookKeeperServiceImpl implements BookKeeperService {
             book.setDescription(bookRequest.description());
             book.setGenre(bookRequest.genre());
             book.setPublicId(bookRequest.title().replaceAll("[^a-zA-Z0-9.\\-]", "_"));
-            book.setImageUrl(bookRequest.title().replaceAll("[^a-zA-Z0-9.\\-]", "_") + ".jpg");
+            if (bookRequest.imageUrl() != null && !bookRequest.imageUrl().trim().isEmpty()) {
+                book.setImageUrl(bookRequest.imageUrl());
+            } else {
+                book.setImageUrl(bookRequest.title().replaceAll("[^a-zA-Z0-9.\\-]", "_") + ".jpg");
+            }
             book.setVolume(bookRequest.volume());
             // Parse and set the publication date
             if (bookRequest.publicationDate() != null && !bookRequest.publicationDate().isEmpty()) {
@@ -75,7 +79,8 @@ public class BookKeeperServiceImpl implements BookKeeperService {
             book.setRating(0.0);
             bookRepository.save(book);
         }
-        logger.info("Book with title '{}' added successfully with {} copies", bookRequest.title(), copies);
+        logger.info("Book with title '{}' added successfully with {} copies (ID: {})", bookRequest.title(), copies,
+                   existingBook.isPresent() ? existingBook.get().getId() : "new book added to database");
     }
 
     public void deleteBook(String bookPublicId) {
@@ -316,22 +321,102 @@ public class BookKeeperServiceImpl implements BookKeeperService {
     }
 
     public String downloadImage(Part filePart) throws IOException {
-        String submittedFileName = Path.of(filePart.getSubmittedFileName()).getFileName().toString();
-        String safeFileName = submittedFileName.replaceAll("[^a-zA-Z0-9.\\-]", "_");
+        logger.info("Starting image upload process...");
 
+        String submittedFileName = filePart.getSubmittedFileName();
+        if (submittedFileName == null || submittedFileName.trim().isEmpty()) {
+            throw new IllegalArgumentException("No file name provided");
+        }
+
+        String fileName = Path.of(submittedFileName).getFileName().toString();
+        String safeFileName = fileName.replaceAll("[^a-zA-Z0-9.\\-]", "_");
+
+        // Add timestamp to make filename unique
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        String extension = "";
+        int lastDot = safeFileName.lastIndexOf('.');
+        if (lastDot > 0) {
+            extension = safeFileName.substring(lastDot);
+            safeFileName = safeFileName.substring(0, lastDot) + "_" + timestamp + extension;
+        } else {
+            safeFileName = safeFileName + "_" + timestamp;
+        }
+
+        logger.info("Original filename: {}, Safe filename: {}", fileName, safeFileName);
+
+        // Try multiple directory options
+        Path imagesDir = null;
+
+        // Option 1: Environment variable
         String imageDirEnv = System.getenv("IMAGE_DIR");
-        if (imageDirEnv == null || imageDirEnv.isBlank()) {
-            throw new IllegalStateException("Environment variable 'IMAGE_DIR' is not set or is empty. Please configure it to specify the image directory.");
-        }
-        Path imagesDir = Paths.get(imageDirEnv);
-        if (!Files.exists(imagesDir)) {
-            Files.createDirectories(imagesDir);
+        if (imageDirEnv != null && !imageDirEnv.isBlank()) {
+            try {
+                imagesDir = Paths.get(imageDirEnv);
+                logger.info("Using IMAGE_DIR environment variable: {}", imagesDir);
+            } catch (Exception e) {
+                logger.warn("Invalid IMAGE_DIR environment variable: {}", e.getMessage());
+            }
         }
 
+        // Option 2: Webapp images directory (fallback)
+        if (imagesDir == null) {
+            try {
+                // Get the webapp root and create images directory
+                String webappRoot = System.getProperty("catalina.base");
+                if (webappRoot != null) {
+                    imagesDir = Paths.get(webappRoot, "webapps", "LibraryProject_war_exploded", "images");
+                    logger.info("Using webapp images directory: {}", imagesDir);
+                } else {
+                    // Fallback to relative path in src/main/webapp/images
+                    imagesDir = Paths.get("src", "main", "webapp", "images");
+                    logger.info("Using relative webapp images directory: {}", imagesDir);
+                }
+            } catch (Exception e) {
+                logger.warn("Could not determine webapp directory: {}", e.getMessage());
+            }
+        }
+
+        // Option 3: Temp directory (last resort)
+        if (imagesDir == null) {
+            imagesDir = Paths.get(System.getProperty("java.io.tmpdir"), "library_images");
+            logger.info("Using temp directory as fallback: {}", imagesDir);
+        }
+
+        // Create directory if it doesn't exist
+        try {
+            if (!Files.exists(imagesDir)) {
+                Files.createDirectories(imagesDir);
+                logger.info("Created images directory: {}", imagesDir);
+            }
+
+            // Check if directory is writable
+            if (!Files.isWritable(imagesDir)) {
+                throw new IOException("Directory is not writable: " + imagesDir);
+            }
+
+        } catch (Exception e) {
+            logger.error("Failed to create or access images directory {}: {}", imagesDir, e.getMessage());
+            throw new IOException("Cannot access images directory: " + e.getMessage());
+        }
+
+        // Write the file
         Path filePath = imagesDir.resolve(safeFileName);
-        filePart.write(filePath.toString());
+        try {
+            logger.info("Writing file to: {}", filePath);
+            filePart.write(filePath.toString());
 
-        logger.info("Downloading image file: {}", filePath);
+            // Verify file was written
+            if (!Files.exists(filePath)) {
+                throw new IOException("File was not written successfully");
+            }
+
+            long fileSize = Files.size(filePath);
+            logger.info("Image file successfully written: {} (size: {} bytes)", filePath, fileSize);
+
+        } catch (Exception e) {
+            logger.error("Failed to write image file {}: {}", filePath, e.getMessage());
+            throw new IOException("Cannot write image file: " + e.getMessage());
+        }
 
         return safeFileName;
     }

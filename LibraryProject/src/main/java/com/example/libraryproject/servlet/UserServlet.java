@@ -181,14 +181,8 @@ public class UserServlet extends HttpServlet {
         try {
             String bookId = jsonNode.get("bookId").asText();
 
-            boolean success = userService.cancelReservation(username, bookId);
+            userService.cancelReservation(username, bookId);
 
-            if (success) {
-                response.getWriter().write("{\"success\": true, \"message\": \"Reservation canceled successfully\"}");
-            } else {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("{\"success\": false, \"message\": \"Failed to cancel reservation\"}");
-            }
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write("{\"success\": false, \"message\": \"Server error: " + e.getMessage() + "\"}");

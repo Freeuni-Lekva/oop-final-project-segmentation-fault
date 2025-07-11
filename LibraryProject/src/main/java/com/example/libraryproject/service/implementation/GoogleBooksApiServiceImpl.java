@@ -31,9 +31,6 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
     private static final Logger logger = LoggerFactory.getLogger(GoogleBooksApiServiceImpl.class);
     private static final HttpClient httpClient = HttpClient.newHttpClient();
 
-    public boolean fetchBook(BookAdditionFromGoogleRequest request) {
-        return fetchBook(request, 1); // Default to 1 copy
-    }
 
     public boolean fetchBook(BookAdditionFromGoogleRequest request, int copies) {
         Book book = getBookFromGoogle(request.title(), request.author());
@@ -393,6 +390,11 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(imagesDir, "*.{jpg,jpeg,png,gif}")) {
                 for (Path file : stream) {
                     try {
+                        // Dzalis_Gamoghvidzeba.jpg is a special image that should never be deleted
+                        // and always be in the repository
+                        if (file.getFileName().toString().equals("Dzalis_Gamoghvidzeba.jpg")) {
+                            continue;
+                        }
                         Files.delete(file);
                     } catch (Exception e) {
                         logger.warn("Could not delete file {}: {}", file.getFileName(), e.getMessage());
