@@ -56,6 +56,12 @@ public class BookKeeperServletTest {
     private static final String USER_PASSWORD = "password123";
     private static final String USER_EMAIL = "user@example.com";
 
+    private static final String BOOKKEEPER_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.bookkeeper-service");
+    private static final String AUTHORIZATION_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.authorization-service");
+    private static final String OBJECT_MAPPER_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.object-mapper");
+    private static final String GOOGLE_BOOKS_API_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.google-books-api");
+    private static final String ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.account-activation-service");
+
     @BeforeAll
     public static void setUpServer() throws Exception {
         logger.info("Starting integration test setup...");
@@ -101,11 +107,11 @@ public class BookKeeperServletTest {
             context.addServlet(new ServletHolder(new AuthorizationServlet()), "/api/authorization/*");
             context.addServlet(new ServletHolder(new BookKeeperServlet()), "/api/bookkeeper/*");
 
-            context.setAttribute(ApplicationProperties.OBJECT_MAPPER_ATTRIBUTE_NAME, objectMapper);
-            context.setAttribute(ApplicationProperties.AUTHORIZATION_SERVICE_ATTRIBUTE_NAME, authorizationService);
-            context.setAttribute(ApplicationProperties.ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME, accountActivationService);
-            context.setAttribute(ApplicationProperties.BOOKKEEPER_SERVICE_ATTRIBUTE_NAME, bookKeeperService);
-            context.setAttribute(ApplicationProperties.GOOGLE_BOOKS_API_ATTRIBUTE_NAME, googleBooksApiService);
+            context.setAttribute(OBJECT_MAPPER_ATTRIBUTE_NAME, objectMapper);
+            context.setAttribute(AUTHORIZATION_SERVICE_ATTRIBUTE_NAME, authorizationService);
+            context.setAttribute(ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME, accountActivationService);
+            context.setAttribute(BOOKKEEPER_SERVICE_ATTRIBUTE_NAME, bookKeeperService);
+            context.setAttribute(GOOGLE_BOOKS_API_ATTRIBUTE_NAME, googleBooksApiService);
             context.setAttribute("sessionFactory", sessionFactory);
 
             server.setHandler(context);
@@ -123,7 +129,7 @@ public class BookKeeperServletTest {
     }
 
     @AfterAll
-    public static void tearDownServer() throws Exception {
+    public static void tearDownServer() {
         logger.info("Shutting down test server...");
 
         try {
@@ -305,7 +311,7 @@ public class BookKeeperServletTest {
         
         JsonNode books = objectMapper.readTree(response.body());
         assertTrue(books.isArray(), "Response should be an array");
-        assertTrue(books.size() > 0, "Books array should not be empty");
+        assertFalse(books.isEmpty(), "Books array should not be empty");
         
         boolean bookFound = false;
         for (JsonNode book : books) {
@@ -341,7 +347,7 @@ public class BookKeeperServletTest {
         
         JsonNode users = objectMapper.readTree(response.body());
         assertTrue(users.isArray(), "Response should be an array");
-        assertTrue(users.size() > 0, "Users array should not be empty");
+        assertFalse(users.isEmpty(), "Users array should not be empty");
 
         boolean userFound = false;
         

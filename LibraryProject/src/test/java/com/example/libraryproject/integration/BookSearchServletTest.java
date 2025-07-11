@@ -26,7 +26,6 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -41,6 +40,8 @@ public class BookSearchServletTest {
             .connectTimeout(Duration.ofSeconds(10))
             .build();
     private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    private static final String BOOK_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.book-service");
 
     @BeforeAll
     public static void setUpServer() throws Exception {
@@ -66,7 +67,7 @@ public class BookSearchServletTest {
             logger.info("Adding servlets...");
             context.addServlet(new ServletHolder(new BookSearchServlet()), "/api/books/search");
 
-            context.setAttribute(ApplicationProperties.BOOK_SERVICE_ATTRIBUTE_NAME, bookService);
+            context.setAttribute(BOOK_SERVICE_ATTRIBUTE_NAME, bookService);
 
             server.setHandler(context);
 
@@ -83,7 +84,7 @@ public class BookSearchServletTest {
     }
 
     @AfterAll
-    public static void tearDownServer() throws Exception {
+    public static void tearDownServer() {
         logger.info("Shutting down test server...");
 
         try {

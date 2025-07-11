@@ -1,5 +1,6 @@
 package com.example.libraryproject.integration;
 
+import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.User;
 import com.example.libraryproject.model.enums.Role;
@@ -35,9 +36,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.UUID;
 
-import static com.example.libraryproject.configuration.ApplicationProperties.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
@@ -54,7 +53,11 @@ public class ReviewServletTest {
             .connectTimeout(Duration.ofSeconds(10))
             .build();
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    
+
+    private static final String OBJECT_MAPPER_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.object-mapper");
+    private static final String USER_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.user-service");
+    private static final String BOOK_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.book-service");
+
     // Test data constants
     private static final String TEST_USERNAME = "testuser";
     private static final String TEST_PASSWORD = "password123";
@@ -121,7 +124,7 @@ public class ReviewServletTest {
     }
 
     @AfterAll
-    public static void tearDownServer() throws Exception {
+    public static void tearDownServer() {
         logger.info("Shutting down test server...");
 
         try {
@@ -549,7 +552,7 @@ public class ReviewServletTest {
     public static class SessionSetterServlet extends jakarta.servlet.http.HttpServlet {
         @Override
         protected void doGet(jakarta.servlet.http.HttpServletRequest req, jakarta.servlet.http.HttpServletResponse resp) 
-                throws jakarta.servlet.ServletException, java.io.IOException {
+                throws java.io.IOException {
             String username = req.getParameter("username");
             if (username != null && !username.isEmpty()) {
                 req.getSession(true).setAttribute("username", username);

@@ -33,7 +33,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -59,6 +58,12 @@ public class UserServletTest {
     private static final String SECOND_USERNAME = "seconduser";
     private static final String SECOND_PASSWORD = "password123";
     private static final String SECOND_EMAIL = "seconduser@example.com";
+
+    private static final String OBJECT_MAPPER_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.object-mapper");
+    private static final String AUTHORIZATION_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.authorization-service");
+    private static final String ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.account-activation-service");
+    private static final String USER_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.user-service");
+
 
     private static String testBookId;
 
@@ -106,10 +111,10 @@ public class UserServletTest {
             context.addServlet(new ServletHolder(new AuthorizationServlet()), "/api/authorization/*");
             context.addServlet(new ServletHolder(new UserServlet()), "/api/user/*");
 
-            context.setAttribute(ApplicationProperties.OBJECT_MAPPER_ATTRIBUTE_NAME, objectMapper);
-            context.setAttribute(ApplicationProperties.AUTHORIZATION_SERVICE_ATTRIBUTE_NAME, authorizationService);
-            context.setAttribute(ApplicationProperties.ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME, accountActivationService);
-            context.setAttribute(ApplicationProperties.USER_SERVICE_ATTRIBUTE_NAME, userService);
+            context.setAttribute(OBJECT_MAPPER_ATTRIBUTE_NAME, objectMapper);
+            context.setAttribute(AUTHORIZATION_SERVICE_ATTRIBUTE_NAME, authorizationService);
+            context.setAttribute(ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME, accountActivationService);
+            context.setAttribute(USER_SERVICE_ATTRIBUTE_NAME, userService);
             context.setAttribute("sessionFactory", sessionFactory);
 
 
@@ -157,7 +162,7 @@ public class UserServletTest {
     }
 
     @AfterAll
-    public static void tearDownServer() throws Exception {
+    public static void tearDownServer() {
         logger.info("Shutting down test server...");
 
         try {

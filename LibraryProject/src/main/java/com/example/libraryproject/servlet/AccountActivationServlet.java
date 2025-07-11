@@ -20,6 +20,8 @@ import java.nio.charset.StandardCharsets;
 public class AccountActivationServlet extends HttpServlet {
 
     private static final Logger logger = LoggerFactory.getLogger(AccountActivationServlet.class);
+    private static final String ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.account-activation-service");
+    private static final String OBJECT_MAPPER_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.object-mapper");
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -32,7 +34,7 @@ public class AccountActivationServlet extends HttpServlet {
         }
 
         AccountActivationService activationService = (AccountActivationService) request.getServletContext()
-                .getAttribute(ApplicationProperties.ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME);
+                .getAttribute(ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME);
 
         if (activationService == null) {
             logger.error("AccountActivationService is null - service not properly initialized");
@@ -56,10 +58,10 @@ public class AccountActivationServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         ObjectMapper objectMapper = (ObjectMapper) request.getServletContext()
-                .getAttribute(ApplicationProperties.OBJECT_MAPPER_ATTRIBUTE_NAME);
+                .getAttribute(OBJECT_MAPPER_ATTRIBUTE_NAME);
 
         AccountActivationService activationService = (AccountActivationService) request.getServletContext()
-                .getAttribute(ApplicationProperties.ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME);
+                .getAttribute(ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME);
 
         String path = request.getPathInfo();
         request.setCharacterEncoding(StandardCharsets.UTF_8.name());

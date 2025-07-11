@@ -29,6 +29,7 @@ public class AuthorizationServlet extends HttpServlet {
 
     private static final String AUTHORIZATION_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.authorization-service");
     private static final String OBJECT_MAPPER_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.object-mapper");
+    private static final String ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.account-activation-service");
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -40,7 +41,7 @@ public class AuthorizationServlet extends HttpServlet {
                 .getAttribute(AUTHORIZATION_SERVICE_ATTRIBUTE_NAME);
 
         AccountActivationService accountActivationService = (AccountActivationService) request.getServletContext()
-                .getAttribute(ApplicationProperties.ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME);
+                .getAttribute(ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME);
 
         if (accountActivationService == null) {
             logger.warn("AccountActivationService is not configured in the servlet context.");

@@ -30,7 +30,9 @@ public class ApplicationContextListener implements ServletContextListener {
     private static final String USER_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.user-service");
     private static final String GOOGLE_BOOKS_API_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.google-books-api");
     private static final String OBJECT_MAPPER_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.object-mapper");
-
+    private static final String ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.account-activation-service");
+    private static final String ADMIN_EMAIL = ApplicationProperties.get("email.admin-email");
+    private static final String ACTIVATION_BASE_URL = ApplicationProperties.get("activation.base-url");
 
     @Override
     public void contextInitialized(ServletContextEvent event) {
@@ -56,7 +58,7 @@ public class ApplicationContextListener implements ServletContextListener {
                 RegistrationRequest request = new RegistrationRequest("gmerti", "123", ADMIN_EMAIL, Role.BOOKKEEPER);
                 User adminUser = authorizationService.register(request);
                 // For admin user, use configured URL since we don't have request context here
-                accountActivationService.createActivation(adminUser, ApplicationProperties.ACTIVATION_BASE_URL + "/activate");
+                accountActivationService.createActivation(adminUser, ACTIVATION_BASE_URL + "/activate");
                 logger.info("Default bookkeeper 'gmerti' created with activation email");
             } else {
                 logger.info("Default bookkeeper 'gmerti' already exists");
