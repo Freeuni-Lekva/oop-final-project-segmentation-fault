@@ -3,6 +3,7 @@ package com.example.libraryproject.repository;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Review;
 import com.example.libraryproject.model.entity.User;
+import com.example.libraryproject.model.enums.Role;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.jupiter.api.*;
@@ -156,5 +157,156 @@ public class TestUserRepository {
         assertEquals(0, borrowedBooks.size());
     }
 
+    @Test
+    public void testUpdateAll() {
+        User user1 = new User();
+        user1.setUsername("user1");
+        user1.setPassword("pass1");
+        user1.setMail("user1@gmail.com");
+        user1.setRole(Role.USER);
 
+        User user2 = new User();
+        user2.setUsername("user2");
+        user2.setPassword("pass2");
+        user2.setMail("user2@gmail.com");
+        user2.setRole(Role.USER);
+
+        User user3 = new User();
+        user3.setUsername("user3");
+        user3.setPassword("pass3");
+        user3.setMail("user3@gmail.com");
+        user3.setRole(Role.BOOKKEEPER);
+
+        userRepository.save(user1);
+        userRepository.save(user2);
+        userRepository.save(user3);
+
+        user1.setBio("Updated bio 1");
+        user2.setBio("Updated bio 2");
+        user3.setBio("Updated bio 3");
+
+        Set<User> usersToUpdate = Set.of(user1, user2);
+        userRepository.updateAll(usersToUpdate);
+
+        Optional<User> updatedUser1 = userRepository.findById(user1.getId());
+        Optional<User> updatedUser2 = userRepository.findById(user2.getId());
+        Optional<User> notUpdatedUser3 = userRepository.findById(user3.getId());
+
+        assertTrue(updatedUser1.isPresent());
+        assertTrue(updatedUser2.isPresent());
+        assertTrue(notUpdatedUser3.isPresent());
+
+        assertEquals("Updated bio 1", updatedUser1.get().getBio());
+        assertEquals("Updated bio 2", updatedUser2.get().getBio());
+        assertEquals("", notUpdatedUser3.get().getBio());
+    }
+
+    @Test
+    public void testFindByMail() {
+        User user = new User();
+        user.setUsername("testuser");
+        user.setPassword("testpass");
+        user.setMail("test@example.com");
+        user.setRole(Role.USER);
+        userRepository.save(user);
+
+        Optional<User> foundUser = userRepository.findByMail("test@example.com");
+        assertTrue(foundUser.isPresent());
+        assertEquals("testuser", foundUser.get().getUsername());
+        assertEquals("test@example.com", foundUser.get().getMail());
+
+        Optional<User> notFoundUser = userRepository.findByMail("nonexistent@example.com");
+        assertFalse(notFoundUser.isPresent());
+
+        Optional<User> nullMailUser = userRepository.findByMail(null);
+        assertFalse(nullMailUser.isPresent());
+    }
+
+    @Test
+    public void testFindByUsernameAndRole() {
+        User userWithUserRole = new User();
+        userWithUserRole.setUsername("regularuser");
+        userWithUserRole.setPassword("userpass");
+        userWithUserRole.setMail("user@example.com");
+        userWithUserRole.setRole(Role.USER);
+
+        User userWithBookkeeperRole = new User();
+        userWithBookkeeperRole.setUsername("bookkeeper");
+        userWithBookkeeperRole.setPassword("bookpass");
+        userWithBookkeeperRole.setMail("bookkeeper@example.com");
+        userWithBookkeeperRole.setRole(Role.BOOKKEEPER);
+
+        User anotherUserWithBookkeeperRole = new User();
+        anotherUserWithBookkeeperRole.setUsername("anotherbookkeeper");
+        anotherUserWithBookkeeperRole.setPassword("pass");
+        anotherUserWithBookkeeperRole.setMail("another@example.com");
+        anotherUserWithBookkeeperRole.setRole(Role.BOOKKEEPER);
+
+        userRepository.save(userWithUserRole);
+        userRepository.save(userWithBookkeeperRole);
+        userRepository.save(anotherUserWithBookkeeperRole);
+
+        Optional<User> foundUser = userRepository.findByUsernameAndRole("regularuser", Role.USER);
+        assertTrue(foundUser.isPresent());
+        assertEquals("regularuser", foundUser.get().getUsername());
+        assertEquals(Role.USER, foundUser.get().getRole());
+
+        Optional<User> foundBookkeeper = userRepository.findByUsernameAndRole("bookkeeper", Role.BOOKKEEPER);
+        assertTrue(foundBookkeeper.isPresent());
+        assertEquals("bookkeeper", foundBookkeeper.get().getUsername());
+        assertEquals(Role.BOOKKEEPER, foundBookkeeper.get().getRole());
+
+        Optional<User> wrongRole = userRepository.findByUsernameAndRole("regularuser", Role.BOOKKEEPER);
+        assertFalse(wrongRole.isPresent());
+
+        Optional<User> notFound = userRepository.findByUsernameAndRole("nonexistent", Role.USER);
+        assertFalse(notFound.isPresent());
+    }
+
+    @Test
+    public void testFindByRole() {
+        User user1 = new User();
+        user1.setUsername("user1");
+        user1.setPassword("pass1");
+        user1.setMail("user1@example.com");
+        user1.setRole(Role.USER);
+
+        User user2 = new User();
+        user2.setUsername("user2");
+        user2.setPassword("pass2");
+        user2.setMail("user2@example.com");
+        user2.setRole(Role.USER);
+
+        User bookkeeper1 = new User();
+        bookkeeper1.setUsername("bookkeeper1");
+        bookkeeper1.setPassword("bookpass1");
+        bookkeeper1.setMail("bookkeeper1@example.com");
+        bookkeeper1.setRole(Role.BOOKKEEPER);
+
+        User bookkeeper2 = new User();
+        bookkeeper2.setUsername("bookkeeper2");
+        bookkeeper2.setPassword("bookpass2");
+        bookkeeper2.setMail("bookkeeper2@example.com");
+        bookkeeper2.setRole(Role.BOOKKEEPER);
+
+        userRepository.save(user1);
+        userRepository.save(user2);
+        userRepository.save(bookkeeper1);
+        userRepository.save(bookkeeper2);
+
+        Set<User> users = userRepository.findByRole(Role.USER);
+        assertEquals(2, users.size());
+        assertTrue(users.stream().allMatch(user -> user.getRole() == Role.USER));
+        assertTrue(users.contains(user1));
+        assertTrue(users.contains(user2));
+
+        Set<User> bookkeepers = userRepository.findByRole(Role.BOOKKEEPER);
+        assertEquals(2, bookkeepers.size());
+        assertTrue(bookkeepers.stream().allMatch(user -> user.getRole() == Role.BOOKKEEPER));
+        assertTrue(bookkeepers.contains(bookkeeper1));
+        assertTrue(bookkeepers.contains(bookkeeper2));
+
+        assertFalse(users.contains(bookkeeper1));
+        assertFalse(bookkeepers.contains(user1));
+    }
 }

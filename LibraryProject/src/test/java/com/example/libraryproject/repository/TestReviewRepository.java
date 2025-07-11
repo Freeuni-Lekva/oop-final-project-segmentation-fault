@@ -70,7 +70,12 @@ public class TestReviewRepository {
 
     @Test
     public void testSaveAndFindById() {
-        Review review = new Review(UUID.randomUUID(),5, "Tafliani 9 weli", user, book1);
+        Review review = new Review();
+        review.setPublicId(UUID.randomUUID());
+        review.setRating(5);
+        review.setComment("Tafliani 9 weli");
+        review.setUser(user);
+        review.setBook(book1);
 
         reviewRepository.save(review);
 
@@ -184,5 +189,80 @@ public class TestReviewRepository {
         assertEquals(2, allReviews.size());
     }
 
+    @Test
+    public void testDeleteAll() {
+        Review review1 = new Review();
+        review1.setUser(user);
+        review1.setPublicId(UUID.randomUUID());
+        review1.setBook(book1);
+        review1.setRating(4);
+        review1.setComment("Great book");
 
+        Review review2 = new Review();
+        review2.setUser(user2);
+        review2.setPublicId(UUID.randomUUID());
+        review2.setBook(book2);
+        review2.setRating(3);
+        review2.setComment("Average book");
+
+        Review review3 = new Review();
+        review3.setUser(user);
+        review3.setPublicId(UUID.randomUUID());
+        review3.setBook(book2);
+        review3.setRating(5);
+        review3.setComment("Excellent");
+
+        reviewRepository.save(review1);
+        reviewRepository.save(review2);
+        reviewRepository.save(review3);
+
+        Set<Review> reviewsToDelete = Set.of(review1, review2);
+        reviewRepository.deleteAll(reviewsToDelete);
+
+        Optional<Review> deletedReview1 = reviewRepository.findById(review1.getId());
+        Optional<Review> deletedReview2 = reviewRepository.findById(review2.getId());
+        Optional<Review> remainingReview = reviewRepository.findById(review3.getId());
+
+        assertTrue(deletedReview1.isEmpty());
+        assertTrue(deletedReview2.isEmpty());
+        assertTrue(remainingReview.isPresent());
+    }
+
+    @Test
+    public void testFindReviewsByBookPublicId() {
+        Review review1 = new Review();
+        review1.setUser(user);
+        review1.setPublicId(UUID.randomUUID());
+        review1.setBook(book1);
+        review1.setRating(5);
+        review1.setComment("Amazing book");
+
+        Review review2 = new Review();
+        review2.setUser(user2);
+        review2.setPublicId(UUID.randomUUID());
+        review2.setBook(book1);
+        review2.setRating(4);
+        review2.setComment("Very good");
+
+        Review review3 = new Review();
+        review3.setUser(user);
+        review3.setPublicId(UUID.randomUUID());
+        review3.setBook(book2);
+        review3.setRating(3);
+        review3.setComment("Okay book");
+
+        reviewRepository.save(review1);
+        reviewRepository.save(review2);
+        reviewRepository.save(review3);
+
+        Set<Review> book1Reviews = reviewRepository.findReviewsByBookPublicId(book1.getPublicId());
+        Set<Review> book2Reviews = reviewRepository.findReviewsByBookPublicId(book2.getPublicId());
+
+        assertEquals(2, book1Reviews.size());
+        assertEquals(1, book2Reviews.size());
+        assertTrue(book1Reviews.contains(review1));
+        assertTrue(book1Reviews.contains(review2));
+        assertTrue(book2Reviews.contains(review3));
+        assertFalse(book1Reviews.contains(review3));
+    }
 }

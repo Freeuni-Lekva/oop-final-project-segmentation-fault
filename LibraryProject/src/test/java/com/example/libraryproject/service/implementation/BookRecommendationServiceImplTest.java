@@ -12,11 +12,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Method;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.example.libraryproject.configuration.ApplicationProperties.RECOMMENDED_COUNT;
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,7 +23,6 @@ public class BookRecommendationServiceImplTest {
     private SessionFactory sessionFactory;
     private BookRepository bookRepository;
     private BookRecommendationServiceImpl recommendationService;
-    private UserRepository userRepository;
     private Set<BookDTO> recommendedBooks;
 
     private User user;
@@ -144,5 +141,48 @@ public class BookRecommendationServiceImplTest {
     @Test
     public void test3() {
         assertTrue(recommendedBooks.stream().noneMatch(user.getReadBooks()::contains));
+    }
+
+    @Test
+    public void testApplyCoefficients() throws Exception {
+        Set<String> topAuthorNames = Set.of("Author A", "Author B");
+        Set<String> topGenreNames = Set.of("Fantasy", "Science Fiction");
+        
+        Map<String, Double> authorScores = new HashMap<>();
+        authorScores.put("Author A", 6.0);
+        authorScores.put("Author B", 3.0);
+        
+        Map<String, Double> genreScores = new HashMap<>();
+        genreScores.put("Fantasy", 4.0);
+        genreScores.put("Science Fiction", 2.0);
+
+        List<Book> candidateBooks = new ArrayList<>();
+        candidateBooks.add(new Book("book1", "Book 1", "Fantasy", "Author A", LocalDate.now(), "Description 1", 300L, 1L, 5L, 4.0, "book1.jpg"));
+        candidateBooks.add(new Book("book2", "Book 2", "Fantasy", "Author B", LocalDate.now(), "Description 2", 300L, 1L, 5L, 4.0, "book2.jpg"));
+        candidateBooks.add(new Book("book3", "Book 3", "Science Fiction", "Author A", LocalDate.now(), "Description 3", 300L, 1L, 5L, 4.0, "book3.jpg"));
+        candidateBooks.add(new Book("book4", "Book 4", "Science Fiction", "Author B", LocalDate.now(), "Description 4", 300L, 1L, 5L, 4.0, "book4.jpg"));
+
+        Method applyCoefficientsMethod = BookRecommendationServiceImpl.class.getDeclaredMethod(
+            "applyCoefficients", 
+            Set.class, Set.class, Map.class, Map.class, List.class
+        );
+        applyCoefficientsMethod.setAccessible(true);
+
+        @SuppressWarnings("unchecked")
+        List<Book> result = (List<Book>) applyCoefficientsMethod.invoke(
+            recommendationService, 
+            topAuthorNames, topGenreNames, authorScores, genreScores, candidateBooks
+        );
+
+        assertNotNull(result);
+        assertTrue(result.size() <= RECOMMENDED_COUNT);
+        assertTrue(result.size() <= candidateBooks.size());
+
+        for (Book book : result) {
+            assertTrue(candidateBooks.contains(book), "Result contains book not in candidate list");
+        }
+
+        Set<Book> uniqueBooks = new HashSet<>(result);
+        assertEquals(result.size(), uniqueBooks.size(), "Result contains duplicate books");
     }
 }
