@@ -39,6 +39,9 @@ public class AuthorizationServlet extends HttpServlet {
         AccountActivationService accountActivationService = (AccountActivationService) request.getServletContext()
                 .getAttribute(ApplicationProperties.ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME);
 
+        if (accountActivationService == null) {
+            logger.warn("AccountActivationService is not configured in the servlet context.");
+        }
         String path = request.getPathInfo();
         request.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType("application/json");
