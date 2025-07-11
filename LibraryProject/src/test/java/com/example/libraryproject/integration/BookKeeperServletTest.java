@@ -5,9 +5,12 @@ import com.example.libraryproject.repository.BookRepository;
 import com.example.libraryproject.repository.OrderRepository;
 import com.example.libraryproject.repository.ReviewRepository;
 import com.example.libraryproject.repository.UserRepository;
+import com.example.libraryproject.repository.AccountActivationRepository;
 import com.example.libraryproject.service.BookKeeperService;
 import com.example.libraryproject.service.GoogleBooksApiService;
 import com.example.libraryproject.service.MailService;
+import com.example.libraryproject.service.AccountActivationService;
+import com.example.libraryproject.service.implementation.AccountActivationServiceImpl;
 import com.example.libraryproject.service.implementation.AuthorizationServiceImpl;
 import com.example.libraryproject.service.implementation.BookKeeperServiceImpl;
 import com.example.libraryproject.service.implementation.GoogleBooksApiServiceImpl;
@@ -73,9 +76,17 @@ public class BookKeeperServletTest {
             BookRepository bookRepository = new BookRepository(sessionFactory);
             OrderRepository orderRepository = new OrderRepository(sessionFactory);
             ReviewRepository reviewRepository = new ReviewRepository(sessionFactory);
+            AccountActivationRepository accountActivationRepository = new AccountActivationRepository(sessionFactory);
 
             MailService mailService = Mockito.mock(MailService.class);
             GoogleBooksApiService googleBooksApiService = Mockito.mock(GoogleBooksApiServiceImpl.class);
+            
+            // Create AccountActivationService with real implementation but mocked dependencies
+            AccountActivationService accountActivationService = new AccountActivationServiceImpl(
+                accountActivationRepository, 
+                userRepository, 
+                mailService
+            );
 
             AuthorizationServiceImpl authorizationService = new AuthorizationServiceImpl(userRepository, mailService);
             BookKeeperService bookKeeperService = new BookKeeperServiceImpl(
@@ -92,6 +103,7 @@ public class BookKeeperServletTest {
 
             context.setAttribute(ApplicationProperties.OBJECT_MAPPER_ATTRIBUTE_NAME, objectMapper);
             context.setAttribute(ApplicationProperties.AUTHORIZATION_SERVICE_ATTRIBUTE_NAME, authorizationService);
+            context.setAttribute(ApplicationProperties.ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME, accountActivationService);
             context.setAttribute(ApplicationProperties.BOOKKEEPER_SERVICE_ATTRIBUTE_NAME, bookKeeperService);
             context.setAttribute(ApplicationProperties.GOOGLE_BOOKS_API_ATTRIBUTE_NAME, googleBooksApiService);
             context.setAttribute("sessionFactory", sessionFactory);
@@ -145,6 +157,8 @@ public class BookKeeperServletTest {
             var transaction = session.beginTransaction();
             try {
                 session.createQuery("DELETE FROM Book").executeUpdate();
+                // Delete AccountActivation first due to foreign key constraint with User
+                session.createQuery("DELETE FROM AccountActivation").executeUpdate();
                 session.createQuery("DELETE FROM User").executeUpdate();
                 logger.info("Database cleaned successfully");
             } catch (Exception e) {
@@ -202,7 +216,27 @@ public class BookKeeperServletTest {
             throw new RuntimeException("Failed to register user: " + response.body());
         }
         
-        logger.info("Test users registered successfully");
+        // Activate both users after registration
+        activateUser(BOOKKEEPER_USERNAME);
+        activateUser(USER_USERNAME);
+        
+        logger.info("Test users registered and activated successfully");
+    }
+    
+    private void activateUser(String username) {
+        logger.info("Activating user: {}", username);
+        try (var session = sessionFactory.openSession()) {
+            var transaction = session.beginTransaction();
+            session.createQuery("UPDATE User u SET u.status = :status WHERE u.username = :username")
+                    .setParameter("status", com.example.libraryproject.model.enums.UserStatus.ACTIVE)
+                    .setParameter("username", username)
+                    .executeUpdate();
+            transaction.commit();
+            logger.info("User {} activated successfully", username);
+        } catch (Exception e) {
+            logger.error("Error activating user {}: {}", username, e.getMessage(), e);
+            throw new RuntimeException("Failed to activate user", e);
+        }
     }
     
     private String loginAndGetSessionCookie(String username, String password) throws Exception {

@@ -6,8 +6,11 @@ import com.example.libraryproject.repository.BookRepository;
 import com.example.libraryproject.repository.OrderRepository;
 import com.example.libraryproject.repository.ReviewRepository;
 import com.example.libraryproject.repository.UserRepository;
+import com.example.libraryproject.repository.AccountActivationRepository;
 import com.example.libraryproject.service.MailService;
 import com.example.libraryproject.service.UserService;
+import com.example.libraryproject.service.AccountActivationService;
+import com.example.libraryproject.service.implementation.AccountActivationServiceImpl;
 import com.example.libraryproject.service.implementation.AuthorizationServiceImpl;
 import com.example.libraryproject.service.implementation.UserServiceImpl;
 import com.example.libraryproject.servlet.AuthorizationServlet;
@@ -79,8 +82,16 @@ public class UserServletTest {
             BookRepository bookRepository = new BookRepository(sessionFactory);
             OrderRepository orderRepository = new OrderRepository(sessionFactory);
             ReviewRepository reviewRepository = new ReviewRepository(sessionFactory);
+            AccountActivationRepository accountActivationRepository = new AccountActivationRepository(sessionFactory);
 
             MailService mailService = Mockito.mock(MailService.class);
+            
+            // Create AccountActivationService with real implementation but mocked dependencies
+            AccountActivationService accountActivationService = new AccountActivationServiceImpl(
+                accountActivationRepository, 
+                userRepository, 
+                mailService
+            );
 
             AuthorizationServiceImpl authorizationService = new AuthorizationServiceImpl(userRepository, mailService);
             UserService userService = new UserServiceImpl(
@@ -97,6 +108,7 @@ public class UserServletTest {
 
             context.setAttribute(ApplicationProperties.OBJECT_MAPPER_ATTRIBUTE_NAME, objectMapper);
             context.setAttribute(ApplicationProperties.AUTHORIZATION_SERVICE_ATTRIBUTE_NAME, authorizationService);
+            context.setAttribute(ApplicationProperties.ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME, accountActivationService);
             context.setAttribute(ApplicationProperties.USER_SERVICE_ATTRIBUTE_NAME, userService);
             context.setAttribute("sessionFactory", sessionFactory);
 
@@ -186,6 +198,8 @@ public class UserServletTest {
                 session.createNativeQuery("DELETE FROM read_books", Void.class).executeUpdate();
                 session.createNativeQuery("DELETE FROM orders_table", Void.class).executeUpdate();
                 session.createNativeQuery("DELETE FROM books_table", Void.class).executeUpdate();
+                // Delete AccountActivation before User due to foreign key constraint
+                session.createNativeQuery("DELETE FROM account_activation_table", Void.class).executeUpdate();
                 session.createNativeQuery("DELETE FROM users_table", Void.class).executeUpdate();
                 logger.info("Database cleaned successfully");
             } catch (Exception e) {
@@ -201,30 +215,6 @@ public class UserServletTest {
     private void registerTestUsers() throws Exception {
         logger.info("Registering test users...");
 
-        // Check if users already exist
-        try (var session = sessionFactory.openSession()) {
-            var transaction = session.beginTransaction();
-
-            // Check if test user exists
-            var testUser = session.createQuery("FROM User u WHERE u.username = :username", User.class)
-                    .setParameter("username", TEST_USERNAME)
-                    .getResultList();
-
-            // Check if second user exists
-            var secondUser = session.createQuery("FROM User u WHERE u.username = :username", User.class)
-                    .setParameter("username", SECOND_USERNAME)
-                    .getResultList();
-
-            // If both users exist, return early
-            if (!testUser.isEmpty() && !secondUser.isEmpty()) {
-                logger.info("Test users already exist, skipping registration");
-                transaction.commit();
-                return;
-            }
-
-            transaction.commit();
-        }
-
         // Register first user if needed
         if (registerUserIfNeeded(TEST_USERNAME, TEST_PASSWORD, TEST_EMAIL)) {
             logger.info("Registered test user: {}", TEST_USERNAME);
@@ -235,7 +225,11 @@ public class UserServletTest {
             logger.info("Registered second test user: {}", SECOND_USERNAME);
         }
 
-        logger.info("Test users registration completed");
+        // Activate both users after registration
+        activateUser(TEST_USERNAME);
+        activateUser(SECOND_USERNAME);
+
+        logger.info("Test users registration and activation completed");
     }
 
     private boolean registerUserIfNeeded(String username, String password, String email) throws Exception {
@@ -273,6 +267,22 @@ public class UserServletTest {
         }
 
         return true;
+    }
+    
+    private void activateUser(String username) {
+        logger.info("Activating user: {}", username);
+        try (var session = sessionFactory.openSession()) {
+            var transaction = session.beginTransaction();
+            session.createQuery("UPDATE User u SET u.status = :status WHERE u.username = :username")
+                    .setParameter("status", com.example.libraryproject.model.enums.UserStatus.ACTIVE)
+                    .setParameter("username", username)
+                    .executeUpdate();
+            transaction.commit();
+            logger.info("User {} activated successfully", username);
+        } catch (Exception e) {
+            logger.error("Error activating user {}: {}", username, e.getMessage(), e);
+            throw new RuntimeException("Failed to activate user", e);
+        }
     }
 
     private void createTestBook() {

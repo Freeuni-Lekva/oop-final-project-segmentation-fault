@@ -40,7 +40,7 @@ public class ApplicationContextListener implements ServletContextListener {
             event.getServletContext().setAttribute(ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME, accountActivationService);
             logger.info("AccountActivationService initialized and registered successfully");
 
-            AuthorizationService authorizationService = new AuthorizationServiceImpl(userRepository);
+            AuthorizationService authorizationService = new AuthorizationServiceImpl(userRepository, mailService);
             event.getServletContext().setAttribute(AUTHORIZATION_SERVICE_ATTRIBUTE_NAME, authorizationService);
 
             if (userRepository.findByUsername("gmerti").isEmpty()) {
