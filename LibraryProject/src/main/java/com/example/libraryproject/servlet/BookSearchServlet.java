@@ -1,9 +1,7 @@
 package com.example.libraryproject.servlet;
 
+import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.model.dto.BookDTO;
-import com.example.libraryproject.repository.BookRepository;
-import com.example.libraryproject.repository.ReviewRepository;
-import com.example.libraryproject.service.BookService;
 import com.example.libraryproject.service.implementation.BookServiceImpl;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
@@ -13,19 +11,16 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
-import static com.example.libraryproject.configuration.ApplicationProperties.BOOK_SERVICE_ATTRIBUTE_NAME;
 
 @WebServlet("/api/books/search")
 public class BookSearchServlet extends HttpServlet {
 
     private BookServiceImpl bookService;
+    private static final String BOOK_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.book-service");
 
     @Override
     public void init() throws ServletException {

@@ -1,5 +1,6 @@
 package com.example.libraryproject.servlet;
 
+import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.model.enums.BookSortCriteria;
 import com.example.libraryproject.service.BookService;
 import com.example.libraryproject.service.UserService;
@@ -13,11 +14,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
-import static com.example.libraryproject.configuration.ApplicationProperties.*;
 
 
 @WebServlet(name = "BookServlet",urlPatterns = {"/api/books/*"})
 public class BookServlet extends HttpServlet {
+
+    private static final String OBJECT_MAPPER_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.object-mapper");
+    private static final String BOOK_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.book-service");
+    private static final String USER_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.user-service");
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {

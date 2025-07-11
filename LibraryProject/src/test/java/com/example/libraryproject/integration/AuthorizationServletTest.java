@@ -46,6 +46,10 @@ public class AuthorizationServletTest {
             .build();
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
+    private static final String OBJECT_MAPPER_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.object-mapper");
+    private static final String AUTHORIZATION_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.authorization-service");
+    private static final String ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.account-activation-service");
+
     // Test data constants
     private static final String TEST_USERNAME = "zura";
     private static final String TEST_PASSWORD = "password123";
@@ -85,9 +89,9 @@ public class AuthorizationServletTest {
             logger.info("Adding servlets...");
             context.addServlet(new ServletHolder(new AuthorizationServlet()), "/api/authorization/*");
 
-            context.setAttribute(ApplicationProperties.OBJECT_MAPPER_ATTRIBUTE_NAME, objectMapper);
-            context.setAttribute(ApplicationProperties.AUTHORIZATION_SERVICE_ATTRIBUTE_NAME, authorizationService);
-            context.setAttribute(ApplicationProperties.ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME, accountActivationService);
+            context.setAttribute(OBJECT_MAPPER_ATTRIBUTE_NAME, objectMapper);
+            context.setAttribute(AUTHORIZATION_SERVICE_ATTRIBUTE_NAME, authorizationService);
+            context.setAttribute(ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME, accountActivationService);
             context.setAttribute("sessionFactory", sessionFactory);
 
             server.setHandler(context);
@@ -105,7 +109,7 @@ public class AuthorizationServletTest {
     }
 
     @AfterAll
-    public static void tearDownServer() throws Exception {
+    public static void tearDownServer() {
         logger.info("Shutting down test server...");
 
         try {
@@ -189,14 +193,14 @@ public class AuthorizationServletTest {
     public void testUserRegistration() throws Exception {
         logger.info("Starting testUserRegistration...");
 
-        String registrationPayload = String.format("""
+        String registrationPayload = """
             {
                 "username": "newuser",
                 "password": "newpass123",
                 "mail": "new@example.com",
                 "role": "USER"
             }
-            """);
+            """;
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/api/authorization/register"))

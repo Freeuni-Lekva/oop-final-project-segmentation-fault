@@ -1,43 +1,26 @@
 package com.example.libraryproject.configuration;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 public class ApplicationProperties {
 
-    public static final String GOOGLE_BOOKS_API_ATTRIBUTE_NAME = "google_api_service";
-    public static final String BOOKKEEPER_SERVICE_ATTRIBUTE_NAME = "BookKeeperService";
-    public static final String AUTHORIZATION_SERVICE_ATTRIBUTE_NAME = "AuthorizationService";
-    public static final String BOOK_RECOMMENDATION_SERVICE_ATTRIBUTE_NAME = "BookRecommendationService";
-    public static final String BOOK_SERVICE_ATTRIBUTE_NAME = "BookService";
-    public static final String USER_SERVICE_ATTRIBUTE_NAME = "UserService";
-    public static final String SCHEDULER_SERVICE_ATTRIBUTE_NAME = "SchedulerService";
-    public static final String ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME = "AccountActivationService";
-    public static final String OBJECT_MAPPER_ATTRIBUTE_NAME = "ObjectMapper";
+    private static final Properties properties = new Properties();
 
-    public static final String[] GOOGLE_BOOKS_GENRES = {
-            "romance", "mystery", "fantasy", "fiction",
-            "horror", "adventure", "comedy", "crime", "memoir", "poetry",
-            "philosophy", "psychology", "art", "religion", "politics",
-            "history", "classics"
-    };
-    public static final String GOOGLE_API_URL = "https://www.googleapis.com/books/v1/volumes";
-    public static final int BOOKS_PER_REQUEST = 40;
-    public static final int GOOGLE_BOOKS_API_MAX_PAGE = 150;
+    static {
 
-    public static final int RECOMMENDED_COUNT = 25;
-    public static final int TOP_AUTHORS_COUNT = 3;
-    public static final int TOP_GENRE_COUNT = 3;
+        InputStream input = ApplicationProperties.class.getClassLoader().getResourceAsStream("application.properties");
 
-    public static final int SCHEDULER_UPDATE_INTERVAL_HRS = 1;
-    public static final int STALE_ORDER_TIMEOUT_HRS = 48;
+        try {
+            properties.load(input);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-    public static final String EMAIL_ADDRESS = "ooplibrarymanagement@gmail.com";
-    public static final String EMAIL_PASSWORD = "zpux dgjo uept afdn";
-    public static final String SMTP_HOST = "smtp.googlemail.com";
-    public static final int SMTP_PORT = 465;
+    }
 
-    public static final String ADMIN_EMAIL = "";
-
-    public static final int SCHEDULER_BOOK_REMINDER_INTERVAL_HRS = 24;
-
-    public static final String ACTIVATION_BASE_URL = System.getenv("ACTIVATION_BASE_URL") != null ? 
-            System.getenv("ACTIVATION_BASE_URL") : "http://localhost:8080/LibraryProject_war_exploded";
+    public static String get(String key) {
+        return properties.getProperty(key);
+    }
 }

@@ -50,6 +50,10 @@ public class BookServletTest {
             .build();
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
+    private static final String OBJECT_MAPPER_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.object-mapper");
+    private static final String USER_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.user-service");
+    private static final String BOOK_SERVICE_ATTRIBUTE_NAME = ApplicationProperties.get("attribute.book-service");
+
     // Test data constants
     private static final String FANTASY_GENRE = "Fantasy";
     private static final String TEST_PASSWORD = "password123";
@@ -94,9 +98,9 @@ public class BookServletTest {
             context.addServlet(new ServletHolder(new BookServlet()), "/api/books/*");
 
             // Set up servlet context attributes
-            context.setAttribute(ApplicationProperties.OBJECT_MAPPER_ATTRIBUTE_NAME, objectMapper);
-            context.setAttribute(ApplicationProperties.BOOK_SERVICE_ATTRIBUTE_NAME, bookService);
-            context.setAttribute(ApplicationProperties.USER_SERVICE_ATTRIBUTE_NAME, userService);
+            context.setAttribute(OBJECT_MAPPER_ATTRIBUTE_NAME, objectMapper);
+            context.setAttribute(BOOK_SERVICE_ATTRIBUTE_NAME, bookService);
+            context.setAttribute(USER_SERVICE_ATTRIBUTE_NAME, userService);
 
             server.setHandler(context);
 
@@ -114,7 +118,7 @@ public class BookServletTest {
     }
 
     @AfterAll
-    public static void tearDownServer() throws Exception {
+    public static void tearDownServer() {
         logger.info("Shutting down test server...");
 
         try {

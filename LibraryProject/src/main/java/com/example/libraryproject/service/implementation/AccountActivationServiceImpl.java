@@ -29,6 +29,8 @@ public class AccountActivationServiceImpl implements AccountActivationService {
     private final UserRepository userRepository;
     private final MailService mailService;
 
+    private static final String ACTIVATION_BASE_URL = ApplicationProperties.get("activation.base-url");
+
     @Override
     public boolean createActivation(User user, String activationBaseUrl) {
         logger.info("Creating activation for user: {}", user.getUsername());
@@ -155,7 +157,7 @@ public class AccountActivationServiceImpl implements AccountActivationService {
             if (activationOpt.isEmpty()) {
                 // Create new activation if none exists
                 // Use fallback URL for resend since we don't have request context
-                return createActivation(user, ApplicationProperties.ACTIVATION_BASE_URL + "/activate");
+                return createActivation(user, ACTIVATION_BASE_URL + "/activate");
             }
             
             AccountActivation activation = activationOpt.get();
@@ -167,7 +169,7 @@ public class AccountActivationServiceImpl implements AccountActivationService {
             accountActivationRepository.update(activation);
             
             // Use fallback URL for resend since we don't have request context
-            return sendActivationEmail(activation, ApplicationProperties.ACTIVATION_BASE_URL + "/activate");
+            return sendActivationEmail(activation, ACTIVATION_BASE_URL + "/activate");
             
         } catch (Exception e) {
             logger.error("Failed to resend activation email: {}", e.getMessage(), e);
