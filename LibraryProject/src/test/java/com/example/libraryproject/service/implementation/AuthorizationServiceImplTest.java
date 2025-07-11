@@ -22,13 +22,11 @@ public class AuthorizationServiceImplTest {
 
     private UserRepository userRepository;
     private AuthorizationServiceImpl authorizationServiceImpl;
-    private MailService mailService;
 
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
-        mailService = mock(MailService.class);
-        authorizationServiceImpl = new AuthorizationServiceImpl(userRepository, mailService);
+        authorizationServiceImpl = new AuthorizationServiceImpl(userRepository);
     }
 
     @Test
@@ -75,6 +73,7 @@ public class AuthorizationServiceImplTest {
         when(userRepository.findByUsername("user1")).thenReturn(Optional.of(user));
 
         LoginRequest request = new LoginRequest("user1", "secret");
+        user.setStatus(UserStatus.ACTIVE);
         LoginResult result = authorizationServiceImpl.login(request);
 
         assertEquals("user1", result.username());
@@ -88,6 +87,7 @@ public class AuthorizationServiceImplTest {
         user.setUsername("keeper1");
         user.setPassword(hashedPassword);
         user.setRole(Role.BOOKKEEPER);
+        user.setStatus(UserStatus.ACTIVE);
 
         when(userRepository.findByUsername("keeper1")).thenReturn(Optional.of(user));
 

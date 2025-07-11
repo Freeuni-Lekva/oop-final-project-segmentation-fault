@@ -26,7 +26,6 @@ public class ProfileViewServlet extends HttpServlet {
 
         // Get the path info (everything after /user/)
         String pathInfo = req.getPathInfo();
-        logger.debug("PathInfo: {}", pathInfo);
         
         if (pathInfo == null) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -35,11 +34,7 @@ public class ProfileViewServlet extends HttpServlet {
 
         // Split the path into segments
         String[] segments = pathInfo.split("/");
-        logger.debug("Number of segments: {}", segments.length);
-        for (int i = 0; i < segments.length; i++) {
-            logger.debug("Segment {}: {}", i, segments[i]);
-        }
-
+        
         if (segments.length < 2) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
@@ -53,20 +48,14 @@ public class ProfileViewServlet extends HttpServlet {
             return;
         }
 
-        // Check if this is a my-books request
-        if (segments.length >= 3 && "my-books".equals(segments[2])) {
-            logger.debug("Forwarding to my-books.jsp");
-            req.getRequestDispatcher("/my-books.jsp").forward(req, resp);
-            return;
-        } 
-        
-        // This is a profile request
-        logger.debug("Forwarding to profile view");
-        String view = req.getParameter("view");
-        if ("grid".equals(view)) {
+        if (segments.length == 2) {
+            // Just /user/username - forward to profile view
+            req.getRequestDispatcher("/profile.html").forward(req, resp);
+        } else if (segments.length >= 3 && "my-books".equals(segments[2])) {
+            // /user/username/my-books - forward to my-books view
             req.getRequestDispatcher("/my-books.jsp").forward(req, resp);
         } else {
-            req.getRequestDispatcher("/profile.html").forward(req, resp);
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
 }

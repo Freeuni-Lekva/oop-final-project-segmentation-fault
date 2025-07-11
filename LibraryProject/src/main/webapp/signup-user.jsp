@@ -49,7 +49,7 @@
     <!-- Removed form action and method, using JS -->
     <form id="registerForm">
         <input type="text" id="username" name="username" placeholder="Username" required />
-        <input type="email" id="mail" name="mail" placeholder="mail" required />
+        <input type="email" id="mail" name="mail" placeholder="Mail" required />
         <input type="password" id="password" name="password" placeholder="Password" required />
         <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required />
         <input type="hidden" id="role" name="role" value="USER" />

@@ -1,7 +1,9 @@
 package com.example.libraryproject.servlet;
 
+import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.configuration.DBConnectionConfig;
 import com.example.libraryproject.model.dto.RegistrationRequest;
+import com.example.libraryproject.model.entity.User;
 import com.example.libraryproject.model.enums.Role;
 import com.example.libraryproject.repository.*;
 import com.example.libraryproject.service.*;
@@ -30,15 +32,23 @@ public class ApplicationContextListener implements ServletContextListener {
             BookRepository bookRepository = new BookRepository(sessionFactory);
             OrderRepository orderRepository = new OrderRepository(sessionFactory);
             ReviewRepository reviewRepository = new ReviewRepository(sessionFactory);
+            AccountActivationRepository accountActivationRepository = new AccountActivationRepository(sessionFactory);
 
             MailService mailService = new MailServiceImpl();
 
-            AuthorizationService authorizationService = new AuthorizationServiceImpl(userRepository, mailService);
+            AccountActivationService accountActivationService = new AccountActivationServiceImpl(accountActivationRepository, userRepository, mailService);
+            event.getServletContext().setAttribute(ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME, accountActivationService);
+            logger.info("AccountActivationService initialized and registered successfully");
+
+            AuthorizationService authorizationService = new AuthorizationServiceImpl(userRepository);
             event.getServletContext().setAttribute(AUTHORIZATION_SERVICE_ATTRIBUTE_NAME, authorizationService);
 
             if (userRepository.findByUsername("gmerti").isEmpty()) {
-                RegistrationRequest request = new RegistrationRequest("gmerti", "123", "froste3110@gmail.com", Role.BOOKKEEPER);
-                authorizationService.register(request);
+                RegistrationRequest request = new RegistrationRequest("gmerti", "123", ADMIN_EMAIL, Role.BOOKKEEPER);
+                User adminUser = authorizationService.register(request);
+                // For admin user, use configured URL since we don't have request context here
+                accountActivationService.createActivation(adminUser, ApplicationProperties.ACTIVATION_BASE_URL + "/activate");
+                logger.info("Default bookkeeper 'gmerti' created with activation email");
             } else {
                 logger.info("Default bookkeeper 'gmerti' already exists");
             }
@@ -46,7 +56,7 @@ public class ApplicationContextListener implements ServletContextListener {
             BookKeeperService bookKeeperService = new BookKeeperServiceImpl(bookRepository, userRepository, orderRepository, reviewRepository, mailService);
             event.getServletContext().setAttribute(BOOKKEEPER_SERVICE_ATTRIBUTE_NAME, bookKeeperService);
 
-            SchedulerService schedulerService = new SchedulerServiceImpl(userRepository, orderRepository, mailService);
+            SchedulerService schedulerService = new SchedulerServiceImpl(userRepository, orderRepository, accountActivationRepository, mailService);
             event.getServletContext().setAttribute(SCHEDULER_SERVICE_ATTRIBUTE_NAME, schedulerService);
             schedulerService.start();
 

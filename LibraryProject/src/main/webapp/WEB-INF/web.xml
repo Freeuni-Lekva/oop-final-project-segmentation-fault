@@ -7,4 +7,18 @@
     <welcome-file-list>
         <welcome-file>login.jsp</welcome-file>
     </welcome-file-list>
+
+    <!-- Account Activation Servlet -->
+    <servlet>
+        <servlet-name>AccountActivationServlet</servlet-name>
+        <servlet-class>com.example.libraryproject.servlet.AccountActivationServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AccountActivationServlet</servlet-name>
+        <url-pattern>/activate</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AccountActivationServlet</servlet-name>
+        <url-pattern>/api/activation/*</url-pattern>
+    </servlet-mapping>
 </web-app>

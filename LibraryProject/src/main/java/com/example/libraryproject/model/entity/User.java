@@ -36,9 +36,10 @@ public class User {
     @NonNull
     private Role role = Role.USER;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     @NonNull
-    private UserStatus status =  UserStatus.ACTIVE;
+    private UserStatus status =  UserStatus.INACTIVE;
 
     @Column(name = "bio")
     @NonNull

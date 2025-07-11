@@ -23,9 +23,8 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthorizationServiceImpl.class);
     private final UserRepository userRepository;
-    private final MailService mailService;
 
-    public void register(RegistrationRequest request) {
+    public User register(RegistrationRequest request) {
         logger.info("Attempting to register user: {} with role: {}", request.username(), request.role());
         Optional<User> existingUser = userRepository.findByUsername(request.username());
         if (existingUser.isPresent()) {
@@ -36,17 +35,9 @@ public class AuthorizationServiceImpl implements AuthorizationService {
             throw new IllegalArgumentException("Account with this mail already exists");
         }
         User user = Mappers.mapRequestToUser(request);
-        try {
-            mailService.sendEmail(
-                    List.of(user.getMail()),
-                    "Library Registration",
-                    "Welcome to the Library, " + user.getUsername() + "! Your registration was successful."
-            );
-        } catch (Exception e) {
-            logger.error("Failed to send registration email to {}: {}", user.getMail(), e.getMessage());
-        }
         userRepository.save(user);
         logger.info("User with username {} and role {} registered successfully", request.username(), request.role());
+        return user;
     }
 
     public LoginResult login(LoginRequest request) {
@@ -66,6 +57,23 @@ public class AuthorizationServiceImpl implements AuthorizationService {
             logger.warn("Login failed: incorrect password for user {}", username);
             throw new IllegalArgumentException(errorMsg);
         }
+        
+        // Check if user account is activated
+        if (user.getStatus() == UserStatus.INACTIVE) {
+            logger.warn("Login failed: user {} account is not activated", username);
+            throw new IllegalArgumentException("Your account is not activated yet. Please check your email for the activation link.");
+        }
+        
+        if (user.getStatus() == UserStatus.BANNED) {
+            logger.warn("Login failed: user {} account is banned", username);
+            throw new IllegalArgumentException("Your account has been banned. Please contact support.");
+        }
+        
+        if (user.getStatus() == UserStatus.CLOSED) {
+            logger.warn("Login failed: user {} account is closed", username);
+            throw new IllegalArgumentException("Your account has been closed. Please contact support.");
+        }
+        
         return new LoginResult(username, user.getRole());
     }
 

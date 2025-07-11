@@ -4,6 +4,7 @@ import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.entity.User;
 import com.example.libraryproject.model.enums.OrderStatus;
 import com.example.libraryproject.model.enums.UserStatus;
+import com.example.libraryproject.repository.AccountActivationRepository;
 import com.example.libraryproject.repository.OrderRepository;
 import com.example.libraryproject.repository.UserRepository;
 import com.example.libraryproject.service.MailService;
@@ -25,13 +26,16 @@ class SchedulerServiceImplTest {
     private UserRepository userRepository;
     private OrderRepository orderRepository;
     private MailService mailService;
+    private AccountActivationRepository accountActivationRepository;
+
 
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
         orderRepository = mock(OrderRepository.class);
         mailService = mock(MailService.class);
-        schedulerService = new SchedulerServiceImpl(userRepository, orderRepository, mailService);
+        accountActivationRepository = mock(AccountActivationRepository.class);
+        schedulerService = new SchedulerServiceImpl(userRepository, orderRepository, accountActivationRepository, mailService);
     }
 
 

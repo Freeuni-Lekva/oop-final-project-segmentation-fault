@@ -4,7 +4,9 @@ import com.example.libraryproject.configuration.ApplicationProperties;
 import com.example.libraryproject.model.dto.LoginRequest;
 import com.example.libraryproject.model.dto.LoginResult;
 import com.example.libraryproject.model.dto.RegistrationRequest;
+import com.example.libraryproject.model.entity.User;
 import com.example.libraryproject.model.enums.Role;
+import com.example.libraryproject.service.AccountActivationService;
 import com.example.libraryproject.service.AuthorizationService;
 import com.example.libraryproject.service.implementation.AuthorizationServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,12 +16,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @WebServlet(name = "AuthorizationServlet", urlPatterns = "/api/authorization/*")
 public class AuthorizationServlet extends HttpServlet {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthorizationServlet.class);
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -29,6 +35,9 @@ public class AuthorizationServlet extends HttpServlet {
 
         AuthorizationService authorizationService = (AuthorizationServiceImpl) request.getServletContext()
                 .getAttribute(ApplicationProperties.AUTHORIZATION_SERVICE_ATTRIBUTE_NAME);
+
+        AccountActivationService accountActivationService = (AccountActivationService) request.getServletContext()
+                .getAttribute(ApplicationProperties.ACCOUNT_ACTIVATION_SERVICE_ATTRIBUTE_NAME);
 
         String path = request.getPathInfo();
         request.setCharacterEncoding(StandardCharsets.UTF_8.name());
@@ -40,22 +49,23 @@ public class AuthorizationServlet extends HttpServlet {
                 try {
 
                     RegistrationRequest registrationRequest = objectMapper.readValue(request.getInputStream(), RegistrationRequest.class);
-                    authorizationService.register(registrationRequest);
+                    User user = authorizationService.register(registrationRequest);
+
+                    // Handle activation email after successful registration using dynamic URL
+                    boolean emailSent = accountActivationService.createActivation(user, request);
+                    if (!emailSent) {
+                        logger.warn("Failed to send activation email to user: {}", user.getUsername());
+                    }
 
                     response.setStatus(HttpServletResponse.SC_CREATED);
-                    String redirectPath = request.getContextPath();
-
-                    if (registrationRequest.role() == Role.BOOKKEEPER) {
-                        redirectPath = redirectPath + "/bookkeeper-admin.jsp";
-                    } else redirectPath = redirectPath + "/main-page.jsp";
-
-                    HttpSession session = request.getSession(true);
-                    session.setAttribute("username", registrationRequest.username());
-                    session.setAttribute("role", registrationRequest.role().name());
+                    
+                    // Redirect to registration success page with email parameter for resend functionality
+                    String redirectPath = request.getContextPath() + "/registration-success.jsp?email=" + 
+                        java.net.URLEncoder.encode(user.getMail(), StandardCharsets.UTF_8);
 
                     objectMapper.writeValue(response.getWriter(),
                             new JsonResponse(
-                                    "User registered successfully",
+                                    "Registration successful! Please check your email for activation instructions.",
                                     redirectPath)
                     );
 

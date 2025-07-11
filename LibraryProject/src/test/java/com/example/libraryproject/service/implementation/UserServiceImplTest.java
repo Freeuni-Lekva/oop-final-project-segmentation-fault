@@ -4,7 +4,9 @@ import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.entity.User;
 import com.example.libraryproject.model.enums.OrderStatus;
+import com.example.libraryproject.model.enums.UserStatus;
 import com.example.libraryproject.repository.*;
+import com.example.libraryproject.service.AccountActivationService;
 import com.example.libraryproject.service.MailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -75,6 +77,7 @@ public class UserServiceImplTest {
         user.setPassword(BCrypt.hashpw("1234", BCrypt.gensalt()));
         user.setBorrowedBooks(new HashSet<>());
         user.setReadBooks(new HashSet<>());
+        user.setStatus(UserStatus.ACTIVE);
 
         // Mock repository behavior
         when(userRepository.findByUsername("rezi")).thenReturn(Optional.of(user));
@@ -88,6 +91,7 @@ public class UserServiceImplTest {
 
         // Mock OrderRepository
         when(orderRepository.findOrdersByUserId(1L)).thenReturn(new HashSet<>());
+
     }
 
     @Test
