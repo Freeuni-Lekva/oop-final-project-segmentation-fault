@@ -139,10 +139,12 @@ public class AuthorizationServletTest {
         try (var session = sessionFactory.openSession()) {
             var transaction = session.beginTransaction();
             try {
+                // Delete AccountActivation first due to foreign key constraint with User
+                session.createQuery("DELETE FROM AccountActivation").executeUpdate();
                 session.createQuery("DELETE FROM User u").executeUpdate();
                 logger.info("Database cleaned successfully");
             } catch (Exception e) {
-                logger.warn("Could not clean User table (might not exist yet): {}", e.getMessage());
+                logger.warn("Could not clean tables (might not exist yet): {}", e.getMessage());
             }
             transaction.commit();
         } catch (Exception e) {

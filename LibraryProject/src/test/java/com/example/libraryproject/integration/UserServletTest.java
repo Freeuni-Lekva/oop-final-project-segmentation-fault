@@ -198,6 +198,8 @@ public class UserServletTest {
                 session.createNativeQuery("DELETE FROM read_books", Void.class).executeUpdate();
                 session.createNativeQuery("DELETE FROM orders_table", Void.class).executeUpdate();
                 session.createNativeQuery("DELETE FROM books_table", Void.class).executeUpdate();
+                // Delete AccountActivation before User due to foreign key constraint
+                session.createNativeQuery("DELETE FROM account_activation_table", Void.class).executeUpdate();
                 session.createNativeQuery("DELETE FROM users_table", Void.class).executeUpdate();
                 logger.info("Database cleaned successfully");
             } catch (Exception e) {

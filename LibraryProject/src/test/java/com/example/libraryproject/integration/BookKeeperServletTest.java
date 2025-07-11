@@ -157,6 +157,8 @@ public class BookKeeperServletTest {
             var transaction = session.beginTransaction();
             try {
                 session.createQuery("DELETE FROM Book").executeUpdate();
+                // Delete AccountActivation first due to foreign key constraint with User
+                session.createQuery("DELETE FROM AccountActivation").executeUpdate();
                 session.createQuery("DELETE FROM User").executeUpdate();
                 logger.info("Database cleaned successfully");
             } catch (Exception e) {
