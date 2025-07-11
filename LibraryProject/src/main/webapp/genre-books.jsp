@@ -153,12 +153,14 @@
                 return defaultCovers[randomIndex];
             }
 
-            if (book.imageUrl && book.imageUrl !== 'NOT_FOUND') {
+            if (!book.imageUrl) {
+                imageHtml = '<img src="' + getRandomDefaultCover() + '" alt="No book cover">';
+            } else if (book.imageUrl.startsWith('noCover')) {
+                imageHtml = '<img src="' + contextPath + '/images/' + book.imageUrl + '" alt="No book cover">';
+            } else {
                 var imagePath = '/images/' + book.imageUrl;
                 imageHtml = '<img src="' + imagePath + '" alt="' + (book.name || 'Book cover') + '"' +
                     ' onerror="this.src=\'' + getRandomDefaultCover() + '\'">';
-            } else {
-                imageHtml = '<img src="' + getRandomDefaultCover() + '" alt="No book cover">';
             }
 
             var rating = book.rating || 0;
