@@ -29,6 +29,7 @@ public class AccountActivationServlet extends HttpServlet {
         
         if (token == null || token.trim().isEmpty()) {
             request.setAttribute("error", "Invalid activation link - no token provided");
+            response.setStatus(HttpServletResponse.SC_OK);
             forwardToActivationPage(request, response);
             return;
         }
