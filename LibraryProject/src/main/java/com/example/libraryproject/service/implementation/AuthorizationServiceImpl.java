@@ -23,6 +23,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthorizationServiceImpl.class);
     private final UserRepository userRepository;
+    private final MailService mailService;
 
     public User register(RegistrationRequest request) {
         logger.info("Attempting to register user: {} with role: {}", request.username(), request.role());
@@ -35,6 +36,15 @@ public class AuthorizationServiceImpl implements AuthorizationService {
             throw new IllegalArgumentException("Account with this mail already exists");
         }
         User user = Mappers.mapRequestToUser(request);
+        try {
+            mailService.sendEmail(
+                    List.of(user.getMail()),
+                    "Library Registration",
+                    "Welcome to the Library, " + user.getUsername() + "! Your registration was successful."
+            );
+        } catch (Exception e) {
+            logger.error("Failed to send registration email to {}: {}", user.getMail(), e.getMessage());
+        }
         userRepository.save(user);
         logger.info("User with username {} and role {} registered successfully", request.username(), request.role());
         return user;
