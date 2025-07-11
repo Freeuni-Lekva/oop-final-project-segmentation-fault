@@ -1094,7 +1094,7 @@
         color: #5d4e37;
     }
 
-    .orders-table tr:hover:not(.overdue-row) {
+    .orders-table tbody tr:hover:not(.overdue-row) {
         background-color: #faf9f6;
     }
 

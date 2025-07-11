@@ -646,7 +646,10 @@ function deleteBook(bookPublicId, bookElement) {
                 msgBox.textContent = data.message || 'Book deleted successfully';
                 msgBox.className = 'message-area success';
                 msgBox.style.display = 'block';
-                bookElement.remove();
+                
+                // Reload the entire books list to ensure consistency
+                loadBooksList();
+                
                 setTimeout(function() {
                   msgBox.style.display = 'none';
                 }, 5000);

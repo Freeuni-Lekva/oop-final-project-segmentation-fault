@@ -182,6 +182,9 @@ public class UserServlet extends HttpServlet {
             String bookId = jsonNode.get("bookId").asText();
 
             userService.cancelReservation(username, bookId);
+            
+            // Return success response
+            response.getWriter().write("{\"success\": true, \"message\": \"Reservation cancelled successfully\"}");
 
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

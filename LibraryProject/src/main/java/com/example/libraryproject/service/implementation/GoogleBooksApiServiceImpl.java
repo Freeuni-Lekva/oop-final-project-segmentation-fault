@@ -3,6 +3,7 @@ package com.example.libraryproject.service.implementation;
 import com.example.libraryproject.model.dto.BookAdditionFromGoogleRequest;
 import com.example.libraryproject.model.dto.GoogleBooksResponse;
 import com.example.libraryproject.model.entity.Book;
+import com.example.libraryproject.model.enums.BookStatus;
 import com.example.libraryproject.repository.BookRepository;
 import com.example.libraryproject.service.GoogleBooksApiService;
 import com.example.libraryproject.utilities.Mappers;
@@ -38,23 +39,52 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
             return false;
         }
 
-        // Check if book already exists in our library
-        Optional<Book> existingBook = bookRepository.findByTitle(book.getName());
+        // Check if book already exists in our library (including deleted ones)
+        Optional<Book> existingBook = bookRepository.findByTitleAnyStatus(book.getName());
 
         if (existingBook.isPresent()) {
-            // Add copies to existing book
             Book bookInLibrary = existingBook.get();
-            bookInLibrary.setTotalAmount(bookInLibrary.getTotalAmount() + copies);
-            bookInLibrary.setCurrentAmount(bookInLibrary.getCurrentAmount() + copies);
+            
+            // If book was deleted, reactivate it and update all fields
+            if (bookInLibrary.getStatus() == BookStatus.DELETED) {
+                bookInLibrary.setStatus(BookStatus.ACTIVE);
+                bookInLibrary.setAuthor(book.getAuthor());
+                bookInLibrary.setDescription(book.getDescription());
+                bookInLibrary.setGenre(book.getGenre());
+                bookInLibrary.setVolume(book.getVolume());
+                bookInLibrary.setImageUrl(book.getImageUrl());
+                // Always set current date when reactivating deleted book to appear as recently added
+                bookInLibrary.setDate(java.time.LocalDate.now());
+                
+                // Set copies for reactivated book
+                bookInLibrary.setTotalAmount((long) copies);
+                bookInLibrary.setCurrentAmount((long) copies);
+                logger.info("Book '{}' reactivated from Google Books with {} copies", book.getName(), copies);
+            } else {
+                // Book exists and is active, update fields and add copies
+                bookInLibrary.setAuthor(book.getAuthor());
+                bookInLibrary.setDescription(book.getDescription());
+                bookInLibrary.setGenre(book.getGenre());
+                bookInLibrary.setVolume(book.getVolume());
+                bookInLibrary.setImageUrl(book.getImageUrl());
+                bookInLibrary.setDate(book.getDate());
+                
+                // Add copies to existing amounts
+                bookInLibrary.setTotalAmount(bookInLibrary.getTotalAmount() + copies);
+                bookInLibrary.setCurrentAmount(bookInLibrary.getCurrentAmount() + copies);
+                logger.info("Updated existing book '{}' from Google Books with {} additional copies", book.getName(), copies);
+            }
+            
             bookRepository.update(bookInLibrary);
-            logger.info("Added {} copies to existing book: {}", copies, book.getName());
         } else {
+            // Book doesn't exist, create new one
+            book.setStatus(BookStatus.ACTIVE);
             book.setTotalAmount((long) copies);
             book.setCurrentAmount((long) copies);
             book.setRating(0.0);
 
             bookRepository.save(book);
-            logger.info("Successfully saved new book: {} with {} copies", book.getName(), copies);
+            logger.info("Successfully saved new book from Google Books: {} with {} copies", book.getName(), copies);
         }
 
         return true;
@@ -84,6 +114,7 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
                 .map(googleBook -> {
                     Book book = Mappers.mapGoogleBookToBook(googleBook);
                     long randomCopies = ThreadLocalRandom.current().nextInt(1, 16);
+                    book.setStatus(BookStatus.ACTIVE);
                     book.setTotalAmount(randomCopies);
                     book.setCurrentAmount(randomCopies);
                     book.setRating(0.0);

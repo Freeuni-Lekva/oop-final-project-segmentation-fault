@@ -7,6 +7,7 @@ import com.example.libraryproject.model.dto.BookDTO;
 import com.example.libraryproject.model.entity.Book;
 import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.entity.User;
+import com.example.libraryproject.model.enums.BookStatus;
 import com.example.libraryproject.model.enums.OrderStatus;
 import com.example.libraryproject.model.enums.Role;
 import com.example.libraryproject.model.enums.UserStatus;
@@ -46,50 +47,98 @@ public class BookKeeperServiceImpl implements BookKeeperService {
 
     public void addBook(BookAdditionRequest bookRequest) {
         Long copies = bookRequest.copies() != null ? bookRequest.copies() : 1L;
-        Optional<Book> existingBook = bookRepository.findByTitle(bookRequest.title());
+        Optional<Book> existingBook = bookRepository.findByTitleAnyStatus(bookRequest.title());
 
         if (existingBook.isPresent()) {
             Book bookInLibrary = existingBook.get();
-            // Add copies to both total and current amount
-            bookInLibrary.setTotalAmount(bookInLibrary.getTotalAmount() + copies);
-            bookInLibrary.setCurrentAmount(bookInLibrary.getCurrentAmount() + copies);
+            
+            // If book was deleted, reactivate it and update all fields
+            if (bookInLibrary.getStatus() == BookStatus.DELETED) {
+                bookInLibrary.setStatus(BookStatus.ACTIVE);
+                bookInLibrary.setAuthor(bookRequest.author());
+                bookInLibrary.setDescription(bookRequest.description());
+                bookInLibrary.setGenre(bookRequest.genre());
+                bookInLibrary.setVolume(bookRequest.volume());
+                
+                if (bookRequest.imageUrl() != null && !bookRequest.imageUrl().trim().isEmpty()) {
+                    bookInLibrary.setImageUrl(bookRequest.imageUrl());
+                } else {
+                    bookInLibrary.setImageUrl(bookRequest.title().replaceAll("[^a-zA-Z0-9.\\-]", "_") + ".jpg");
+                }
+                
+                // Always set current date when reactivating deleted book to appear as recently added
+                bookInLibrary.setDate(java.time.LocalDate.now());
+                
+                // Set copies for reactivated book
+                bookInLibrary.setTotalAmount(copies);
+                bookInLibrary.setCurrentAmount(copies);
+                logger.info("Book with title '{}' reactivated and updated with {} copies", bookRequest.title(), copies);
+            } else {
+                // Book exists and is active, just add copies and update other fields
+                bookInLibrary.setAuthor(bookRequest.author());
+                bookInLibrary.setDescription(bookRequest.description());
+                bookInLibrary.setGenre(bookRequest.genre());
+                bookInLibrary.setVolume(bookRequest.volume());
+                
+                if (bookRequest.imageUrl() != null && !bookRequest.imageUrl().trim().isEmpty()) {
+                    bookInLibrary.setImageUrl(bookRequest.imageUrl());
+                }
+                
+                if (bookRequest.publicationDate() != null && !bookRequest.publicationDate().isEmpty()) {
+                    bookInLibrary.setDate(java.time.LocalDate.parse(bookRequest.publicationDate()));
+                }
+                
+                // Add copies to existing amounts
+                bookInLibrary.setTotalAmount(bookInLibrary.getTotalAmount() + copies);
+                bookInLibrary.setCurrentAmount(bookInLibrary.getCurrentAmount() + copies);
+                logger.info("Book with title '{}' updated with {} additional copies", bookRequest.title(), copies);
+            }
+            
             bookRepository.update(bookInLibrary);
         } else {
+            // Book doesn't exist, create new one
             Book book = new Book();
             book.setName(bookRequest.title());
             book.setAuthor(bookRequest.author());
             book.setDescription(bookRequest.description());
             book.setGenre(bookRequest.genre());
             book.setPublicId(bookRequest.title().replaceAll("[^a-zA-Z0-9.\\-]", "_"));
+            book.setStatus(BookStatus.ACTIVE);
+            
             if (bookRequest.imageUrl() != null && !bookRequest.imageUrl().trim().isEmpty()) {
                 book.setImageUrl(bookRequest.imageUrl());
             } else {
                 book.setImageUrl(bookRequest.title().replaceAll("[^a-zA-Z0-9.\\-]", "_") + ".jpg");
             }
+            
             book.setVolume(bookRequest.volume());
-            // Parse and set the publication date
+            
             if (bookRequest.publicationDate() != null && !bookRequest.publicationDate().isEmpty()) {
                 book.setDate(java.time.LocalDate.parse(bookRequest.publicationDate()));
             } else {
-                book.setDate(java.time.LocalDate.now()); // Fallback to current date
+                book.setDate(java.time.LocalDate.now());
             }
-            // Set both total and current amount to the number of copies
+            
             book.setTotalAmount(copies);
             book.setCurrentAmount(copies);
             book.setRating(0.0);
             bookRepository.save(book);
+            logger.info("New book with title '{}' added with {} copies", bookRequest.title(), copies);
         }
-        logger.info("Book with title '{}' added successfully with {} copies (ID: {})", bookRequest.title(), copies,
-                   existingBook.isPresent() ? existingBook.get().getId() : "new book added to database");
     }
 
     public void deleteBook(String bookPublicId) {
-        Optional<Book> bookOptional = bookRepository.findByPublicId(bookPublicId);
+        Optional<Book> bookOptional = bookRepository.findByPublicIdAnyStatus(bookPublicId);
         if (bookOptional.isEmpty()) {
             throw new IllegalArgumentException("Book not found");
         }
 
         Book book = bookOptional.get();
+
+        // Check if book is already deleted
+        if (book.getStatus() == BookStatus.DELETED) {
+            throw new IllegalStateException("Book is already deleted");
+        }
 
         // Check if there are any active orders for this book
         Set<Order> activeOrders = orderRepository.findOrdersByBookId(book.getId());
@@ -101,10 +150,10 @@ public class BookKeeperServiceImpl implements BookKeeperService {
             throw new IllegalStateException("Cannot delete book with active reservations or borrowed copies");
         }
 
-        reviewRepository.deleteAll(reviewRepository.findReviewsByBookId(book.getId()));
-        orderRepository.deleteAll(orderRepository.findOrdersByBookId(book.getId()));
-        bookRepository.delete(book);
-        logger.info("Book with title '{}' and publicId '{}' deleted successfully", book.getName(), bookPublicId);
+        // Soft delete: just change the status instead of actually deleting
+        book.setStatus(BookStatus.DELETED);
+        bookRepository.update(book);
+        logger.info("Book with title '{}' and publicId '{}' soft deleted successfully", book.getName(), bookPublicId);
     }
 
     public void tookBook(String orderPublicId) {
@@ -183,7 +232,6 @@ public class BookKeeperServiceImpl implements BookKeeperService {
         }
 
         logger.debug("Borrowed books count after removal: {}", user.getBorrowedBooks().size());
-        orderRepository.delete(order);
 
         if (book.getCurrentAmount() == 0) {
 

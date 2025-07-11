@@ -1,6 +1,7 @@
 package com.example.libraryproject.repository;
 
 import com.example.libraryproject.model.entity.Book;
+import com.example.libraryproject.model.enums.BookStatus;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -69,11 +70,13 @@ public class BookRepository {
         Session session = sessionFactory.openSession();
 
         String hql = "FROM Book b WHERE " +
+                "b.status = :status AND " +
                 "(:authorsSize = 0 OR b.author IN :authors) AND " +
                 "(:genresSize = 0 OR b.genre IN :genres) AND " +
                 "(b NOT IN :readBooks)";
         Query<Book> query = session.createQuery(hql, Book.class);
 
+        query.setParameter("status", BookStatus.ACTIVE);
         query.setParameter("authors", authors);
         query.setParameter("genres", genres);
         query.setParameter("readBooks", readBooks);
@@ -91,7 +94,8 @@ public class BookRepository {
     public List<Book> findAll() {
         Session session = sessionFactory.openSession();
 
-        Query<Book> query = session.createQuery("FROM Book", Book.class);
+        Query<Book> query = session.createQuery("FROM Book WHERE status = :status", Book.class);
+        query.setParameter("status", BookStatus.ACTIVE);
 
         List<Book> books = query.getResultList();
 
@@ -102,8 +106,9 @@ public class BookRepository {
     public Optional<Book> findByPublicId(String publicId) {
         Session session = sessionFactory.openSession();
 
-        Query<Book> query = session.createQuery("FROM Book WHERE publicId = :publicId", Book.class);
+        Query<Book> query = session.createQuery("FROM Book WHERE publicId = :publicId AND status = :status", Book.class);
         query.setParameter("publicId", publicId);
+        query.setParameter("status", BookStatus.ACTIVE);
 
         Optional<Book> result = Optional.ofNullable(query.uniqueResult());
 
@@ -115,8 +120,9 @@ public class BookRepository {
     public Optional<Book> findByTitle(String title) {
         Session session = sessionFactory.openSession();
 
-        Query<Book> query = session.createQuery("FROM Book WHERE name = :title", Book.class);
+        Query<Book> query = session.createQuery("FROM Book WHERE name = :title AND status = :status", Book.class);
         query.setParameter("title", title);
+        query.setParameter("status", BookStatus.ACTIVE);
         Book book = query.uniqueResult();
 
         session.close();
@@ -127,8 +133,9 @@ public class BookRepository {
     public List<Book> findByAuthor(String author) {
         Session session = sessionFactory.openSession();
 
-        Query<Book> query = session.createQuery("FROM Book WHERE author = :author", Book.class);
+        Query<Book> query = session.createQuery("FROM Book WHERE author = :author AND status = :status", Book.class);
         query.setParameter("author", author);
+        query.setParameter("status", BookStatus.ACTIVE);
 
         List<Book> books = query.getResultList();
         session.close();
@@ -138,8 +145,9 @@ public class BookRepository {
     public List<Book> findByGenre(String genre) {
         Session session = sessionFactory.openSession();
 
-        Query<Book> query = session.createQuery("FROM Book WHERE genre = :genre", Book.class);
+        Query<Book> query = session.createQuery("FROM Book WHERE genre = :genre AND status = :status", Book.class);
         query.setParameter("genre", genre);
+        query.setParameter("status", BookStatus.ACTIVE);
 
         List<Book> books = query.getResultList();
 
@@ -166,8 +174,9 @@ public class BookRepository {
         Session session = sessionFactory.openSession();
 
         Query<Book> query = session.createQuery(
-                "FROM Book WHERE LOWER(name) LIKE LOWER(:searchTerm)", Book.class);
+                "FROM Book WHERE LOWER(name) LIKE LOWER(:searchTerm) AND status = :status", Book.class);
         query.setParameter("searchTerm", "%" + searchTerm + "%");
+        query.setParameter("status", BookStatus.ACTIVE);
 
         List<Book> results = query.getResultList();
         session.close();
@@ -178,11 +187,43 @@ public class BookRepository {
         Session session = sessionFactory.openSession();
 
         Query<Book> query = session.createQuery(
-                "FROM Book WHERE LOWER(author) LIKE LOWER(:searchTerm)", Book.class);
+                "FROM Book WHERE LOWER(author) LIKE LOWER(:searchTerm) AND status = :status", Book.class);
         query.setParameter("searchTerm", "%" + searchTerm + "%");
+        query.setParameter("status", BookStatus.ACTIVE);
 
         List<Book> results = query.getResultList();
         session.close();
         return results;
+    }
+
+    /**
+     * Find book by public ID regardless of status (for deletion operations)
+     */
+    public Optional<Book> findByPublicIdAnyStatus(String publicId) {
+        Session session = sessionFactory.openSession();
+
+        Query<Book> query = session.createQuery("FROM Book WHERE publicId = :publicId", Book.class);
+        query.setParameter("publicId", publicId);
+
+        Optional<Book> result = Optional.ofNullable(query.uniqueResult());
+
+        session.close();
+
+        return result;
+    }
+
+    /**
+     * Find book by title regardless of status (for update operations)
+     */
+    public Optional<Book> findByTitleAnyStatus(String title) {
+        Session session = sessionFactory.openSession();
+
+        Query<Book> query = session.createQuery("FROM Book WHERE name = :title", Book.class);
+        query.setParameter("title", title);
+        Book book = query.uniqueResult();
+
+        session.close();
+
+        return Optional.ofNullable(book);
     }
 }

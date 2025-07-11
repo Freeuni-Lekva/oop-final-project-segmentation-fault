@@ -145,7 +145,7 @@ public class BookServiceImpl implements BookService {
             );
             case AVAILABLE -> Comparator.comparingLong(Book::getCurrentAmount).reversed(); // Most available first
             case DATE -> Comparator.comparing(Book::getDate).reversed(); // Most recent publication date first
-            case RECENT -> Comparator.comparingLong(Book::getId).reversed(); // Most recently added to system first
+            case RECENT -> Comparator.comparing(Book::getDate).reversed(); // Most recently added/updated to system first (by date)
             default -> Comparator.comparingDouble(Book::getRating).reversed(); // Highest rating first
         };
 
