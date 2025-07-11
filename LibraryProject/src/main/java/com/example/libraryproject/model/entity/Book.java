@@ -1,5 +1,6 @@
 package com.example.libraryproject.model.entity;
 
+import com.example.libraryproject.model.enums.BookStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -67,6 +68,11 @@ public class Book {
     @Column(name = "image_url")
     private String imageUrl;
 
+    @NonNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private BookStatus status = BookStatus.ACTIVE;
+
     @Override
     public String toString() {
         return "Book{" +
@@ -80,6 +86,7 @@ public class Book {
                 ", total amount=" + totalAmount +
                 ", current amount=" + currentAmount +
                 ", rating=" + rating +
+                ", status=" + status +
                 '}';
     }
     @Override

@@ -482,6 +482,9 @@
             console.log(data)
             alert(data.message);
             updateReserveButtonState(true);
+            
+            // Refresh book details to update available copies count
+            loadBookDetails();
         })
         .catch(error => {
             console.error('Error reserving book:', error);
@@ -513,6 +516,9 @@
             .then(data => {
                 alert('Reservation cancelled successfully!');
                 updateReserveButtonState(false);
+                
+                // Refresh book details to update available copies count
+                loadBookDetails();
             })
             .catch(error => {
                 console.error('Error cancelling reservation:', error);

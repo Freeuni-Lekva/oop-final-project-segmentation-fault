@@ -120,12 +120,20 @@ function handleConfirmPickup(orderPublicId) {
     credentials: 'include'
   })
   .then(response => {
-    if (response.ok) {
-      showOrderMessage('Order confirmed - book marked as borrowed', 'success');
-      loadOrders();
-    } else {
-      showOrderMessage('Failed to confirm pickup', 'error');
-    }
+    return response.json().then(data => {
+      if (response.ok && data.status === 'success') {
+        showOrderMessage(data.message || 'Order confirmed - book marked as borrowed', 'success');
+        loadOrders();
+        
+        // Refresh book list in admin panel if the books tab is active
+        if (typeof loadBooksList === 'function' && document.getElementById('book-collection') && 
+            document.getElementById('book-collection').classList.contains('active')) {
+          loadBooksList();
+        }
+      } else {
+        showOrderMessage(data.message || 'Failed to confirm pickup', 'error');
+      }
+    });
   })
   .catch(error => {
     console.error('Error confirming pickup:', error);
@@ -149,12 +157,20 @@ function handleConfirmReturn(orderPublicId) {
     credentials: 'include'
   })
   .then(response => {
-    if (response.ok) {
-      showOrderMessage('Book return confirmed - added to user\'s read books', 'success');
-      loadOrders();
-    } else {
-      showOrderMessage('Failed to confirm return', 'error');
-    }
+    return response.json().then(data => {
+      if (response.ok && data.status === 'success') {
+        showOrderMessage(data.message || 'Book return confirmed - added to user\'s read books', 'success');
+        loadOrders();
+        
+        // Refresh book list in admin panel if the books tab is active
+        if (typeof loadBooksList === 'function' && document.getElementById('book-collection') && 
+            document.getElementById('book-collection').classList.contains('active')) {
+          loadBooksList();
+        }
+      } else {
+        showOrderMessage(data.message || 'Failed to confirm return', 'error');
+      }
+    });
   })
   .catch(error => {
     console.error('Error confirming return:', error);

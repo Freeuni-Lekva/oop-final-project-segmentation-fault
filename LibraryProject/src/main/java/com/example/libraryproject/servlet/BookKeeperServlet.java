@@ -82,18 +82,32 @@ public class BookKeeperServlet extends HttpServlet {
                 break;
 
             case "/mark-borrowed":
-
-                handleMarkBorrowed(request, bookKeeperService);
+                try {
+                    handleMarkBorrowed(request, response, bookKeeperService);
+                } catch (Exception e) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    Map<String, String> responseMap = new HashMap<>();
+                    responseMap.put("status", "error");
+                    responseMap.put("message", e.getMessage());
+                    objectMapper.writeValue(response.getWriter(), responseMap);
+                }
                 break;
 
             case "/return-book":
-
-                handleReturnBook(request, bookKeeperService);
+                try {
+                    handleReturnBook(request, response, bookKeeperService);
+                } catch (Exception e) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    Map<String, String> responseMap = new HashMap<>();
+                    responseMap.put("status", "error");
+                    responseMap.put("message", e.getMessage());
+                    objectMapper.writeValue(response.getWriter(), responseMap);
+                }
                 break;
 
             case "/ban-user":
                 try {
-                    handleBanUser(request, bookKeeperService);
+                    handleBanUser(request, response, bookKeeperService);
                     response.setStatus(HttpServletResponse.SC_OK);
                     Map<String, String> responseMap = new HashMap<>();
 
@@ -114,7 +128,7 @@ public class BookKeeperServlet extends HttpServlet {
 
             case "/unban-user":
                 try {
-                    handleUnbanUser(request, bookKeeperService);
+                    handleUnbanUser(request, response, bookKeeperService);
                     response.setStatus(HttpServletResponse.SC_OK);
                     Map<String, String> responseMap = new HashMap<>();
 
@@ -341,30 +355,44 @@ public class BookKeeperServlet extends HttpServlet {
         }
     }
 
-    private void handleMarkBorrowed(HttpServletRequest req, BookKeeperService bookKeeperService) throws IOException {
+    private void handleMarkBorrowed(HttpServletRequest req, HttpServletResponse response, BookKeeperService bookKeeperService) throws IOException {
 
         JsonNode params = objectMapper.readTree(req.getReader());
 
         String orderPublicId = params.get("orderPublicId").asText();
 
-        if (orderPublicId == null) {
+        if (orderPublicId == null || orderPublicId.trim().isEmpty()) {
             throw new IllegalArgumentException("Order Public ID is required to mark book as borrowed.");
         }
 
         bookKeeperService.tookBook(orderPublicId);
+        
+        // Return success response
+        response.setStatus(HttpServletResponse.SC_OK);
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("status", "success");
+        responseMap.put("message", "Book pickup confirmed successfully");
+        objectMapper.writeValue(response.getWriter(), responseMap);
     }
 
-    private void handleReturnBook(HttpServletRequest req, BookKeeperService bookKeeperService) throws IOException {
+    private void handleReturnBook(HttpServletRequest req, HttpServletResponse response, BookKeeperService bookKeeperService) throws IOException {
 
         JsonNode params = objectMapper.readTree(req.getReader());
 
         String orderPublicId = params.get("orderPublicId").asText();
 
-        if (orderPublicId == null) {
+        if (orderPublicId == null || orderPublicId.trim().isEmpty()) {
             throw new IllegalArgumentException("Order Public ID is required to return book.");
         }
 
         bookKeeperService.returnBook(orderPublicId);
+        
+        // Return success response
+        response.setStatus(HttpServletResponse.SC_OK);
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("status", "success");
+        responseMap.put("message", "Book return confirmed successfully");
+        objectMapper.writeValue(response.getWriter(), responseMap);
     }
 
     private void handleDeleteBook(HttpServletRequest req, BookKeeperService bookKeeperService) throws IOException {
@@ -380,7 +408,7 @@ public class BookKeeperServlet extends HttpServlet {
         bookKeeperService.deleteBook(bookPublicId);
     }
 
-    private void handleBanUser(HttpServletRequest req, BookKeeperService bookKeeperService) throws IOException {
+    private void handleBanUser(HttpServletRequest req, HttpServletResponse response, BookKeeperService bookKeeperService) throws IOException {
 
         JsonNode params = objectMapper.readTree(req.getReader());
 
@@ -392,7 +420,7 @@ public class BookKeeperServlet extends HttpServlet {
         bookKeeperService.banUser(username);
     }
 
-    private void handleUnbanUser(HttpServletRequest req, BookKeeperService bookKeeperService) throws IOException {
+    private void handleUnbanUser(HttpServletRequest req, HttpServletResponse response, BookKeeperService bookKeeperService) throws IOException {
 
         JsonNode params = objectMapper.readTree(req.getReader());
 
