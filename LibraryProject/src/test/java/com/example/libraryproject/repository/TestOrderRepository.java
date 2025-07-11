@@ -1,4 +1,4 @@
-package com.example.libraryproject.repository;
+ package com.example.libraryproject.repository;
 
 
 import com.example.libraryproject.model.entity.Book;
@@ -45,7 +45,10 @@ public class TestOrderRepository {
 
         sessionFactory = configuration.buildSessionFactory();
         orderRepository = new OrderRepository(sessionFactory);
-        User user = new User("gubaz","541541","froste3110@gmail.com");
+        User user = new User();
+        user.setUsername("gubaz");
+        user.setPassword("541541");
+        user.setMail("froste3110@gmail.com");
         Book book = new Book("Oddysey","Oddysey", "Sci-Fi", "Arthur C. Clarke", LocalDate.of(1968, 7, 1),
                 "A journey through space and time", 300L, 1L, 10L, 5.0, "oddysey.jpg");
         UserRepository userRepository = new UserRepository(sessionFactory);
@@ -220,5 +223,119 @@ public class TestOrderRepository {
         assertTrue(allOrders.isEmpty());
     }
 
+    @Test
+    public void testFindOrdersByUsername() {
+        User user2 = new User();
+        user2.setUsername("testUser");
+        user2.setPassword("password123");
+        user2.setMail("testuser@gmail.com");
+        UserRepository userRepository = new UserRepository(sessionFactory);
+        userRepository.save(user2);
+        
+        Order order2 = Order.builder()
+                .publicId(UUID.randomUUID())
+                .createDate(LocalDateTime.now())
+                .dueDate(LocalDateTime.now().plusDays(14))
+                .requestedDurationInDays(14L)
+                .status(OrderStatus.RESERVED)
+                .user(user2)
+                .book(order.getBook())
+                .build();
+        orderRepository.save(order2);
 
+        Set<Order> foundOrders = orderRepository.findOrdersByUsername("gubaz");
+        assertEquals(1, foundOrders.size());
+        assertTrue(foundOrders.contains(order));
+
+        Set<Order> foundOrders2 = orderRepository.findOrdersByUsername("test");
+        assertEquals(1, foundOrders2.size());
+        assertTrue(foundOrders2.contains(order2));
+
+        Set<Order> foundOrders3 = orderRepository.findOrdersByUsername("GUBAZ");
+        assertEquals(1, foundOrders3.size());
+        assertTrue(foundOrders3.contains(order));
+    }
+
+    @Test
+    public void testFindActiveOrders() {
+        Order reservedOrder = Order.builder()
+                .publicId(UUID.randomUUID())
+                .createDate(LocalDateTime.now())
+                .dueDate(LocalDateTime.now().plusDays(14))
+                .requestedDurationInDays(14L)
+                .status(OrderStatus.RESERVED)
+                .user(order.getUser())
+                .book(order.getBook())
+                .build();
+        Order returnedOrder = Order.builder()
+                .publicId(UUID.randomUUID())
+                .createDate(LocalDateTime.now())
+                .dueDate(LocalDateTime.now().plusDays(14))
+                .requestedDurationInDays(14L)
+                .status(OrderStatus.RETURNED)
+                .user(order.getUser())
+                .book(order.getBook())
+                .build();
+        
+        orderRepository.save(reservedOrder);
+        orderRepository.save(returnedOrder);
+
+        Set<Order> activeOrders = orderRepository.findActiveOrders();
+
+        assertEquals(2, activeOrders.size());
+        assertTrue(activeOrders.contains(order));
+        assertTrue(activeOrders.contains(reservedOrder));
+        assertFalse(activeOrders.contains(returnedOrder));
+    }
+
+    @Test
+    public void testFindOverdueOrders() {
+        Order overdueOrder = Order.builder()
+                .publicId(UUID.randomUUID())
+                .createDate(LocalDateTime.now().minusDays(20))
+                .dueDate(LocalDateTime.now().minusDays(5))
+                .requestedDurationInDays(15L)
+                .status(OrderStatus.BORROWED)
+                .user(order.getUser())
+                .book(order.getBook())
+                .build();
+        orderRepository.save(overdueOrder);
+
+        Order futureOrder = Order.builder()
+                .publicId(UUID.randomUUID())
+                .createDate(LocalDateTime.now())
+                .dueDate(LocalDateTime.now().plusDays(7))
+                .requestedDurationInDays(7L)
+                .status(OrderStatus.BORROWED)
+                .user(order.getUser())
+                .book(order.getBook())
+                .build();
+        orderRepository.save(futureOrder);
+
+        Set<Order> overdueOrders = orderRepository.findOverdueOrders();
+
+        assertEquals(1, overdueOrders.size());
+        assertTrue(overdueOrders.contains(overdueOrder));
+        assertFalse(overdueOrders.contains(futureOrder));
+        assertFalse(overdueOrders.contains(order));
+    }
+
+    @Test
+    public void testHasReservation() {
+        Order reservedOrder = Order.builder()
+                .publicId(UUID.randomUUID())
+                .createDate(LocalDateTime.now())
+                .dueDate(LocalDateTime.now().plusDays(14))
+                .requestedDurationInDays(14L)
+                .status(OrderStatus.RESERVED)
+                .user(order.getUser())
+                .book(order.getBook())
+                .build();
+        orderRepository.save(reservedOrder);
+
+        assertTrue(orderRepository.hasReservation(order.getUser().getId(), order.getBook().getId()));
+        assertFalse(orderRepository.hasReservation(999L, order.getBook().getId()));
+        assertFalse(orderRepository.hasReservation(order.getUser().getId(), 999L));
+        assertTrue(orderRepository.hasReservation(order.getUser().getId(), order.getBook().getId()));
+    }
 }

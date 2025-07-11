@@ -183,4 +183,132 @@ public class UserServiceImplTest {
         // Verify that bookRepository.update was called to update the book's rating
         verify(bookRepository, atLeastOnce()).update(any(Book.class));
     }
+
+    @Test
+    void test5() throws Exception {
+        java.lang.reflect.Method method = UserServiceImpl.class.getDeclaredMethod("calculateAverageRating", String.class);
+        method.setAccessible(true);
+
+        Set<com.example.libraryproject.model.entity.Review> reviews = new HashSet<>();
+        com.example.libraryproject.model.entity.Review review1 = new com.example.libraryproject.model.entity.Review();
+        review1.setPublicId(UUID.randomUUID());
+        review1.setRating(4);
+        com.example.libraryproject.model.entity.Review review2 = new com.example.libraryproject.model.entity.Review();
+        review2.setPublicId(UUID.randomUUID());
+        review2.setRating(5);
+        reviews.add(review1);
+        reviews.add(review2);
+
+        when(reviewRepository.findReviewsByBookPublicId("testBook")).thenReturn(reviews);
+
+        double result = (double) method.invoke(userServiceImpl, "testBook");
+
+        assertEquals(4.5, result);
+        verify(reviewRepository).findReviewsByBookPublicId("testBook");
+    }
+
+    @Test
+    void test6() throws Exception {
+        java.lang.reflect.Method method = UserServiceImpl.class.getDeclaredMethod("calculateAverageRating", String.class);
+        method.setAccessible(true);
+
+        when(reviewRepository.findReviewsByBookPublicId("emptyBook")).thenReturn(new HashSet<>());
+
+        double result = (double) method.invoke(userServiceImpl, "emptyBook");
+
+        assertEquals(0.0, result);
+        verify(reviewRepository).findReviewsByBookPublicId("emptyBook");
+    }
+
+    @Test
+    void test7() {
+        String newBio = "This is my new bio";
+
+        assertDoesNotThrow(() -> userServiceImpl.changeBio("rezi", newBio));
+
+        assertEquals(newBio, user.getBio());
+        verify(userRepository).update(user);
+    }
+
+    @Test
+    void test8() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            userServiceImpl.changeBio("nonexistent", "new bio");
+        });
+
+        verify(userRepository, never()).update(any(User.class));
+    }
+
+    @Test
+    void test9() {
+        com.example.libraryproject.model.dto.UserDTO result = userServiceImpl.getUserInfo("rezi");
+
+        assertNotNull(result);
+        assertEquals("rezi", result.username());
+        assertEquals(user.getBio(), result.bio());
+        assertEquals("ACTIVE", result.status());
+        assertEquals("froste3110@gmail.com", result.mail());
+    }
+
+    @Test
+    void test10() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            userServiceImpl.getUserInfo("nonexistent");
+        });
+    }
+
+    @Test
+    void test11() {
+        when(orderRepository.hasReservation(user.getId(), book1.getId())).thenReturn(true);
+
+        boolean result = userServiceImpl.hasUserReservedBook("rezi", "Shadow_Realms");
+
+        assertTrue(result);
+        verify(orderRepository).hasReservation(user.getId(), book1.getId());
+    }
+
+    @Test
+    void test12() {
+        when(orderRepository.hasReservation(user.getId(), book1.getId())).thenReturn(false);
+
+        boolean result = userServiceImpl.hasUserReservedBook("rezi", "Shadow_Realms");
+
+        assertFalse(result);
+        verify(orderRepository).hasReservation(user.getId(), book1.getId());
+    }
+
+    @Test
+    void test13() {
+        Order mockOrder = Order.builder()
+                .publicId(UUID.randomUUID())
+                .borrowDate(LocalDateTime.now().plusDays(1))
+                .dueDate(LocalDateTime.now().plusDays(22))
+                .requestedDurationInDays(21L)
+                .status(OrderStatus.RESERVED)
+                .user(user)
+                .book(book1)
+                .build();
+
+        Set<Order> userOrders = new HashSet<>();
+        userOrders.add(mockOrder);
+
+        when(orderRepository.findOrdersByUserId(1L)).thenReturn(userOrders);
+
+        assertDoesNotThrow(() -> userServiceImpl.cancelReservation("rezi", "Shadow_Realms"));
+
+        verify(orderRepository).findOrdersByUserId(1L);
+        verify(orderRepository).update(mockOrder);
+    }
+
+    @Test
+    void test14() {
+        when(orderRepository.findOrdersByUserId(1L)).thenReturn(new HashSet<>());
+
+        assertThrows(IllegalStateException.class, () -> {
+            userServiceImpl.cancelReservation("rezi", "Shadow_Realms");
+        });
+
+        verify(orderRepository).findOrdersByUserId(1L);
+        verify(orderRepository, never()).update(any(Order.class));
+    }
 }

@@ -147,7 +147,7 @@ public class Mappers {
                 book.getTotalAmount() != null ? book.getTotalAmount() : 0L,
                 book.getCurrentAmount() != null ? book.getCurrentAmount() : 0L,
                 book.getVolume() != null ? book.getVolume() : 0L,
-                book.getRating() != null ? book.getRating() : 0L,
+                book.getRating() != null ? book.getRating() : 0.0,
                 book.getDate() != null ? book.getDate().toString() : ""
         );
     }

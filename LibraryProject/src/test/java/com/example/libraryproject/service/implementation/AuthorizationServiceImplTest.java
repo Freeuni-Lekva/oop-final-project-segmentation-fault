@@ -5,6 +5,7 @@ import com.example.libraryproject.model.dto.LoginResult;
 import com.example.libraryproject.model.dto.RegistrationRequest;
 import com.example.libraryproject.model.entity.User;
 import com.example.libraryproject.model.enums.Role;
+import com.example.libraryproject.model.enums.UserStatus;
 import com.example.libraryproject.repository.UserRepository;
 import com.example.libraryproject.service.MailService;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +27,7 @@ public class AuthorizationServiceImplTest {
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
+        mailService = mock(MailService.class);
         authorizationServiceImpl = new AuthorizationServiceImpl(userRepository, mailService);
     }
 
@@ -121,5 +123,59 @@ public class AuthorizationServiceImplTest {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
             () -> authorizationServiceImpl.login(request));
         assertEquals("Username or password is incorrect. Please try again.", ex.getMessage());
+    }
+
+    @Test
+    void testCheckBookkeeper_Success() {
+        User bookkeeper = new User();
+        bookkeeper.setUsername("activeBookkeeper");
+        bookkeeper.setRole(Role.BOOKKEEPER);
+        bookkeeper.setStatus(UserStatus.ACTIVE);
+
+        when(userRepository.findByUsernameAndRole("activeBookkeeper", Role.BOOKKEEPER))
+                .thenReturn(Optional.of(bookkeeper));
+
+        boolean result = authorizationServiceImpl.checkBookkeeper("activeBookkeeper");
+
+        assertTrue(result);
+        verify(userRepository).findByUsernameAndRole("activeBookkeeper", Role.BOOKKEEPER);
+    }
+
+    @Test
+    void testCheckBookkeeper_Failure() {
+        when(userRepository.findByUsernameAndRole("nonexistent", Role.BOOKKEEPER))
+                .thenReturn(Optional.empty());
+
+        boolean result = authorizationServiceImpl.checkBookkeeper("nonexistent");
+
+        assertFalse(result);
+        verify(userRepository).findByUsernameAndRole("nonexistent", Role.BOOKKEEPER);
+    }
+
+    @Test
+    void testCheckUser_Success() {
+        User user = new User();
+        user.setUsername("activeUser");
+        user.setRole(Role.USER);
+        user.setStatus(UserStatus.ACTIVE);
+
+        when(userRepository.findByUsernameAndRole("activeUser", Role.USER))
+                .thenReturn(Optional.of(user));
+
+        boolean result = authorizationServiceImpl.checkUser("activeUser");
+
+        assertTrue(result);
+        verify(userRepository).findByUsernameAndRole("activeUser", Role.USER);
+    }
+
+    @Test
+    void testCheckUser_Failure() {
+        when(userRepository.findByUsernameAndRole("nonexistent", Role.USER))
+                .thenReturn(Optional.empty());
+
+        boolean result = authorizationServiceImpl.checkUser("nonexistent");
+
+        assertFalse(result);
+        verify(userRepository).findByUsernameAndRole("nonexistent", Role.USER);
     }
 }
