@@ -11,6 +11,7 @@ import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.entity.Review;
 import com.example.libraryproject.model.entity.User;
 import com.example.libraryproject.model.enums.OrderStatus;
+import com.example.libraryproject.model.enums.UserStatus;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.time.LocalDate;
@@ -35,7 +36,19 @@ public class Mappers {
         user.setMail(userRequest.mail());
         return user;
     }
-
+    public static User mapRequestToActiveUser(RegistrationRequest userRequest) {
+        User user = new User();
+        String hashedPassword = BCrypt.hashpw(userRequest.password(), BCrypt.gensalt());
+        user.setUsername(userRequest.username());
+        user.setPassword(hashedPassword);
+        user.setRole(userRequest.role());
+        user.setBorrowedBooks(new HashSet<>());
+        user.setReadBooks(new HashSet<>());
+        user.setReviewCount(0L);
+        user.setMail(userRequest.mail());
+        user.setStatus(UserStatus.ACTIVE);
+        return user;
+    }
     public static Book mapGoogleBookToBook(GoogleBooksResponse googleBooksResponse) {
         Book book = new Book();
         String safeTitle = googleBooksResponse.title().replaceAll("[^a-zA-Z0-9.\\-]", "_");

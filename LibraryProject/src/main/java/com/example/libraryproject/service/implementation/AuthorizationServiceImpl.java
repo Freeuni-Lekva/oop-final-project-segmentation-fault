@@ -14,8 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -26,27 +24,26 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     private final MailService mailService;
 
     public User register(RegistrationRequest request) {
+
         logger.info("Attempting to register user: {} with role: {}", request.username(), request.role());
+
         Optional<User> existingUser = userRepository.findByUsername(request.username());
+
         if (existingUser.isPresent()) {
             throw new IllegalArgumentException("This username already exists");
         }
+
         Optional<User> existingUserWithMail = userRepository.findByMail(request.mail());
+
         if (existingUserWithMail.isPresent()) {
             throw new IllegalArgumentException("Account with this mail already exists");
         }
+
         User user = Mappers.mapRequestToUser(request);
-        try {
-            mailService.sendEmail(
-                    List.of(user.getMail()),
-                    "Library Registration",
-                    "Welcome to the Library, " + user.getUsername() + "! Your registration was successful."
-            );
-        } catch (Exception e) {
-            logger.error("Failed to send registration email to {}: {}", user.getMail(), e.getMessage());
-        }
+
         userRepository.save(user);
         logger.info("User with username {} and role {} registered successfully", request.username(), request.role());
+
         return user;
     }
 
