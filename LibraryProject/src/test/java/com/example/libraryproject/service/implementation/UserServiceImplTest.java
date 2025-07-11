@@ -5,6 +5,7 @@ import com.example.libraryproject.model.entity.Order;
 import com.example.libraryproject.model.entity.User;
 import com.example.libraryproject.model.enums.OrderStatus;
 import com.example.libraryproject.repository.*;
+import com.example.libraryproject.service.MailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mindrot.jbcrypt.BCrypt;
@@ -25,6 +26,7 @@ public class UserServiceImplTest {
     private UserServiceImpl userServiceImpl;
     private BookRepository bookRepository;
     private OrderRepository orderRepository;
+    private final MailService mailService = mock(MailService.class);
     private User user;
 
     private Book book1, book2, book3;
@@ -35,7 +37,8 @@ public class UserServiceImplTest {
         reviewRepository = mock(ReviewRepository.class);
         bookRepository = mock(BookRepository.class);
         orderRepository = mock(OrderRepository.class);
-        userServiceImpl = new UserServiceImpl(userRepository, bookRepository, reviewRepository, orderRepository);
+
+        userServiceImpl = new UserServiceImpl(userRepository, bookRepository, reviewRepository, orderRepository, mailService);
 
         book1 = new Book(
                 "Shadow_Realms",
@@ -92,11 +95,6 @@ public class UserServiceImplTest {
         // Test successful reservation
         assertDoesNotThrow(() -> userServiceImpl.reserveBook(user.getUsername(), book1.getPublicId(), 2L));
 
-        // Test reservation when book is not available
-        book2.setCurrentAmount(0L);
-        assertThrows(IllegalStateException.class,
-                () -> userServiceImpl.reserveBook(user.getUsername(), book2.getPublicId(), 2L));
-
         // Test reservation with non-existent user
         book2.setCurrentAmount(1L);
         assertThrows(IllegalArgumentException.class,
@@ -110,14 +108,15 @@ public class UserServiceImplTest {
     @Test
     public void testCancelReservation() {
         // Create a mock order
-        Order mockOrder = new Order(
-                UUID.randomUUID(),
-                LocalDateTime.now().plusDays(1),
-                LocalDateTime.now().plusDays(22),
-                OrderStatus.RESERVED,
-                user,
-                book1
-        );
+        Order mockOrder = Order.builder()
+                .publicId(UUID.randomUUID())
+                .borrowDate(LocalDateTime.now().plusDays(1))
+                .dueDate(LocalDateTime.now().plusDays(22))
+                .requestedDurationInDays(21L) // 22 - 1
+                .status(OrderStatus.RESERVED)
+                .user(user)
+                .book(book1)
+                .build();
 
         Set<Order> userOrders = new HashSet<>();
         userOrders.add(mockOrder);

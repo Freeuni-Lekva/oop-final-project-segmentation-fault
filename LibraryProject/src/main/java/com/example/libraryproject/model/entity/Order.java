@@ -2,10 +2,7 @@ package com.example.libraryproject.model.entity;
 
 import com.example.libraryproject.model.enums.OrderStatus;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 
 import java.time.LocalDateTime;
@@ -17,6 +14,8 @@ import java.util.UUID;
 @Setter
 @Table(name = "orders_table")
 @Entity
+@Builder
+@AllArgsConstructor
 public class Order {
 
     @Id
@@ -30,16 +29,18 @@ public class Order {
     @Column(name = "create_date", nullable = false)
     private LocalDateTime createDate = LocalDateTime.now();
 
-    @Column(name = "borrow_date", nullable = false)
-    @NonNull
+    @Column(name = "borrow_date")
     private LocalDateTime borrowDate;
 
-    @Column(name = "due_date", nullable = false)
-    @NonNull
+    @Column(name = "due_date")
     private LocalDateTime dueDate;
 
     @Column(name = "return_date")
     private LocalDateTime returnDate;
+
+    @Column(name = "requested_duration")
+    @NonNull
+    private Long requestedDurationInDays;
 
     @Column(name = "status", length = 50, nullable = false)
     @NonNull

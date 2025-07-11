@@ -56,7 +56,7 @@ public class ApplicationContextListener implements ServletContextListener {
             BookRecommendationService bookRecommendationService = new BookRecommendationServiceImpl(bookRepository, userRepository);
             event.getServletContext().setAttribute(BOOK_RECOMMENDATION_SERVICE_ATTRIBUTE_NAME, bookRecommendationService);
 
-            UserService userService = new UserServiceImpl(userRepository, bookRepository, reviewRepository, orderRepository);
+            UserService userService = new UserServiceImpl(userRepository, bookRepository, reviewRepository, orderRepository, mailService);
             event.getServletContext().setAttribute(USER_SERVICE_ATTRIBUTE_NAME, userService);
 
             GoogleBooksApiService googleBooksAPIService = new GoogleBooksApiServiceImpl(bookRepository);

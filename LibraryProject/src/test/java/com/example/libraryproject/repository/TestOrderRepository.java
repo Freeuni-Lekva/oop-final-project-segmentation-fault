@@ -54,7 +54,15 @@ public class TestOrderRepository {
         bookRepository.save(book);
 
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS);
-        order = new Order(UUID.randomUUID(), now, now.plusDays(14), OrderStatus.BORROWED, user, book);
+        order = Order.builder()
+                .publicId(UUID.randomUUID())
+                .createDate(now)
+                .dueDate(now.plusDays(14))
+                .status(OrderStatus.BORROWED)
+                .user(user)
+                .book(book)
+                .requestedDurationInDays(14L)
+                .build();
 
         orderRepository.save(order);
     }
@@ -113,8 +121,17 @@ public class TestOrderRepository {
 
     @Test
     public void testFindAll() {
-        Order newOrder = new Order(UUID.randomUUID(),LocalDateTime.now().plusDays(40), LocalDateTime.now().plusDays(40+14),
-                OrderStatus.RESERVED, order.getUser(), order.getBook());
+        Order newOrder = Order.builder()
+                .publicId(UUID.randomUUID())
+                .createDate(LocalDateTime.now())
+                .borrowDate(LocalDateTime.now().plusDays(40))
+                .dueDate(LocalDateTime.now().plusDays(54))
+                .requestedDurationInDays(14L)
+                .status(OrderStatus.RESERVED)
+                .user(order.getUser())
+                .book(order.getBook())
+                .build();
+
         orderRepository.save(newOrder);
         Set<Order> allOrders = orderRepository.findAll();
         assertFalse(allOrders.isEmpty());
@@ -141,8 +158,16 @@ public class TestOrderRepository {
         assertFalse(dueOrders.isEmpty());
         assertTrue(dueOrders.contains(order));
 
-        Order notDueOrder = new Order(UUID.randomUUID(),LocalDateTime.now().plusDays(20), LocalDateTime.now().plusDays(20 + 14),
-                OrderStatus.RESERVED, order.getUser(), order.getBook());
+        Order notDueOrder = Order.builder()
+                .publicId(UUID.randomUUID())
+                .createDate(LocalDateTime.now())
+                .borrowDate(LocalDateTime.now().plusDays(20))
+                .dueDate(LocalDateTime.now().plusDays(34))
+                .requestedDurationInDays(14L)
+                .status(OrderStatus.RESERVED)
+                .user(order.getUser())
+                .book(order.getBook())
+                .build();
         orderRepository.save(notDueOrder);
 
         Set<Order> allDueOrders = orderRepository.findDueOrders();
@@ -159,8 +184,16 @@ public class TestOrderRepository {
         assertFalse(staleOrders.isEmpty());
         assertTrue(staleOrders.contains(order));
 
-        Order notStaleOrder = new Order(UUID.randomUUID(),LocalDateTime.now().minusHours(10), LocalDateTime.now().plusDays(14),
-                OrderStatus.BORROWED, order.getUser(), order.getBook());
+        Order notStaleOrder = Order.builder()
+                .publicId(UUID.randomUUID())
+                .createDate(LocalDateTime.now().minusHours(STALE_ORDER_TIMEOUT_HRS - 1))
+                .borrowDate(LocalDateTime.now().minusHours(10))
+                .dueDate(LocalDateTime.now().plusDays(14))
+                .requestedDurationInDays(14L)
+                .status(OrderStatus.BORROWED)
+                .user(order.getUser())
+                .book(order.getBook())
+                .build();
         orderRepository.save(notStaleOrder);
 
         Set<Order> allStaleOrders = orderRepository.findStaleOrders();

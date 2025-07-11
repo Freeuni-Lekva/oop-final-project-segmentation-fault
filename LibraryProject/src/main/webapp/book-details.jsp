@@ -282,9 +282,12 @@
                     showReservationModal();
                 };
             } else {
-                reserveButtonText.textContent = 'Unavailable';
-                reserveButton.disabled = true;
-                reserveButton.onclick = null;
+                reserveButtonText.textContent = 'Reserve in Advance';
+                reserveButton.disabled = false;
+                reserveButton.onclick = function(e) {
+                    e.preventDefault();
+                    showReservationModal();
+                };
             }
         }
     }
@@ -476,7 +479,8 @@
             });
         })
         .then(data => {
-            alert('Book reserved successfully!');
+            console.log(data)
+            alert(data.message);
             updateReserveButtonState(true);
         })
         .catch(error => {

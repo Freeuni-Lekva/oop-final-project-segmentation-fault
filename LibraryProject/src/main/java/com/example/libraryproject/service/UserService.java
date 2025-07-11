@@ -1,14 +1,15 @@
 package com.example.libraryproject.service;
 
 import com.example.libraryproject.model.dto.UserDTO;
+import com.example.libraryproject.model.enums.ReservationResponse;
 
 public interface UserService {
 
     boolean reviewBook(String username, String publicId, int rating, String comment);
 
-    boolean reserveBook(String username, String publicId, Long durationInDays);
+    ReservationResponse reserveBook(String username, String publicId, Long durationInDays) ;
 
-    boolean cancelReservation(String username, String publicId);
+    boolean cancelReservation(String username, String publicId) ;
 
     void changePassword(String username, String oldPassword, String newPassword);
 
