@@ -1,16 +1,18 @@
 // Handle file upload area click and file input change
 document.addEventListener('DOMContentLoaded', function() {
+  console.log('Setting up file upload handlers...');
   
   const bookImageInput = document.getElementById('bookImage');
   const fileUploadClickArea = document.getElementById('fileUploadClickArea');
-    const preview = document.getElementById('imagePreview');
-    const previewName = document.getElementById('imagePreviewName');
+  const preview = document.getElementById('imagePreview');
+  const previewName = document.getElementById('imagePreviewName');
   const previewImg = document.getElementById('imagePreviewImg');
 
   // Handle click area - open file dialog
   if (fileUploadClickArea && !fileUploadClickArea.hasAttribute('data-click-handler')) {
     fileUploadClickArea.setAttribute('data-click-handler', 'true');
     fileUploadClickArea.addEventListener('click', function(e) {
+      console.log('Upload area clicked');
       e.preventDefault();
       e.stopPropagation();
       if (bookImageInput) {
@@ -24,9 +26,11 @@ document.addEventListener('DOMContentLoaded', function() {
     bookImageInput.setAttribute('data-change-handler', 'true');
     
     bookImageInput.addEventListener('change', function(e) {
+      console.log('File input changed, files count:', e.target.files.length);
       const file = e.target.files[0];
 
       if (file) {
+        console.log('File selected:', file.name, 'Size:', file.size, 'Type:', file.type);
         
         // Validate file type
         if (!file.type.startsWith('image/')) {
@@ -44,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show file name immediately
         if (previewName) {
-    previewName.textContent = file.name;
+          previewName.textContent = file.name;
         }
         
         // Create and show image preview
@@ -53,6 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
           if (previewImg) {
             previewImg.src = readerEvent.target.result;
           }
+          console.log('Image preview loaded successfully');
         };
         reader.onerror = function() {
           console.error('Error reading file for preview');
@@ -64,7 +69,10 @@ document.addEventListener('DOMContentLoaded', function() {
           preview.style.display = 'block';
         }
         
+        console.log('File processing completed');
+        
       } else {
+        console.log('No file selected or file cleared');
         // Hide preview if no file
         if (preview) {
           preview.style.display = 'none';
@@ -75,8 +83,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (previewName) {
           previewName.textContent = '';
         }
-  }
-});
+      }
+    });
   }
 });
 
@@ -86,81 +94,100 @@ if (addBookForm && !addBookForm.hasAttribute('data-listener-added')) {
   addBookForm.setAttribute('data-listener-added', 'true');
   
   addBookForm.addEventListener('submit', async function (e) {
-  e.preventDefault();
+    e.preventDefault();
+    console.log('Form submission started');
 
-  const form = this;
-  const button = document.getElementById('addBookBtn');
-  const buttonText = button.textContent;
-  const msgBox = document.getElementById('addBookMessage');
+    const form = this;
+    const button = document.getElementById('addBookBtn');
+    const buttonText = button.textContent;
+    const msgBox = document.getElementById('addBookMessage');
 
-  button.disabled = true;
-  button.textContent = 'Adding...';
-  msgBox.style.display = 'none';
+    button.disabled = true;
+    button.textContent = 'Adding...';
+    msgBox.style.display = 'none';
 
-  try {
-    const title = document.getElementById('title').value.trim();
-    const author = document.getElementById('author').value.trim();
-    const genre = document.getElementById('genre').value.trim();
-    const volume = document.getElementById('volume').value.trim();
-    const description = document.getElementById('description').value.trim();
-    const copies = parseInt(document.getElementById('copies').value) || 1;
-    const publicationDate = document.getElementById('publicationDate').value;
-    const fileInput = document.getElementById('bookImage');
-    const imageFile = fileInput.files[0];
+    try {
+      const title = document.getElementById('title').value.trim();
+      const author = document.getElementById('author').value.trim();
+      const genre = document.getElementById('genre').value.trim();
+      const volume = document.getElementById('volume').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const copies = parseInt(document.getElementById('copies').value) || 1;
+      const publicationDate = document.getElementById('publicationDate').value;
+      const fileInput = document.getElementById('bookImage');
+      const imageFile = fileInput.files[0];
+
+      console.log('Form data:', { title, author, genre, copies, publicationDate });
+      console.log('Image file:', imageFile ? imageFile.name : 'NO FILE SELECTED');
 
       // Validate required fields (image is now optional)
       if (!title || !author || !genre || !publicationDate) {
         throw new Error('Please fill in all required fields');
       }
+      
+      console.log('Validation passed - proceeding with book creation');
 
-    let imageUrl = null;
+      let imageUrl = null;
       
       // Only upload image if one was selected
-    if (imageFile) {
-      const imageFormData = new FormData();
-      imageFormData.append('image', imageFile);
+      if (imageFile) {
+        console.log('Starting image upload...');
+        const imageFormData = new FormData();
+        imageFormData.append('image', imageFile);
 
-      const imageUploadResponse = await fetch(window.CONTEXT_PATH + '/api/bookkeeper/upload-image', {
+        const imageUploadResponse = await fetch(window.CONTEXT_PATH + '/api/bookkeeper/upload-image', {
+          method: 'POST',
+          body: imageFormData,
+          credentials: "include"
+        });
+
+        console.log('Image upload response status:', imageUploadResponse.status);
+
+        if (!imageUploadResponse.ok) {
+          const errorData = await imageUploadResponse.json().catch(() => null);
+          const errorMessage = errorData?.message || 'Image upload failed';
+          console.error('Image upload failed:', errorMessage);
+          throw new Error(errorMessage);
+        }
+        
+        const imageData = await imageUploadResponse.json();
+        console.log('Image upload response:', imageData);
+        
+        if (imageData.status !== 'success') {
+          throw new Error(imageData.message || 'Image upload failed');
+        }
+        imageUrl = imageData.imageUrl;
+        console.log('Image uploaded successfully:', imageUrl);
+      } else {
+        console.log('No image file selected - proceeding without image');
+      }
+
+            const bookData = {
+        title,
+        author,
+        genre,
+        volume,
+        description,
+        copies,
+        publicationDate,
+        imageUrl
+      };
+
+      console.log('Final book data being sent:', JSON.stringify(bookData, null, 2));
+
+          const bookCreateResponse = await fetch(window.CONTEXT_PATH + '/api/bookkeeper/add-book', {
         method: 'POST',
-        body: imageFormData,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(bookData),
         credentials: "include"
       });
 
-      if (!imageUploadResponse.ok) {
-        const errorData = await imageUploadResponse.json().catch(() => null);
-        const errorMessage = errorData?.message || 'Image upload failed';
-        throw new Error(errorMessage);
-      }
-      
-      const imageData = await imageUploadResponse.json();
-        
-      if (imageData.status !== 'success') {
-        throw new Error(imageData.message || 'Image upload failed');
-      }
-      imageUrl = imageData.imageUrl;
-    }
+      console.log('Book creation response status:', bookCreateResponse.status);
+      console.log('Book creation response headers:', [...bookCreateResponse.headers.entries()]);
 
-    const bookData = {
-      title,
-      author,
-      genre,
-      volume,
-      description,
-      copies,
-      publicationDate,
-      imageUrl
-    };
-
-    const bookCreateResponse = await fetch(window.CONTEXT_PATH + '/api/bookkeeper/add-book', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(bookData),
-      credentials: "include"
-    });
-
-    if (bookCreateResponse.ok) {
+      if (bookCreateResponse.ok) {
       const responseData = await bookCreateResponse.json().catch(() => null);
       const successMessage = responseData ? responseData.message : 'Book added successfully';
       msgBox.textContent = successMessage;
@@ -186,21 +213,23 @@ if (addBookForm && !addBookForm.hasAttribute('data-listener-added')) {
       loadBooksList();
       
       setTimeout(() => (msgBox.style.display = 'none'), 5000);
-    } else {
+          } else {
+        console.log('Book creation failed with status:', bookCreateResponse.status);
         const responseText = await bookCreateResponse.text();
+        console.log('Error response text:', responseText);
         
         let responseData = null;
         try {
           responseData = JSON.parse(responseText);
         } catch (e) {
-          // Response is not valid JSON, will use default error message
+          console.log('Response is not valid JSON:', e);
         }
         
-      const errorMessage = responseData ? responseData.message : 'Failed to add book';
+        const errorMessage = responseData ? responseData.message : 'Failed to add book';
         msgBox.textContent = errorMessage + ' (Status: ' + bookCreateResponse.status + ')';
-      msgBox.className = 'message-area error';
-      msgBox.style.display = 'block';
-    }
+        msgBox.className = 'message-area error';
+        msgBox.style.display = 'block';
+      }
   } catch (error) {
     console.error(error);
     msgBox.textContent = 'Error: Check your connection or input';
@@ -301,6 +330,7 @@ document.getElementById('genreFilter').addEventListener('change', function(e) {
 
 function filterBooks(searchTerm, genreFilter) {
   const allBooks = document.querySelectorAll('.book-item');
+  console.log('Filtering with search:', searchTerm, 'genre:', genreFilter, 'Total books:', allBooks.length);
   
   let count = 0;
   
@@ -332,6 +362,8 @@ function filterBooks(searchTerm, genreFilter) {
       item.style.display = 'none';
     }
   });
+  
+  console.log('books after filter:', count);
 }
 
 const uploadArea = document.querySelector('.file-upload-area');
@@ -445,11 +477,13 @@ function loadBooksList() {
           })
           .then(function(books) {
             list.textContent = '';
+            console.log('Loaded books:', books.length);
 
             const genres = new Set();
             books.forEach(book => {
               if (book.genre) genres.add(book.genre);
             });
+            console.log('Available genres:', Array.from(genres));
             
 
             const genreFilter = document.getElementById('genreFilter');
@@ -497,9 +531,14 @@ function loadBooksList() {
                 img.alt = book.name || 'Book Cover';
 
                 img.onerror = function() {
+                  console.log('Failed to load image:', this.src);
                   this.style.display = 'none';
                   const placeholder = createBookPlaceholder(book);
                   bookImage.appendChild(placeholder);
+                };
+                
+                img.onload = function() {
+                  console.log('Successfully loaded image:', this.src);
                 };
                 
                 bookImage.appendChild(img);

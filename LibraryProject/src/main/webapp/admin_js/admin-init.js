@@ -8,6 +8,7 @@ document.addEventListener('visibilitychange', function() {
   if (!document.hidden) {
     // Page became visible again - refresh the book list in case books were deleted
     if (document.getElementById('book-collection').classList.contains('active')) {
+      console.log('Admin panel became visible - refreshing book list');
       loadBooksList();
     }
   }
@@ -16,6 +17,7 @@ document.addEventListener('visibilitychange', function() {
 // Also refresh when window gains focus
 window.addEventListener('focus', function() {
   if (document.getElementById('book-collection').classList.contains('active')) {
+    console.log('Admin panel gained focus - refreshing book list');
     loadBooksList();
   }
 }); 
