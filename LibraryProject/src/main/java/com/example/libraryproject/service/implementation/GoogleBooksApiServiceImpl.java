@@ -74,9 +74,6 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
                 bookInLibrary.setImageUrl(book.getImageUrl());
                 bookInLibrary.setDate(book.getDate());
                 
-                // Set dateAdded to now when book is updated to appear as recently added
-                bookInLibrary.setDateAdded(java.time.LocalDateTime.now());
-                
                 // Add copies to existing amounts
                 bookInLibrary.setTotalAmount(bookInLibrary.getTotalAmount() + copies);
                 bookInLibrary.setCurrentAmount(bookInLibrary.getCurrentAmount() + copies);
