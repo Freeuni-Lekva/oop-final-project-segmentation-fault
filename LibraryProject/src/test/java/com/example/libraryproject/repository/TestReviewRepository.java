@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -50,9 +51,9 @@ public class TestReviewRepository {
         user2.setPassword("kubdari1234");
         user2.setMail("kubdari@gmail.com");
 
-        book1 = new Book("Dzalis_Gamogvidzeba","Dzalis Gamogvidzeba","Politics" , "Mikheil Saakashvili", LocalDate.now(), "A thrilling political fiction novel",
+        book1 = new Book("Dzalis_Gamogvidzeba","Dzalis Gamogvidzeba","Politics" , "Mikheil Saakashvili", LocalDate.now(), LocalDateTime.now(), "A thrilling political fiction novel",
                 300L, 4L,  555L,4.0, "dzalisGamogvidzeba.jpg" );
-        book2 = new Book("100_Years_of_Solitude", "100 Years of Solitude", "Fiction", "Gabriel Garcia Marquez", LocalDate.now(), "A classic novel about the Buendia family",
+        book2 = new Book("100_Years_of_Solitude", "100 Years of Solitude", "Fiction", "Gabriel Garcia Marquez", LocalDate.now(), LocalDateTime.now(), "A classic novel about the Buendia family",
                 300L, 4L, 600L, 3.0, "100YearsOfSolitude.jpg");
         UserRepository userRepository = new UserRepository(sessionFactory);
         BookRepository bookRepository = new BookRepository(sessionFactory);

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +39,10 @@ public class Book {
     @NonNull
     @Column(name = "publication_date")
     private LocalDate date;
+
+    @NonNull
+    @Column(name = "date_added")
+    private LocalDateTime dateAdded;
 
     @Lob
     @NonNull
@@ -81,6 +86,7 @@ public class Book {
                 ", genre='" + genre + '\'' +
                 ", author='" + author + '\'' +
                 ", date=" + date +
+                ", dateAdded=" + dateAdded +
                 ", volume=" + volume +
                 ", reviews=" + reviews +
                 ", total amount=" + totalAmount +

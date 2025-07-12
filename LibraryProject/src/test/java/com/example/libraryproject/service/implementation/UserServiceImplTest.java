@@ -47,6 +47,7 @@ public class UserServiceImplTest {
                 "Fantasy",
                 "Author A",
                 LocalDate.of(2020, 5, 10),
+                LocalDateTime.now(),
                 "A gripping tale of magic and destiny.",
                 300L, 1L, 1L, 4.0, ""
         );
@@ -57,6 +58,7 @@ public class UserServiceImplTest {
                 "Fantasy",
                 "Author A",
                 LocalDate.of(2021, 6, 15),
+                LocalDateTime.now(),
                 "The saga continues with greater peril.",
                 300L, 0L, 2L, 5.0, ""
         );
@@ -67,6 +69,7 @@ public class UserServiceImplTest {
                 "Fantasy",
                 "Author A",
                 LocalDate.of(2019, 4, 20),
+                LocalDateTime.now(),
                 "Ancient secrets resurface to test the realm.",
                 300L, 3L, 3L, 3.0, ""
         );

@@ -62,6 +62,8 @@ public class TestBookRepository {
     @DisplayName("Should handle exception during save and rollback transaction")
     void testSaveWithException() {
         Book invalidBook = new Book();
+        // Set minimal required fields to test save exception handling
+        invalidBook.setDateAdded(java.time.LocalDateTime.now());
 
         assertThrows(Exception.class, () -> bookRepository.save(invalidBook));
     }

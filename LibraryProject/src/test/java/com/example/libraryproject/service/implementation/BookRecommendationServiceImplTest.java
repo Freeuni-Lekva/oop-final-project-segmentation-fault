@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -53,6 +54,7 @@ public class BookRecommendationServiceImplTest {
                 "Fantasy",
                 "Author A",
                 LocalDate.of(2020, 5, 10),
+                LocalDateTime.now(),
                 "A gripping tale of magic and destiny.",
                 300L, 1L, 5L, 4.0, ""
         );
@@ -63,6 +65,7 @@ public class BookRecommendationServiceImplTest {
                 "Fantasy",
                 "Author A",
                 LocalDate.of(2021, 6, 15),
+                LocalDateTime.now(),
                 "The saga continues with greater peril.",
                 300L, 2L, 3L, 5.0, ""
         );
@@ -73,6 +76,7 @@ public class BookRecommendationServiceImplTest {
                 "Fantasy",
                 "Author A",
                 LocalDate.of(2019, 4, 20),
+                LocalDateTime.now(),
                 "Ancient secrets resurface to test the realm.",
                 300L, 3L, 2L, 3.0, ""
         );
@@ -83,6 +87,7 @@ public class BookRecommendationServiceImplTest {
                 "Fantasy",
                 "Author A",
                 LocalDate.of(2022, 1, 5),
+                LocalDateTime.now(),
                 "The rise of a legendary sorcerer.",
                 300L, 4L, 1L, 5.0, ""
         );
@@ -93,6 +98,7 @@ public class BookRecommendationServiceImplTest {
                 "Fantasy",
                 "Author A",
                 LocalDate.of(2023, 3, 12),
+                LocalDateTime.now(),
                 "A kingdom on the edge of collapse.",
                 300L, 5L, 4L, 2.0, ""
         );
@@ -103,6 +109,7 @@ public class BookRecommendationServiceImplTest {
                 "Fantasy",
                 "Author A",
                 LocalDate.of(2023, 3, 12),
+                LocalDateTime.now(),
                 "euf.",
                 300L, 5L, 4L, 2.0, ""
         );
@@ -159,10 +166,10 @@ public class BookRecommendationServiceImplTest {
         genreScores.put("Science Fiction", 2.0);
 
         List<Book> candidateBooks = new ArrayList<>();
-        candidateBooks.add(new Book("book1", "Book 1", "Fantasy", "Author A", LocalDate.now(), "Description 1", 300L, 1L, 5L, 4.0, "book1.jpg"));
-        candidateBooks.add(new Book("book2", "Book 2", "Fantasy", "Author B", LocalDate.now(), "Description 2", 300L, 1L, 5L, 4.0, "book2.jpg"));
-        candidateBooks.add(new Book("book3", "Book 3", "Science Fiction", "Author A", LocalDate.now(), "Description 3", 300L, 1L, 5L, 4.0, "book3.jpg"));
-        candidateBooks.add(new Book("book4", "Book 4", "Science Fiction", "Author B", LocalDate.now(), "Description 4", 300L, 1L, 5L, 4.0, "book4.jpg"));
+        candidateBooks.add(new Book("book1", "Book 1", "Fantasy", "Author A", LocalDate.now(), LocalDateTime.now(), "Description 1", 300L, 1L, 5L, 4.0, "book1.jpg"));
+        candidateBooks.add(new Book("book2", "Book 2", "Fantasy", "Author B", LocalDate.now(), LocalDateTime.now(), "Description 2", 300L, 1L, 5L, 4.0, "book2.jpg"));
+        candidateBooks.add(new Book("book3", "Book 3", "Science Fiction", "Author A", LocalDate.now(), LocalDateTime.now(), "Description 3", 300L, 1L, 5L, 4.0, "book3.jpg"));
+        candidateBooks.add(new Book("book4", "Book 4", "Science Fiction", "Author B", LocalDate.now(), LocalDateTime.now(), "Description 4", 300L, 1L, 5L, 4.0, "book4.jpg"));
 
         Method applyCoefficientsMethod = BookRecommendationServiceImpl.class.getDeclaredMethod(
             "applyCoefficients", 

@@ -22,6 +22,7 @@ public class MockDataForTests {
                 genre,
                 author,
                 LocalDate.of(2023, 4, 1),
+                LocalDateTime.now(),
                 "Test description for " + name,
                 300L,
                 originalAmount,
@@ -43,6 +44,7 @@ public class MockDataForTests {
         book.setGenre("Fiction");
         book.setDescription("Test Description");
         book.setDate(LocalDate.now());
+        book.setDateAdded(LocalDateTime.now());
         book.setVolume(200L);
         book.setTotalAmount(5L);
         book.setCurrentAmount(3L);
@@ -59,6 +61,7 @@ public class MockDataForTests {
         book.setGenre(genre);
         book.setDescription("Test description");
         book.setDate(LocalDate.now());
+        book.setDateAdded(LocalDateTime.now());
         book.setVolume(300L);
         book.setTotalAmount(5L);
         book.setCurrentAmount(3L);
