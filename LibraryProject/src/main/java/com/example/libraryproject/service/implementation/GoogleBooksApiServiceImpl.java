@@ -59,6 +59,7 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
                 bookInLibrary.setImageUrl(book.getImageUrl());
                 // Always set current date when reactivating deleted book to appear as recently added
                 bookInLibrary.setDate(java.time.LocalDate.now());
+                bookInLibrary.setDateAdded(java.time.LocalDateTime.now());
                 
                 // Set copies for reactivated book
                 bookInLibrary.setTotalAmount((long) copies);
@@ -86,6 +87,7 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
             book.setTotalAmount((long) copies);
             book.setCurrentAmount((long) copies);
             book.setRating(0.0);
+            book.setDateAdded(java.time.LocalDateTime.now());
 
             bookRepository.save(book);
             logger.info("Successfully saved new book from Google Books: {} with {} copies", book.getName(), copies);
@@ -122,6 +124,7 @@ public class GoogleBooksApiServiceImpl implements GoogleBooksApiService {
                     book.setTotalAmount(randomCopies);
                     book.setCurrentAmount(randomCopies);
                     book.setRating(0.0);
+                    book.setDateAdded(java.time.LocalDateTime.now());
                     return book;
                 })
                 .toList();

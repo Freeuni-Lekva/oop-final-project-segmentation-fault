@@ -68,6 +68,7 @@ public class BookKeeperServiceImpl implements BookKeeperService {
                 
                 // Always set current date when reactivating deleted book to appear as recently added
                 bookInLibrary.setDate(java.time.LocalDate.now());
+                bookInLibrary.setDateAdded(java.time.LocalDateTime.now());
                 
                 // Set copies for reactivated book
                 bookInLibrary.setTotalAmount(copies);
@@ -87,6 +88,9 @@ public class BookKeeperServiceImpl implements BookKeeperService {
                 if (bookRequest.publicationDate() != null && !bookRequest.publicationDate().isEmpty()) {
                     bookInLibrary.setDate(java.time.LocalDate.parse(bookRequest.publicationDate()));
                 }
+                
+                // Set dateAdded to now when book is updated to appear as recently added
+                bookInLibrary.setDateAdded(java.time.LocalDateTime.now());
                 
                 // Add copies to existing amounts
                 bookInLibrary.setTotalAmount(bookInLibrary.getTotalAmount() + copies);
@@ -118,6 +122,9 @@ public class BookKeeperServiceImpl implements BookKeeperService {
             } else {
                 book.setDate(java.time.LocalDate.now());
             }
+            
+            // Set dateAdded to now for new books
+            book.setDateAdded(java.time.LocalDateTime.now());
             
             book.setTotalAmount(copies);
             book.setCurrentAmount(copies);

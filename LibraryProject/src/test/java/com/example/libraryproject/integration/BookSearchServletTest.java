@@ -26,6 +26,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -175,6 +176,7 @@ public class BookSearchServletTest {
         book.setTotalAmount(5L);
         book.setCurrentAmount(5L);
         book.setDate(LocalDate.now());
+        book.setDateAdded(LocalDateTime.now());
         book.setDescription("Description of " + name);
         book.setImageUrl("images/" + name.toLowerCase().replaceAll("[^a-z0-9]", "_") + ".jpg");
         book.setVolume(1L);

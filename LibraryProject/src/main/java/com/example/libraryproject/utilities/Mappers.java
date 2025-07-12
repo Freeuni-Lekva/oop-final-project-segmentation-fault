@@ -77,6 +77,7 @@ public class Mappers {
         book.setTotalAmount(1L);
         book.setCurrentAmount(1L);
         book.setRating(0.0);
+        book.setDateAdded(java.time.LocalDateTime.now());
 
         return book;
     }

@@ -9,6 +9,7 @@ import org.hibernate.cfg.Configuration;
 import org.junit.jupiter.api.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -122,11 +123,11 @@ public class TestUserRepository {
     @Test
     public void testFindBorrowedReadBooksByUserId() {
         Book book1 = new Book("100_Years_of_Solitude","100 Years of Solitude", "Fiction", "Gabriel Garcia Marquez", LocalDate.now(),
-                "A classic novel about the Buendia family",
+                LocalDateTime.now(), "A classic novel about the Buendia family",
                 300L, 4L, 600L, 300.0, "100YearsOfSolitude.jpg");
 
         Book book2 = new Book("Dzalis_Gamogvidzeba","Dzalis Gamogvidzeba", "Politics", "Mikheil Saakashvili",
-                LocalDate.now(), "A thrilling political fiction novel", 300L, 4L, 555L, 400.0, "dzalisGamogvidzeba.jpg");
+                LocalDate.now(), LocalDateTime.now(), "A thrilling political fiction novel", 300L, 4L, 555L, 400.0, "dzalisGamogvidzeba.jpg");
 
 
         User user = new User();

@@ -77,6 +77,7 @@ public class BookKeeperServiceImplTest {
         existingBook.setTotalAmount(5L);
         existingBook.setCurrentAmount(2L);
         existingBook.setStatus(com.example.libraryproject.model.enums.BookStatus.ACTIVE);
+        existingBook.setDateAdded(java.time.LocalDateTime.now());
 
         when(bookRepository.findByTitleAnyStatus("Existing Book")).thenReturn(Optional.of(existingBook));
 

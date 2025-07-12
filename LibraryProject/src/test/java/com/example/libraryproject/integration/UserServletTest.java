@@ -33,6 +33,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -300,6 +301,7 @@ public class UserServletTest {
             book.setDescription("Test Description");
             book.setGenre("Fiction");
             book.setDate(LocalDate.now().minusYears(1));
+            book.setDateAdded(LocalDateTime.now());
             book.setPublicId(UUID.randomUUID().toString());
             book.setTotalAmount(5L);
             book.setCurrentAmount(5L);

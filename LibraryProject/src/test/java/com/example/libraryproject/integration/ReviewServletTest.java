@@ -17,6 +17,7 @@ import com.example.libraryproject.servlet.ReviewServlet;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hibernate.SessionFactory;
@@ -35,6 +36,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -46,7 +48,7 @@ public class ReviewServletTest {
     private static final Logger logger = LoggerFactory.getLogger(ReviewServletTest.class);
     private static Server server;
     private static SessionFactory sessionFactory;
-    private static final String BASE_URL = "http://localhost:8080";
+    private static String BASE_URL; // Will be set dynamically based on server port
     private static final CookieManager cookieManager = new CookieManager();
     private static final HttpClient httpClient = HttpClient.newBuilder()
             .cookieHandler(cookieManager)
@@ -79,7 +81,7 @@ public class ReviewServletTest {
 
             // Create embedded Jetty server for testing
             logger.info("Creating Jetty server...");
-            server = new Server(8080);
+            server = new Server(0); // Use port 0 to get any available port
             ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
             context.setContextPath("/");
 
@@ -112,7 +114,11 @@ public class ReviewServletTest {
 
             logger.info("Starting server...");
             server.start();
-            logger.info("Server started successfully on port 8080");
+            
+            ServerConnector connector = (ServerConnector) server.getConnectors()[0];
+            int port = connector.getLocalPort();
+            BASE_URL = "http://localhost:" + port;
+            logger.info("Server started successfully on port {}", port);
 
             // Wait a bit for server to fully start
             Thread.sleep(1000);
@@ -243,6 +249,7 @@ public class ReviewServletTest {
         book.setTotalAmount(5L);
         book.setCurrentAmount(5L);
         book.setDate(LocalDate.now());
+        book.setDateAdded(LocalDateTime.now());
         book.setDescription("Description of " + name);
         book.setImageUrl("images/" + name.toLowerCase().replaceAll("[^a-z0-9]", "_") + ".jpg");
         book.setVolume(1L);
